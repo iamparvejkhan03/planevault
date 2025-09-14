@@ -1,10 +1,38 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { lazy, StrictMode, Suspense } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.jsx';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoadingSpinner from './components/LoadingSpinner.jsx';
+
+const Home = lazy(() => import('./pages/Home'));
+const Contact = lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfUse = lazy(() => import('./pages/TermsOfUse'));
+const PaymentRefundPolicy = lazy(() => import('./pages/PaymentRefundPolicy'));
+const SellerAgreement = lazy(() => import('./pages/SellerAgreement'));
+const BuyerAgreement = lazy(() => import('./pages/BuyerAgreement'));
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+    <StrictMode>
+        <BrowserRouter>
+            <Routes>
+                <Route path='/' element={<App />}>
+                    <Route path='' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><Home /></Suspense>} />
+
+                    <Route path='/contact' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><Contact /></Suspense>} />
+
+                    <Route path='/privacy-policy' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><PrivacyPolicy /></Suspense>} />
+
+                    <Route path='/terms-of-use' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><TermsOfUse /></Suspense>} />
+
+                    <Route path='/payment-refund-policy' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><PaymentRefundPolicy /></Suspense>} />
+
+                    <Route path='/seller-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><SellerAgreement /></Suspense>} />
+
+                    <Route path='/buyer-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><BuyerAgreement /></Suspense>} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    </StrictMode>,
 )

@@ -7,6 +7,7 @@ import LoadingSpinner from './components/LoadingSpinner.jsx';
 
 const Home = lazy(() => import('./pages/Home'));
 const Contact = lazy(() => import('./pages/Contact'));
+const About = lazy(() => import('./pages/About'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfUse = lazy(() => import('./pages/TermsOfUse'));
 const PaymentRefundPolicy = lazy(() => import('./pages/PaymentRefundPolicy'));
@@ -21,6 +22,8 @@ createRoot(document.getElementById('root')).render(
                     <Route path='' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><Home /></Suspense>} />
 
                     <Route path='/contact' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><Contact /></Suspense>} />
+
+                    <Route path='/about' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><About /></Suspense>} />
 
                     <Route path='/privacy-policy' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'}  />}><PrivacyPolicy /></Suspense>} />
 

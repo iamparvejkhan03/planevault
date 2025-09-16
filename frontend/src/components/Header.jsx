@@ -41,7 +41,7 @@ function Header() {
     }, [pathname])
 
     return (
-        <header className={`${isScrolled ? 'fixed bg-white bg-opacity-100 shadow-lg shadow-primary/15' : 'absolute bg-opacity-0'} w-full transition-all duration-150 z-50`}>
+        <header className={`${isScrolled ? 'fixed bg-white bg-opacity-100 shadow-lg shadow-primary/5' : 'absolute bg-opacity-0'} w-full transition-all duration-150 z-50`}>
             <Container className={`flex items-center justify-between py-4`}>
                 <Link to="/">
                     <img src={(isScrolled || isMenuOpen) ? `${darkLogo}` : `${logo}`} alt="PlaneVault Logo" className="h-10 md:h-12 z-10" />

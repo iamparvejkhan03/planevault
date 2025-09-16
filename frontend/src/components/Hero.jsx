@@ -1,4 +1,4 @@
-import { Clock, Phone, Plane, Search, Shield, Video } from "lucide-react";
+import { Clock, Plane, Search, Shield } from "lucide-react";
 import { Container } from "../components";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -25,7 +25,7 @@ function Hero() {
 
                 <div className="xl:w-4/5 w-full px-2 flex flex-col items-start justify-between gap-3 relative mt-10 lg:mt-16">
                     <p className={`inline-flex items-center gap-1 bg-white text-primary px-4 py-2 rounded-full text-sm font-medium`}>
-                        <Shield size={24} strokeWidth={1.5} />
+                        <Plane size={24} strokeWidth={1.5} />
 
                         Trusted Auctions, Anytime
                     </p>
@@ -97,7 +97,7 @@ function Hero() {
                             <div className="col-span-1 sm:col-span-1 lg:col-span-1">
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center items-center py-2.5 px-3.5 rounded-md bg-primary text-white hover:bg-blue-700 transition"
+                                    className="w-full flex justify-center items-center py-2.5 px-3.5 rounded-md bg-primary text-white hover:bg-black/90 transition"
                                 >
                                     <Search size={20} />
                                 </button>
@@ -128,7 +128,6 @@ function Hero() {
                             </h4>
                         </div>
                     </div>
-
                 </div>
             </Container>
         </section>

@@ -3,6 +3,7 @@ import { closeMenu, darkLogo, logo, menuIcon } from "../assets";
 import Container from "./Container";
 import { ChevronDown, ChevronRight, LayoutDashboard, LogIn, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { usePopUp } from "../contexts/popups";
 
 const navLinks = [
     {
@@ -27,6 +28,8 @@ function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { pathname } = useLocation();
+
+    const { popUps, setPopUps } = usePopUp();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -63,7 +66,7 @@ function Header() {
                             ))
                         }
                         <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
-                            <button className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
+                            <button onClick={() => setPopUps({...popUps, category: true})} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
                         </li>
                         <li>
                             <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer"><LogIn size={20} /> Log In</button>

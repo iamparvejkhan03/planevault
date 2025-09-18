@@ -1,12 +1,10 @@
 import { Clock, Plane, Search, Shield } from "lucide-react";
 import { Container } from "../components";
-import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
 function Hero() {
     const searchForm = useForm({
         defaultValues: {
-
         }
     });
 
@@ -104,7 +102,6 @@ function Hero() {
                             </div>
                         </div>
                     </form>
-
 
                     <div className="flex gap-5 sm:gap-10 flex-wrap text-white">
                         <div className="flex items-center gap-1">

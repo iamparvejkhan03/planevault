@@ -1,8 +1,10 @@
 import { lazy, Suspense } from "react";
-import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner } from "../components";
+import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner, About, CategoryImg, AllCategoryImages, AuctionCard } from "../components";
 import Marquee from "react-fast-marquee";
-import { BadgeCheck, Gavel, Tag, Upload } from "lucide-react";
-import { airBus, beechCraft, bell, cessna, diamond, mooney, pilatus, piper } from "../assets";
+import { ArrowUp, BadgeCheck, Gavel, Tag, Upload } from "lucide-react";
+import { airBus, airCrafts, beechCraft, bell, cessna, diamond, heroImg, memorabilia, mooney, parts, pilatus, piper } from "../assets";
+import { Link } from "react-router-dom";
+import { usePopUp } from "../contexts/popups";
 
 const FAQs = lazy(() => import('../components/FAQs'));
 const CTA = lazy(() => import('../components/CTA'));
@@ -139,10 +141,43 @@ const trustedBrands = [
     },
 ];
 
+const categoryImg = [
+    {
+        title: 'Aircrafts',
+        image: airCrafts,
+        link: '/category/aircraft'
+    },
+    {
+        title: 'Parts & Engines',
+        image: parts,
+        link: '/category/parts'
+    },
+    {
+        title: 'Memorabilia',
+        image: memorabilia,
+        link: '/category/memorabilia'
+    }
+];
+
 function Home() {
+    const { popUps } = usePopUp();
+    console.log(popUps)
     return (
         <>
             <Hero />
+
+            <Container className="my-14">
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-10">
+                    <AuctionCard />
+                    <AuctionCard />
+                    <AuctionCard />
+                    <AuctionCard />
+                </section>
+            </Container>
+
+            <section className={`bg-black/70 fixed z-50 top-0 w-full min-h-full ${popUps.category ? 'flex flex-col justify-center items-center' : 'hidden'}`}>
+                <AllCategoryImages />
+            </section>
 
             {/* Marquee section */}
             <Container>
@@ -157,6 +192,26 @@ function Home() {
                         }
                     </div>
                 </Marquee>
+            </Container>
+
+            {/* Category Images */}
+            {/* <Container className="my-14">
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {
+                        categoryImg.map(category => (
+                            <CategoryImg key={category.title} title={category.title} image={category.image} link={category.link} />
+                        ))
+                    }
+                    <Link to={'/auctions'} className="group hover:scale-[101%] transition-all duration-200 relative h-44 rounded-xl overflow-hidden bg-gray-100 border-2 border-gray-200">
+                        <p className="absolute bottom-5 left-5 text-primary">Explore All Auctions</p>
+                        <ArrowUp className="absolute group-hover:top-4 group-hover:right-4 transition-all duration-200 top-5 right-5 text-primary rotate-45" strokeWidth={1.5} size={30} />
+                    </Link>
+                </section>
+            </Container> */}
+
+            {/* About us section */}
+            <Container className="my-14">
+                <About />
             </Container>
 
             {/* How it works Section */}

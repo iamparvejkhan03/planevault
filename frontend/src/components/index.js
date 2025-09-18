@@ -8,6 +8,12 @@ import FAQs from "./FAQs";
 import HowItWorksCard from "./HowItWorksCard";
 import Testimonial from "./Testimonial";
 import CTA from "./CTA";
+import About from "./About";
+import CategoryImg from "./CategoryImg";
+import AllCategoryImages from "./AllCategoryImages";
+import AuctionCard from "./AuctionCard";
+import VimeoEmbed from "./VimeoEmbed";
+import YouTubeEmbed from "./YouTubeEmbed";
 
 export {
     Container,
@@ -18,5 +24,12 @@ export {
     LoadingSpinner,
     FAQs,
     HowItWorksCard,
-    Testimonial,CTA,
+    Testimonial,
+    CTA,
+    About,
+    CategoryImg,
+    AllCategoryImages,
+    AuctionCard,
+    VimeoEmbed,
+    YouTubeEmbed,
 }

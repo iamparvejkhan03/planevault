@@ -14,6 +14,10 @@ import diamond from './diamond.webp';
 import pilatus from './pilatus.webp';
 import bell from './bell.webp';
 import airBus from './airBus.webp';
+import about from './about.webp';
+import parts from './parts.webp';
+import airCrafts from './airCrafts.webp';
+import memorabilia from './memorabilia.webp';
 
 const otherData = {
     phone: '+13477456985',
@@ -39,4 +43,8 @@ export {
     pilatus,
     bell,
     airBus,
+    about,
+    airCrafts,
+    parts,
+    memorabilia,
 }

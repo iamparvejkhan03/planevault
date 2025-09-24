@@ -10,12 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^4.0.2",
+    "@stripe/stripe-js": "^7.9.0",
+    "@tailwindcss/typography": "^0.5.18",
+    "@tinymce/tinymce-react": "^6.3.0",
+    "axios": "^1.12.2",
+    "html-react-parser": "^5.2.6",
     "lucide-react": "^0.543.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-fast-marquee": "^1.6.5",
     "react-hook-form": "^7.62.0",
-    "react-router-dom": "^7.9.1"
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.9.1",
+    "yet-another-react-lightbox": "^3.25.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

@@ -1,0 +1,10 @@
+function Description() {
+    return (
+        <div>
+            <h3 className="text-primary text-xl font-semibold">Description</h3>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Obcaecati porro incidunt modi nihil quibusdam dolorum magnam. Voluptatibus sed totam necessitatibus, officiis ratione dolorum temporibus, accusantium blanditiis excepturi quis, facilis aliquid! Enim accusantium illo architecto sapiente nisi nostrum voluptate, modi eum sint, deserunt iste porro inventore deleniti est voluptatibus consequatur unde. Quibusdam debitis nulla esse culpa numquam cum inventore qui voluptates, explicabo laudantium enim voluptate a eius fugit reprehenderit dignissimos! Sequi, a. A sed veritatis laudantium sequi quod unde officia molestias necessitatibus aliquid impedit error dolore optio explicabo aspernatur, deserunt doloribus similique, culpa recusandae labore. Earum quae voluptate, odio doloremque facilis excepturi voluptates obcaecati quisquam, nobis nam in quam sint omnis eveniet voluptatum maxime laborum eius dolores similique tenetur accusantium! Labore possimus fuga aspernatur molestiae, sed error pariatur eveniet ducimus libero sit? Minus magni non doloribus voluptatem a eligendi, velit quas tempora qui ipsam dolore dolores maxime error repellat corporis incidunt perferendis in corrupti, pariatur rem sapiente minima doloremque id officia. Aliquid at aut accusamus nisi, dolores provident ea repellendus expedita ullam. Ipsam quasi aspernatur voluptatem officiis assumenda reprehenderit atque aliquam in sequi iure, at maxime voluptates? Cupiditate eligendi nemo facere alias in delectus vitae incidunt blanditiis aliquam sint eos est, neque id reprehenderit autem doloribus excepturi illo. Labore repellendus laborum exercitationem est quam provident sapiente, numquam necessitatibus sed itaque accusantium praesentium soluta ipsa modi aliquid perferendis voluptates quas nisi ea ratione nesciunt quaerat facere a libero? Velit, ab in doloribus culpa tempora, repellendus veniam laborum labore porro, fuga placeat harum.</p>
+        </div>
+    );
+}
+
+export default Description;

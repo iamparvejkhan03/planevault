@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, Building } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, Building, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { darkLogo } from '../assets';
 import { ForgotPasswordModal } from '../components';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { useEffect } from 'react';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showForgotPasswordModel, setShowForgotPasswordModal] = useState(false);
+    const navigate = useNavigate();
 
     const { register, handleSubmit } = useForm({
         defaultValues: {
@@ -17,9 +21,27 @@ const Login = () => {
         }
     });
 
-    const loginHandler = (loginData) => {
-        setIsLoading(true);
-        console.log('Logging in with:', loginData.email, loginData.password);
+    const loginHandler = async (loginData) => {
+        try {
+            setIsLoading(true);
+
+            const { data } = await axios.post(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/users/login`, { email: loginData.email, password: loginData.password });
+
+            if (data && data.success) {
+                const accessToken = data.data.accessToken;
+                const refreshToken = data.data.refreshToken;
+                // dispatch(toggleIsUserLoggedIn(true));
+                // dispatch(toggleShowUserAuthForm(false));
+                // dispatch(updateUser({...data.data.user, accessToken, refreshToken}));
+                toast.success(data.message);
+                navigate(`/${data.data.user.userType}/dashboard`);
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message);
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -42,15 +64,15 @@ const Login = () => {
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail size={20} className="text-gray-400" />
+                                    <User size={20} className="text-gray-400" />
                                 </div>
                                 <input
                                     type="email"
                                     id="email"
                                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg"
-                                    placeholder="Enter your email"
+                                    placeholder="Enter your email or username"
                                     required
-                                    {...register('email', {required: true})}
+                                    {...register('email', { required: true })}
                                 />
                             </div>
                         </div>
@@ -70,7 +92,7 @@ const Login = () => {
                                     className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg "
                                     placeholder="Enter your password"
                                     required
-                                    {...register('password', {required: true})}
+                                    {...register('password', { required: true })}
                                 />
                                 <button
                                     type="button"

@@ -161,7 +161,6 @@ const categoryImg = [
 
 function Home() {
     const { popUps } = usePopUp();
-    console.log(popUps)
     return (
         <>
             <Hero />

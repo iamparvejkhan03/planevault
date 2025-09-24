@@ -1,143 +1,54 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, User, Gavel, Store, CreditCard, MapPin, Phone, Building, ChevronDown} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, User, Gavel, Store, CreditCard, MapPin, Phone, Building, ChevronDown } from 'lucide-react';
 import { darkLogo } from '../assets';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useStripe, useElements, CardElement, Elements } from '@stripe/react-stripe-js';
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 // Initialize Stripe
-const stripePromise = loadStripe('your-publishable-key-here'); // Replace with your Stripe publishable key
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const countries = [
-    'United States',
-    'India',
-    'United Kingdom',
-    'Canada',
-    'Australia',
-    'Germany',
-    'France',
-    // Add more countries as needed
+    { name: 'United States', code: 'US' },
+    { name: 'India', code: 'IN' },
+    { name: 'United Kingdom', code: 'GB' },
+    { name: 'Canada', code: 'CA' },
+    { name: 'Australia', code: 'AU' },
+    { name: 'Germany', code: 'DE' },
+    { name: 'France', code: 'FR' },
+    { name: 'Japan', code: 'JP' },
+    { name: 'China', code: 'CN' },
+    { name: 'Brazil', code: 'BR' },
+    { name: 'Mexico', code: 'MX' },
+    { name: 'Italy', code: 'IT' },
+    { name: 'Spain', code: 'ES' },
+    { name: 'South Korea', code: 'KR' },
+    { name: 'Russia', code: 'RU' },
+    { name: 'Netherlands', code: 'NL' },
+    { name: 'Switzerland', code: 'CH' },
+    { name: 'Sweden', code: 'SE' },
+    { name: 'Norway', code: 'NO' },
+    { name: 'Denmark', code: 'DK' },
 ];
 
-const states = [
-    'California',
-    'New York',
-    'Texas',
-    'Florida',
-    'Washington',
-    // Add more states as needed
-];
 
+// CardSection component that uses Stripe hooks
 const CardSection = () => {
+    const stripe = useStripe();
+    const elements = useElements();
+
     return (
         <div className="space-y-4 border-t pt-6 mt-6">
             <h3 className="text-lg font-semibold text-gray-800">Payment Information</h3>
             <p className="text-sm text-gray-600">
-                Bring a Trailer requires a credit card to bid. There is no charge to register.
+                PlaneVault requires a credit card to bid. There is no charge to register.
                 We will only authorize that your card is valid.
             </p>
 
             <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Full name
-                    </label>
-                    <input
-                        type="text"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="Please provide your full name"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Country or region
-                    </label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="">Select country</option>
-                        {countries.map(country => (
-                            <option key={country} value={country}>{country}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Address line 1
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="Street address"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Address line 2 (optional)
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="Apt, suite, unit, etc."
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            City
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="City"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            State
-                        </label>
-                        <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <option value="">Select state</option>
-                            {states.map(state => (
-                                <option key={state} value={state}>{state}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            ZIP / Postal code
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="ZIP code"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone number
-                    </label>
-                    <input
-                        type="tel"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="+1 234 567 8900"
-                        required
-                    />
-                </div>
-
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Credit Card Information
@@ -149,9 +60,14 @@ const CardSection = () => {
                                     base: {
                                         fontSize: '16px',
                                         color: '#424770',
+                                        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
                                         '::placeholder': {
                                             color: '#aab7c4',
                                         },
+                                    },
+                                    invalid: {
+                                        color: '#fa755a',
+                                        iconColor: '#fa755a',
                                     },
                                 },
                             }}
@@ -161,22 +77,28 @@ const CardSection = () => {
             </div>
 
             <p className="text-sm text-gray-500 mt-4">
-                Note: You will automatically be taken to two-factor authentication (2FA) setup after submitting billing information.
-                2FA is required for all registered bidders for account security.
+                Note: Your card will be verified with a small authorization that will be immediately refunded.
             </p>
         </div>
     );
 };
 
+// Main Register component
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [userType, setUserType] = useState('');
+    const navigate = useNavigate();
 
-    const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    // Stripe hooks - these must be used at the top level of the component
+    const stripe = useStripe();
+    const elements = useElements();
+
+    const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm({
         defaultValues: {
             email: '',
+            phone: '',
             password: '',
             confirmPassword: '',
             username: '',
@@ -189,31 +111,94 @@ const Register = () => {
 
     const password = watch('password');
 
-    const onSubmit = async (data) => {
+    // Update form value when userType changes
+    const handleUserTypeChange = (type) => {
+        setUserType(type);
+        setValue('userType', type);
+    };
+
+    const onSubmit = async (registrationData) => {
         setIsLoading(true);
-
         try {
-            // Handle registration logic here
-            if (userType === 'bidder') {
-                // Process Stripe payment first
-                // const { error, paymentMethod } = await stripe.createPaymentMethod({
-                //   type: 'card',
-                //   card: elements.getElement(CardElement),
-                // });
+            let paymentMethodId = null;
 
-                // if (error) {
-                //   console.error('Payment error:', error);
-                //   return;
-                // }
+            // Handle bidder card verification
+            if (registrationData.userType === 'bidder') {
+                if (!stripe || !elements) {
+                    toast.error('Stripe not initialized properly');
+                    setIsLoading(false);
+                    return;
+                }
 
-                // Save payment method reference
-                console.log('Payment method created');
+                // Validate card element
+                const cardElement = elements.getElement(CardElement);
+                if (!cardElement) {
+                    toast.error('Please enter your card details');
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Create payment method with country code
+                const { error, paymentMethod } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                    billing_details: {
+                        name: `${registrationData.firstName} ${registrationData.lastName}`,
+                        email: registrationData.email,
+                        phone: registrationData.phone,
+                        address: {
+                            country: registrationData.country, // This should be 'US', 'IN', etc.
+                        }
+                    }
+                });
+
+                if (error) {
+                    toast.error(`Payment error: ${error.message}`);
+                    setIsLoading(false);
+                    return;
+                }
+
+                paymentMethodId = paymentMethod.id;
             }
 
-            console.log('Registration data:', data);
-            // Proceed with registration
+            // Prepare registration data - store both name and code
+            const registrationPayload = {
+                firstName: registrationData.firstName,
+                lastName: registrationData.lastName,
+                email: registrationData.email,
+                phone: registrationData.phone,
+                password: registrationData.password,
+                username: registrationData.username,
+                countryCode: registrationData.country, // This will be the code like 'IN', 'US'
+                countryName: countries.find(c => c.code === registrationData.country)?.name || registrationData.country,
+                userType: registrationData.userType,
+                ...(registrationData.userType === 'bidder' && { paymentMethodId })
+            };
+
+            // Send registration request
+            const { data } = await axios.post(
+                `${import.meta.env.VITE_DOMAIN_URL}/api/v1/users/register`,
+                registrationPayload,
+                { withCredentials: true }
+            );
+
+            if (data.success) {
+                const accessToken = data.data.accessToken;
+                // dispatch(updateUser({ ...data.data.user, accessToken }));
+                // dispatch(toggleIsUserLoggedIn(true));
+                // dispatch(toggleShowUserAuthForm(false));
+
+                // Redirect based on user type
+                const redirectPath = registrationData.userType === 'seller'
+                    ? '/seller/dashboard'
+                    : '/bidder/dashboard';
+
+                navigate(redirectPath);
+                toast.success(data.message);
+            }
 
         } catch (error) {
+            toast.error(error?.response?.data?.message || 'Registration failed');
             console.error('Registration error:', error);
         } finally {
             setIsLoading(false);
@@ -247,7 +232,13 @@ const Register = () => {
                                         </div>
                                         <input
                                             type="email"
-                                            {...register('email', { required: 'Email is required' })}
+                                            {...register('email', {
+                                                required: 'Email is required',
+                                                pattern: {
+                                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                    message: 'Invalid email address'
+                                                }
+                                            })}
                                             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                             placeholder="Enter your email"
                                         />
@@ -259,20 +250,26 @@ const Register = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Username
+                                        Phone
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User size={20} className="text-gray-400" />
+                                            <Phone size={20} className="text-gray-400" />
                                         </div>
                                         <input
-                                            type="text"
-                                            {...register('username', { required: 'Username is required' })}
+                                            type="tel"
+                                            {...register('phone', {
+                                                required: 'Phone is required',
+                                                pattern: {
+                                                    value: /^[+]?[1-9][\d]{0,15}$/,
+                                                    message: 'Invalid phone number'
+                                                }
+                                            })}
                                             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            placeholder="What others see when you bid"
+                                            placeholder="Enter your contact no."
                                         />
-                                        {errors.username && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+                                        {errors.phone && (
+                                            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
                                         )}
                                     </div>
                                 </div>
@@ -360,7 +357,10 @@ const Register = () => {
                                     </label>
                                     <input
                                         type="text"
-                                        {...register('firstName', { required: 'First name is required' })}
+                                        {...register('firstName', {
+                                            required: 'First name is required',
+                                            minLength: { value: 2, message: 'First name must be at least 2 characters' }
+                                        })}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="First name"
                                     />
@@ -375,7 +375,10 @@ const Register = () => {
                                     </label>
                                     <input
                                         type="text"
-                                        {...register('lastName', { required: 'Last name is required' })}
+                                        {...register('lastName', {
+                                            required: 'Last name is required',
+                                            minLength: { value: 2, message: 'Last name must be at least 2 characters' }
+                                        })}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="Last name"
                                     />
@@ -385,24 +388,55 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Country of residence
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        {...register('country', { required: 'Country is required' })}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
-                                    >
-                                        <option value="">Select country</option>
-                                        {countries.map(country => (
-                                            <option key={country} value={country}>{country}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={20} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
-                                    {errors.country && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
-                                    )}
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Username
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <User size={20} className="text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            {...register('username', {
+                                                required: 'Username is required',
+                                                minLength: { value: 3, message: 'Username must be at least 3 characters' },
+                                                pattern: {
+                                                    value: /^[a-zA-Z0-9_]+$/,
+                                                    message: 'Username can only contain letters, numbers, and underscores'
+                                                }
+                                            })}
+                                            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            placeholder="What others see when you bid"
+                                        />
+                                        {errors.username && (
+                                            <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Country of residence
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            {...register('country', { required: 'Country is required' })}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
+                                        >
+                                            <option value="">Select country</option>
+                                            {countries.map(country => (
+                                                <option key={country.code} value={country.code}>
+                                                    {country.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown size={20} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
+                                        {errors.country && (
+                                            <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -418,13 +452,13 @@ const Register = () => {
                                 <label
                                     className={`flex items-center gap-5 border py-3 px-5 rounded cursor-pointer transition-colors ${userType === 'bidder' ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                                         }`}
-                                    onClick={() => setUserType('bidder')}
                                 >
                                     <input
                                         type="radio"
                                         value="bidder"
                                         {...register('userType', { required: 'Please select user type' })}
                                         className="hidden"
+                                        onChange={() => handleUserTypeChange('bidder')}
                                     />
                                     <Gavel size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'bidder' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
                                         }`} />
@@ -437,13 +471,13 @@ const Register = () => {
                                 <label
                                     className={`flex items-center gap-5 border py-3 px-5 rounded cursor-pointer transition-colors ${userType === 'seller' ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                                         }`}
-                                    onClick={() => setUserType('seller')}
                                 >
                                     <input
                                         type="radio"
                                         value="seller"
                                         {...register('userType', { required: 'Please select user type' })}
                                         className="hidden"
+                                        onChange={() => handleUserTypeChange('seller')}
                                     />
                                     <Store size={40} className={`flex-shrink-0 p-2 rounded ${userType === 'seller' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
                                         }`} />
@@ -459,16 +493,12 @@ const Register = () => {
                         </div>
 
                         {/* Stripe Card Section for Bidders */}
-                        {userType === 'bidder' && (
-                            <Elements stripe={stripePromise}>
-                                <CardSection />
-                            </Elements>
-                        )}
+                        {userType === 'bidder' && <CardSection />}
 
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading || (userType === 'bidder' && !stripe)}
                             className="w-full bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
                         >
                             {isLoading ? 'Creating account...' : 'Create Account'}
@@ -497,4 +527,11 @@ const Register = () => {
     );
 };
 
-export default Register;
+// Wrap the main component with Stripe Elements provider
+const RegisterWithStripe = () => (
+    <Elements stripe={stripePromise}>
+        <Register />
+    </Elements>
+);
+
+export default RegisterWithStripe;

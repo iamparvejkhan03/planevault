@@ -9,11 +9,11 @@ const MobileBidStickyBar = ({ currentBid, timeRemaining, onBidClick }) => {
         {/* Left: Current Bid */}
         <div className="flex-1 space-y-1">
           <p className="text-xs text-gray-500 font-light">CURRENT BID</p>
-          <p className="text-2xl font-semibold">€ {currentBid}</p>
+          <p className="text-lg font-semibold">${currentBid.toLocaleString()}</p>
         </div>
 
         {/* Right: Bid Button */}
-        <div className="flex-1 flex flex-col items-end gap-2 justify-end">
+        <div className="flex-1 flex flex-col items-end gap-2 justify-end flex-wrap">
           {/* Center: Simplified Timer */}
           <div className="flex-1 flex justify-start items-center space-x-1 text-sm font-medium">
             <span className="bg-gray-100 px-1 rounded">{days}d</span>

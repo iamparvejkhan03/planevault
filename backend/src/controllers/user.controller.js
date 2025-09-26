@@ -1,5 +1,6 @@
 import User from '../models/user.model.js';
 import { StripeService } from '../services/stripeService.js';
+import jwt from "jsonwebtoken";
 
 // Helper function to generate tokens and set cookies
 const generateTokensAndRespond = async (user, res, message) => {
@@ -234,48 +235,65 @@ export const logoutUser = async (req, res) => {
     }
 };
 
-// Refresh Token Controller
+// Refresh Access Token
 export const refreshAccessToken = async (req, res) => {
     try {
-        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+        const { refreshToken } = req.body;
 
-        if (!incomingRefreshToken) {
+        if (!refreshToken) {
             return res.status(401).json({
                 success: false,
                 message: 'Refresh token required'
             });
         }
 
-        const decoded = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
         const user = await User.findById(decoded.id);
 
-        if (!user || user.refreshToken !== incomingRefreshToken) {
+        if (!user || user.refreshToken !== refreshToken) {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid refresh token'
             });
         }
 
+        // Generate new tokens
         const newAccessToken = user.generateAccessToken();
+        const newRefreshToken = user.generateRefreshToken();
 
-        res.status(200)
-            .cookie('accessToken', newAccessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 15 * 60 * 1000
-            })
-            .json({
-                success: true,
-                message: 'Access token refreshed',
-                data: { accessToken: newAccessToken }
-            });
+        // Update refresh token in database
+        user.refreshToken = newRefreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        res.status(200).json({
+            success: true,
+            message: 'Access token refreshed',
+            data: {
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken
+            }
+        });
 
     } catch (error) {
         console.error('Token refresh error:', error);
-        res.status(401).json({
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid refresh token'
+            });
+        }
+        
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                success: false,
+                message: 'Refresh token expired'
+            });
+        }
+
+        res.status(500).json({
             success: false,
-            message: 'Invalid or expired refresh token'
+            message: 'Internal server error during token refresh'
         });
     }
 };

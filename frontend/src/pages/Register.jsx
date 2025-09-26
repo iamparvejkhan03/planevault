@@ -184,6 +184,10 @@ const Register = () => {
 
             if (data.success) {
                 const accessToken = data.data.accessToken;
+                const refreshToken = data.data.refreshToken;
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('user', JSON.stringify(data.data.user));
                 // dispatch(updateUser({ ...data.data.user, accessToken }));
                 // dispatch(toggleIsUserLoggedIn(true));
                 // dispatch(toggleShowUserAuthForm(false));

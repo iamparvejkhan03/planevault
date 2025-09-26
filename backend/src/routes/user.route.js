@@ -1,13 +1,12 @@
 import { Router } from "express";
-import verifyUser from "../middlewares/verifyUser.js";
-import verifyAdmin from "../middlewares/verifyAdmin.js";
-import upload from "../utils/multer.js";
-import { loginUser, registerUser } from "../controllers/user.controller.js";
+import upload from "../middlewares/multer.middleware.js";
+import { loginUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
 
 const userRouter = Router();
 
 userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
+userRouter.post('/refresh-token', refreshAccessToken);
 // userRouter.post('/forgot-password', forgotPassword);
 // userRouter.post('/reset-password/:token', resetPassword);
 // userRouter.get('/logout', verifyUser, logOutUser);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import parse from 'html-react-parser';
+import axios from "axios";
 import {
     FileText,
     DollarSign,
@@ -17,11 +18,16 @@ import {
     Youtube
 } from "lucide-react";
 import { RTE, SellerContainer, SellerHeader, SellerSidebar } from '../../components';
+import toast from 'react-hot-toast';
+import axiosInstance from '../../utils/axiosInstance.js';
+import { useNavigate } from 'react-router-dom';
 
 const CreateAuction = () => {
     const [step, setStep] = useState(1);
     const [uploadedPhotos, setUploadedPhotos] = useState([]);
     const [uploadedDocuments, setUploadedDocuments] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -31,6 +37,7 @@ const CreateAuction = () => {
         clearErrors,
         trigger,
         getValues,
+        reset,
         control,
         formState: { errors }
     } = useForm({
@@ -111,12 +118,17 @@ const CreateAuction = () => {
     };
 
     const removePhoto = (index) => {
-        setUploadedPhotos(uploadedPhotos.filter((_, i) => i !== index));
-        if (uploadedPhotos.length === 1) {
+        const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
+        setUploadedPhotos(newPhotos);
+
+        // Fix: Check the NEW array length, not the old one
+        if (newPhotos.length === 0) {
             setError('photos', {
                 type: 'manual',
                 message: 'At least one photo is required'
             });
+        } else {
+            clearErrors('photos');
         }
     };
 
@@ -124,14 +136,66 @@ const CreateAuction = () => {
         setUploadedDocuments(uploadedDocuments.filter((_, i) => i !== index));
     };
 
-    const onSubmit = (data) => {
-        const formData = {
-            ...data,
-            photos: uploadedPhotos,
-            documents: uploadedDocuments
-        };
-        console.log('Auction Data:', formData);
-        alert('Auction created successfully!');
+    const createAuctionHandler = async (auctionData) => {
+        try {
+            setIsLoading(true);
+            const accessToken = localStorage.getItem('accessToken');
+
+            // Create FormData object for file uploads
+            const formData = new FormData();
+
+            // Append all text fields
+            formData.append('title', auctionData.title);
+            formData.append('category', auctionData.category);
+            formData.append('description', auctionData.description);
+            formData.append('location', auctionData.location || '');
+            formData.append('videoLink', auctionData.video || '');
+            formData.append('startPrice', auctionData.startPrice);
+            formData.append('bidIncrement', auctionData.bidIncrement);
+            formData.append('auctionType', auctionData.auctionType);
+            formData.append('startDate', auctionData.startDate);
+            formData.append('endDate', auctionData.endDate);
+
+            // Append reserve price if applicable
+            if (auctionData.auctionType === 'reserve' && auctionData.reservePrice) {
+                formData.append('reservePrice', auctionData.reservePrice);
+            }
+
+            // Append photos as files
+            uploadedPhotos.forEach((photo, index) => {
+                formData.append('photos', photo); // This should be the actual File object
+            });
+
+            // Append documents as files
+            uploadedDocuments.forEach((doc, index) => {
+                formData.append('documents', doc); // This should be the actual File object
+            });
+
+            const { data } = await axiosInstance.post(
+                '/api/v1/auctions/create',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                }
+            );
+
+            if (data && data.success) {
+                toast.success(data.message);
+                setStep(1);
+                setUploadedPhotos([]);
+                setUploadedDocuments([]);
+                reset();
+                navigate('/seller/auctions/all');
+            }
+        } catch (error) {
+            const errorMessage = error?.response?.data?.message || 'Failed to create auction';
+            toast.error(errorMessage);
+            console.log('Create auction error:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -168,7 +232,7 @@ const CreateAuction = () => {
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                        <form onSubmit={handleSubmit(createAuctionHandler)} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                             {/* Step 1: Auction Information */}
                             {step === 1 && (
                                 <div>
@@ -644,7 +708,7 @@ const CreateAuction = () => {
                                         className="flex items-center px-6 py-2 bg-black text-white rounded-lg hover:bg-black/90 transition-colors"
                                     >
                                         <Gavel size={18} className="mr-2" />
-                                        Create Auction
+                                        {isLoading ? 'Creating Auction...' : 'Create Auction'}
                                     </button>
                                 )}
                             </div>

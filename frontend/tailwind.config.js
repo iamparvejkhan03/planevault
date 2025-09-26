@@ -11,6 +11,9 @@ export default {
         // primary: '#0033FF',
         secondary: '#666666',
       },
+      animation: {
+        "spin-slow": "spin 1s linear infinite", // adjust 1s -> slower/faster
+      },
     },
   },
   plugins: [

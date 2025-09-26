@@ -1,4 +1,4 @@
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, lazy, useEffect, forwardRef } from "react";
 import { MessageSquare, Gavel, Notebook } from "lucide-react";
 
 const LoadingSpinner = lazy(() => import("./LoadingSpinner"));
@@ -6,27 +6,35 @@ const CommentSection = lazy(() => import("./CommentSection"));
 const BidHistory = lazy(() => import("./BidHistory"));
 const Description = lazy(() => import("./Description"));
 
-const TabSection = ({ref}) => {
-  const [activeTab, setActiveTab] = useState("comments");
+const TabSection = forwardRef(({ description, bids, auction, activatedTab }, ref) => {
+  // Internal state that syncs with the activatedTab prop
+  const [activeTab, setActiveTab] = useState(activatedTab || "comments");
+
+  // Sync internal state when activatedTab prop changes
+  useEffect(() => {
+    if (activatedTab) {
+      setActiveTab(activatedTab);
+    }
+  }, [activatedTab]);
 
   const tabs = [
     {
       id: "comments",
       label: "Comments",
       icon: <MessageSquare size={18} />,
-      component: <CommentSection />,
+      component: <CommentSection auctionId={auction._id} />,
     },
     {
       id: "bids",
       label: "Bid History",
       icon: <Gavel size={18} />,
-      component: <BidHistory />,
+      component: <BidHistory bids={bids} auction={auction} />,
     },
     {
       id: "description",
-      label: "Descripton",
+      label: "Description",
       icon: <Notebook size={18} />,
-      component: <Description />,
+      component: <Description description={description} />,
     },
   ];
 
@@ -62,6 +70,8 @@ const TabSection = ({ref}) => {
       </div>
     </div>
   );
-};
+});
+
+TabSection.displayName = "TabSection";
 
 export default TabSection;

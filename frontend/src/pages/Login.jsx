@@ -30,6 +30,9 @@ const Login = () => {
             if (data && data.success) {
                 const accessToken = data.data.accessToken;
                 const refreshToken = data.data.refreshToken;
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('user', JSON.stringify(data.data.user));
                 // dispatch(toggleIsUserLoggedIn(true));
                 // dispatch(toggleShowUserAuthForm(false));
                 // dispatch(updateUser({...data.data.user, accessToken, refreshToken}));

@@ -11,6 +11,14 @@ export const useWatchlist = (auctionId) => {
     useEffect(() => {
         const checkWatchlistStatus = async () => {
             if (!auctionId) return;
+
+            const accessToken = localStorage.getItem('accessToken');
+
+             if (!accessToken) {
+                setIsWatchlisted(false);
+                setLoading(false);
+                return;
+            }
             
             try {
                 const { data } = await axiosInstance.get(`/api/v1/watchlist/status/${auctionId}`);

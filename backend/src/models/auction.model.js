@@ -9,6 +9,11 @@ const auctionSchema = new Schema({
         required: true,
         trim: true
     },
+    specifications: {
+        type: Map,
+        of: String,
+        default: new Map()
+    },
     description: {
         type: String,
         required: true

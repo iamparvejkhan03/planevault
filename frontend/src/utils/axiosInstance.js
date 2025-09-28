@@ -37,7 +37,6 @@ axiosInstance.interceptors.response.use(
                 
                 if (!refreshToken) {
                     // No refresh token, redirect to login
-                    window.location.href = '/login';
                     return Promise.reject(error);
                 }
 
@@ -71,7 +70,6 @@ axiosInstance.interceptors.response.use(
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('user');
-                window.location.href = '/login';
             }
         }
 

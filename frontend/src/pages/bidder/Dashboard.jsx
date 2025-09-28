@@ -7,63 +7,10 @@ import { useState } from "react";
 import { TrendingUp, TrendingDown, Users, Gavel, Award, Heart, DollarSign, BarChart3, Clock, Eye, Bookmark, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { about } from "../../assets";
+import { useStats } from "../../hooks/useStats";
 // import useRefreshToken from "../../hooks/useRefreshToken";
 // import { updateUser } from "../../features/forms/UserAuthSlice.js";
 // import cleanFileName from "../../hooks/CleanFileName.jsx";
-
-const statsData = [
-    {
-        title: "Active Bids",
-        value: "12",
-        change: "+3",
-        icon: <Gavel size={24} />,
-        trend: "up"
-    },
-    {
-        title: "Watchlist Items",
-        value: "8",
-        change: "+2",
-        icon: <Bookmark size={24} />,
-        trend: "up"
-    },
-    {
-        title: "Total Spent",
-        value: "14,250",
-        change: "+2,150",
-        icon: <DollarSign size={24} />,
-        trend: "up",
-        currency: "$"
-    },
-    {
-        title: "Auctions Won",
-        value: "5",
-        change: "+1",
-        icon: <Award size={24} />,
-        trend: "up"
-    },
-    {
-        title: "Bidding Success Rate",
-        value: "42",
-        change: "+5",
-        icon: <TrendingUp size={24} />,
-        trend: "up",
-        suffix: "%"
-    },
-    {
-        title: "Outbid Notifications",
-        value: "18",
-        change: "-3",
-        icon: <Bell size={24} />,
-        trend: "down"
-    },
-    {
-        title: "Ending Soon",
-        value: "4",
-        change: "-1",
-        icon: <Clock size={24} />,
-        trend: "down"
-    }
-];
 
 // Mock data for bidder-specific components
 const recentAuctions = [
@@ -119,6 +66,61 @@ function Dashboard() {
     const [loading, setLoading] = useState(false);
     const [activeBids, setActiveBids] = useState(12);
     const [watchlistCount, setWatchlistCount] = useState(8);
+    const { stats } = useStats();
+
+    const statsData = [
+    {
+        title: "Active Bids",
+        value: stats.myActiveBids,
+        change: "On Active Auctions",
+        icon: <Gavel size={24} />,
+        trend: "up"
+    },
+    {
+        title: "Watchlist Items",
+        value: "8",
+        change: "+2",
+        icon: <Bookmark size={24} />,
+        trend: "up"
+    },
+    {
+        title: "Total Spent",
+        value: "14,250",
+        change: "+2,150",
+        icon: <DollarSign size={24} />,
+        trend: "up",
+        currency: "$"
+    },
+    {
+        title: "Auctions Won",
+        value: stats.myWinningAuctions,
+        change: "All Time",
+        icon: <Award size={24} />,
+        trend: "up"
+    },
+    {
+        title: "Bidding Success Rate",
+        value: stats.bidSuccessRate,
+        change: "All Time",
+        icon: <TrendingUp size={24} />,
+        trend: "up",
+        suffix: "%"
+    },
+    {
+        title: "Outbid Notifications",
+        value: "18",
+        change: "-3",
+        icon: <Bell size={24} />,
+        trend: "down"
+    },
+    {
+        title: "Ending Soon",
+        value: stats.endingSoon,
+        change: "In Next 24 Hours",
+        icon: <Clock size={24} />,
+        trend: "down"
+    }
+];
 
     // useEffect(() => {
     //   // Fetch bidder data
@@ -254,42 +256,6 @@ function Dashboard() {
                                         <Award size={24} className="mx-auto mb-2 text-blue-600" />
                                         <p className="text-sm font-medium">Won Auctions</p>
                                     </Link>
-                                </div>
-                            </div>
-
-                            {/* Recommended Auctions */}
-                            <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold">Recommended for You</h3>
-                                    <Link to="/bidder/auctions/active" className="text-sm text-blue-600 hover:underline">
-                                        View All
-                                    </Link>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                        <div className="flex items-center mb-3">
-                                            <div className="w-10 h-10 bg-gray-200 rounded-md flex items-center justify-center mr-3">
-                                                <Award size={20} className="text-gray-500" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">Vintage Aircraft Instruments</p>
-                                                <p className="text-xs text-gray-500">12 bids • 3h 22m left</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-lg font-bold text-green-600">$2,400</p>
-                                    </div>
-                                    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                        <div className="flex items-center mb-3">
-                                            <div className="w-10 h-10 bg-gray-200 rounded-md flex items-center justify-center mr-3">
-                                                <Award size={20} className="text-gray-500" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">Rare Aviation Books Collection</p>
-                                                <p className="text-xs text-gray-500">8 bids • 1d 5h left</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-lg font-bold text-green-600">$1,850</p>
-                                    </div>
                                 </div>
                             </div>
                         </>

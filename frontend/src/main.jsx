@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { PopUpContextProvider } from './contexts/popups/index.jsx';
+import { PopUpContextProvider } from './contexts/PopUpContextProvider';
 import { Protected, LoadingSpinner, AdminRoute } from './components';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 
@@ -82,110 +82,92 @@ createRoot(document.getElementById('root')).render(
                         </Route>
 
                         {/* Seller Layout */}
-                        <Route path='/seller' element={<SellerLayout />}>
+                        <Route path='/seller' element={<Protected authetication={true} userType='seller'><SellerLayout /></Protected>}>
                             {/* Seller Dashboard */}
                             <Route
                                 path='/seller/dashboard'
                                 index={true}
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <SellerDashboard />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <SellerDashboard />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Create Auction */}
                             <Route
                                 path='/seller/auctions/create'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <CreateAuction />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <CreateAuction />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Edit Auction */}
                             <Route
                                 path='/seller/auctions/edit/:auctionId'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <EditAuction />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <EditAuction />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Live Auctions */}
                             <Route
                                 path='/seller/auctions/all'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <SellerAllAuctions />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <SellerAllAuctions />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Won Auctions */}
                             <Route
                                 path='/seller/auctions/won'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <SellerWonAuctions />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <SellerWonAuctions />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Auctions Bid History */}
                             <Route
                                 path='/seller/bids/history'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <BidHistory />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <BidHistory />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Profile */}
                             <Route
                                 path='/seller/profile'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <SellerProfile />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <SellerProfile />
+                                    </Suspense>
                                 }
                             />
                             {/* Seller Notifications */}
                             <Route
                                 path='/seller/notifications'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <SellerNotifications />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <SellerNotifications />
+                                    </Suspense>
                                 }
                             />
                         </Route>
 
                         {/* Bidder Layout */}
-                        <Route path='/bidder' element={<BidderLayout />}>
+                        <Route path='/bidder' element={<Protected authetication={true} userType='bidder'><BidderLayout /></Protected>}>
                             {/* Bidder Dashboard */}
                             <Route
                                 path='/bidder/dashboard'
                                 index={true}
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <BidderDashboard />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <BidderDashboard />
+                                    </Suspense>
                                 }
                             />
 
@@ -193,11 +175,9 @@ createRoot(document.getElementById('root')).render(
                             <Route
                                 path='/bidder/watchlist'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <Watchlist />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <Watchlist />
+                                    </Suspense>
                                 }
                             />
 
@@ -205,11 +185,9 @@ createRoot(document.getElementById('root')).render(
                             <Route
                                 path='/bidder/auctions/active'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <ActiveAuctions />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <ActiveAuctions />
+                                    </Suspense>
                                 }
                             />
 
@@ -217,11 +195,9 @@ createRoot(document.getElementById('root')).render(
                             <Route
                                 path='/bidder/bids'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <MyBids />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <MyBids />
+                                    </Suspense>
                                 }
                             />
 
@@ -229,22 +205,18 @@ createRoot(document.getElementById('root')).render(
                             <Route
                                 path='/bidder/auctions/won'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <BidderWonAuctions />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <BidderWonAuctions />
+                                    </Suspense>
                                 }
                             />
                             {/* Bidder Profile */}
                             <Route
                                 path='/bidder/profile'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <BidderProfile />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <BidderProfile />
+                                    </Suspense>
                                 }
                             />
 
@@ -252,17 +224,15 @@ createRoot(document.getElementById('root')).render(
                             <Route
                                 path='/bidder/notifications'
                                 element={
-                                    <Protected authetication={true}>
-                                        <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                            <BidderNotifications />
-                                        </Suspense>
-                                    </Protected>
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <BidderNotifications />
+                                    </Suspense>
                                 }
                             />
                         </Route>
 
                         {/* Admin Layout */}
-                        <Route path='/admin' element={<AdminRoute><AdminLayout /></AdminRoute>} >
+                        <Route path='/admin' element={<Protected authetication={true} userType='admin'><AdminLayout /></Protected>} >
                             {/* Admin Dashboard */}
                             <Route
                                 path='/admin/dashboard'

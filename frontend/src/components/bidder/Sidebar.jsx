@@ -10,9 +10,10 @@ import {
     Menu,
     Bookmark
 } from "lucide-react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { logo } from "../../assets";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const navigation = [
     { name: 'Dashboard', path: '/bidder/dashboard', icon: <LayoutDashboard size={20} /> },
@@ -25,9 +26,9 @@ const navigation = [
 ];
 
 function Sidebar() {
-    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const { logout } = useAuth();
 
     // Handle window resize
     useEffect(() => {
@@ -55,15 +56,6 @@ function Sidebar() {
             document.body.style.overflow = 'unset';
         };
     }, [isOpen, isMobile]);
-
-    const logOutHandler = async () => {
-        try {
-            console.log("Logging out...");
-            // Your actual logout implementation
-        } catch (error) {
-            console.error("Logout error:", error);
-        }
-    }
 
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
@@ -128,7 +120,7 @@ function Sidebar() {
                         ))}
                         <li>
                             <button
-                                onClick={logOutHandler}
+                                onClick={logout}
                                 className="flex items-center w-full p-3 rounded-lg text-white hover:bg-red-600 transition-all duration-200"
                             >
                                 <LogOut size={20} className="mr-3" />

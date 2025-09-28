@@ -40,6 +40,7 @@ import AdminSidebar from "./admin/Sidebar";
 import AdminContainer from "./admin/Container";
 import TimerDisplay from "./TimerDisplay";
 import WatchlistButton from "./WatchlistButton";
+import SpecificationsSection from "./SpecificationsSection";
 
 export {
     Container,
@@ -84,4 +85,5 @@ export {
     AdminRoute,
     TimerDisplay,
     WatchlistButton,
+    SpecificationsSection,
 }

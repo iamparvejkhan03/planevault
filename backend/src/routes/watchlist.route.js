@@ -13,16 +13,16 @@ import { authSeller } from '../middlewares/auth.middleware.js';
 const watchlistRouter = Router();
 
 // All routes require authentication
-watchlistRouter.use(authBidder);
+// watchlistRouter.use(authBidder);
 
 // Watchlist management
-watchlistRouter.post('/add/:auctionId', addToWatchlist);
-watchlistRouter.delete('/remove/:auctionId/', removeFromWatchlist);
-watchlistRouter.post('/toggle/:auctionId', toggleWatchlist); // Most commonly used
+watchlistRouter.post('/add/:auctionId', authBidder, addToWatchlist);
+watchlistRouter.delete('/remove/:auctionId/', authBidder, removeFromWatchlist);
+watchlistRouter.post('/toggle/:auctionId', authBidder, toggleWatchlist);
 
 // Get watchlist data
-watchlistRouter.get('/my-watchlist', getMyWatchlist);
-watchlistRouter.get('/status/:auctionId', getWatchlistStatus);
+watchlistRouter.get('/my-watchlist', authBidder, getMyWatchlist);
+watchlistRouter.get('/status/:auctionId', authBidder, getWatchlistStatus);
 
 // Seller only routes
 // watchlistRouter.get('/auction/:auctionId/users', getAuctionWatchlistUsers);

@@ -1,10 +1,9 @@
 import { lazy, Suspense } from "react";
-import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner, About, CategoryImg, AllCategoryImages, AuctionCard } from "../components";
+import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner, About, AuctionCard } from "../components";
 import Marquee from "react-fast-marquee";
-import { ArrowUp, BadgeCheck, Gavel, Tag, Upload } from "lucide-react";
-import { airBus, airCrafts, beechCraft, bell, cessna, diamond, heroImg, memorabilia, mooney, parts, pilatus, piper } from "../assets";
-import { Link } from "react-router-dom";
-import { usePopUp } from "../contexts/popups";
+import { BadgeCheck, Gavel, Tag, Upload, Filter, Loader } from "lucide-react";
+import { airBus, airCrafts, beechCraft, bell, diamond, memorabilia, mooney, parts, pilatus, piper } from "../assets";
+import { useAuctions } from '../hooks/useAuctions';
 
 const FAQs = lazy(() => import('../components/FAQs'));
 const CTA = lazy(() => import('../components/CTA'));
@@ -160,28 +159,36 @@ const categoryImg = [
 ];
 
 function Home() {
-    const { popUps } = usePopUp();
+    const {
+        auctions,
+        loading,
+        loadingMore,
+        pagination,
+        loadMoreAuctions,
+        updateFilters
+    } = useAuctions();
+
+    const handleLoadMore = () => {
+        loadMoreAuctions();
+    };
+
+    // if (loading && auctions.length === 0) {
+    //     return (
+    //         <Container className="my-14">
+    //             <div className="flex justify-center items-center min-h-96">
+    //                 <Loader size={32} className="animate-spin text-primary" />
+    //             </div>
+    //         </Container>
+    //     );
+    // }
     return (
         <>
             <Hero />
 
-            <Container className="my-14">
-                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-10">
-                    <AuctionCard />
-                    <AuctionCard />
-                    <AuctionCard />
-                    <AuctionCard />
-                </section>
-            </Container>
-
-            <section className={`bg-black/70 fixed z-50 top-0 w-full min-h-full ${popUps.category ? 'flex flex-col justify-center items-center' : 'hidden'}`}>
-                <AllCategoryImages />
-            </section>
-
             {/* Marquee section */}
             <Container>
                 <Marquee speed={50} gradient={false}>
-                    <div className="flex gap-8 w-full mt-14 mr-8">
+                    <div className="flex gap-8 w-full my-14 mr-8">
                         {
                             trustedBrands.map(brand => (
                                 <div key={brand.alt} className="flex items-center justify-center border rounded-lg shadow hover:shadow-lg transition-all border-slate-200 p-4 md:p-5">
@@ -191,6 +198,58 @@ function Home() {
                         }
                     </div>
                 </Marquee>
+            </Container>
+
+            {/* Auctions section */}
+            <Container className="mb-14">
+                {/* Auctions Grid */}
+                <h2 className="text-3xl md:text-4xl font-bold text-primary">All Auctions</h2>
+                <p className="text-sm md:text-base text-gray-500 mt-3 mb-8">
+                    Browse through our selection of premium aircraft auctions — find your perfect plane with transparent bidding and expert verification.
+                </p>
+
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7 gap-y-10">
+                    {auctions.map((auction) => (
+                        <AuctionCard
+                            key={auction._id}
+                            auction={auction} // Pass the full auction object
+                        />
+                    ))}
+                </section>
+
+                {/* Load More Button */}
+                {pagination?.currentPage < pagination?.totalPages && (
+                    <div className="flex justify-center mt-10">
+                        <button
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            className="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                        >
+                            {loadingMore ? (
+                                <>
+                                    <Loader size={16} className="animate-spin" />
+                                    Loading...
+                                </>
+                            ) : (
+                                <>
+                                    Load More Auctions
+                                    <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                                        {pagination.totalAuctions - auctions.length} more
+                                    </span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* No Results Message */}
+                {auctions.length === 0 && !loading && (
+                    <div className="text-center py-16 text-gray-500">
+                        <Filter size={48} className="mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium">No auctions found</p>
+                        <p className="text-sm">Try adjusting your filters or search terms</p>
+                    </div>
+                )}
             </Container>
 
             {/* Category Images */}

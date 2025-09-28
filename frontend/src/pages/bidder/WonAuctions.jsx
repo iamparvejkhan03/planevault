@@ -1,143 +1,91 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BidderContainer, BidderHeader, BidderSidebar } from "../../components";
 import { Award, Trophy, Star, DollarSign, Calendar, MapPin, Truck, MessageCircle, Phone, Mail, Search, Filter, Download, Share2, Gift, Zap, Clock, Users, TrendingUp } from "lucide-react";
-
-// Mock data for won auctions
-const wonAuctionsData = [
-    {
-        id: "AV267400",
-        auctionId: "AU267400",
-        title: "Vintage Boeing 747 Control Panel",
-        description: "Fully restored cockpit control panel from a 1978 Boeing 747-200. Includes all original components and documentation.",
-        category: "Aviation Memorabilia",
-        finalBid: 18500,
-        startingBid: 5000,
-        yourMaxBid: 17500,
-        winningBid: 18500,
-        bids: 24,
-        watchers: 42,
-        endTime: "2023-12-19T15:30:00",
-        winTime: "2023-12-19T15:28:00",
-        image: "/api/placeholder/400/300",
-        location: "Seattle, WA",
-        seller: {
-            name: "AeroCollectors Inc.",
-            rating: 4.8,
-            reviews: 127,
-            memberSince: "2018"
-        },
-        condition: "Excellent",
-        shipping: {
-            cost: 250,
-            estimatedDelivery: "5-7 business days",
-            insurance: true
-        },
-        status: "payment_pending", // payment_pending, paid, shipped, delivered
-        congratulatoryMessage: "Congratulations! You won this rare piece of aviation history!"
-    },
-    {
-        id: "AV351289",
-        auctionId: "AU351289",
-        title: "Pratt & Whitney JT9D Engine",
-        description: "Used Pratt & Whitney JT9D-7R4 turbofan engine with 50,000 hours total time. Complete with maintenance records.",
-        category: "Engines & Parts",
-        finalBid: 42750,
-        startingBid: 25000,
-        yourMaxBid: 42750,
-        winningBid: 42750,
-        bids: 12,
-        watchers: 18,
-        endTime: "2023-12-20T14:00:00",
-        winTime: "2023-12-20T13:55:00",
-        image: "/api/placeholder/400/300",
-        location: "Miami, FL",
-        seller: {
-            name: "Global Air Services",
-            rating: 4.5,
-            reviews: 89,
-            memberSince: "2019"
-        },
-        condition: "Good",
-        shipping: {
-            cost: 1200,
-            estimatedDelivery: "10-14 business days",
-            insurance: true
-        },
-        status: "paid",
-        congratulatoryMessage: "Outstanding win! This engine is a fantastic addition to any collection."
-    },
-    {
-        id: "AV498712",
-        auctionId: "AU498712",
-        title: "Rare WWII P-51 Mustang Propeller",
-        description: "Authentic Hamilton Standard propeller from a North American P-51 Mustang. Museum quality preservation.",
-        category: "Aviation Memorabilia",
-        finalBid: 22500,
-        startingBid: 8000,
-        yourMaxBid: 22000,
-        winningBid: 22500,
-        bids: 31,
-        watchers: 56,
-        endTime: "2023-12-10T16:45:00",
-        winTime: "2023-12-10T16:40:00",
-        image: "/api/placeholder/400/300",
-        location: "New York, NY",
-        seller: {
-            name: "Warbird Restorations",
-            rating: 4.9,
-            reviews: 203,
-            memberSince: "2015"
-        },
-        condition: "Very Good",
-        shipping: {
-            cost: 350,
-            estimatedDelivery: "3-5 business days",
-            insurance: true
-        },
-        status: "shipped",
-        trackingNumber: "1Z987XYZ654321",
-        congratulatoryMessage: "Historic win! This propeller is a true piece of aviation heritage."
-    },
-    {
-        id: "AV672341",
-        auctionId: "AU672341",
-        title: "Vintage Pilot Uniform Collection",
-        description: "Complete set of 1960s pilot uniform with hat, jacket, and accessories. Perfect condition.",
-        category: "Aviation Memorabilia",
-        finalBid: 3200,
-        startingBid: 1500,
-        yourMaxBid: 3000,
-        winningBid: 3200,
-        bids: 15,
-        watchers: 23,
-        endTime: "2023-12-15T12:00:00",
-        winTime: "2023-12-15T11:58:00",
-        image: "/api/placeholder/400/300",
-        location: "Los Angeles, CA",
-        seller: {
-            name: "Vintage Aviation Co.",
-            rating: 4.7,
-            reviews: 156,
-            memberSince: "2017"
-        },
-        condition: "Excellent",
-        shipping: {
-            cost: 45,
-            estimatedDelivery: "2-3 business days",
-            insurance: false
-        },
-        status: "delivered",
-        deliveredDate: "2023-12-18T14:30:00",
-        congratulatoryMessage: "Fantastic win! This uniform collection is in impeccable condition."
-    }
-];
+import axiosInstance from "../../utils/axiosInstance";
 
 function WonAuctions() {
-    const [auctions, setAuctions] = useState(wonAuctionsData);
+    const [auctions, setAuctions] = useState([]);
     const [filter, setFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedAuction, setSelectedAuction] = useState(null);
     const [showContactModal, setShowContactModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [statistics, setStatistics] = useState({
+        totalWon: 0,
+        totalSpent: 0,
+        averageSavings: 0,
+        recentWins: 0
+    });
+
+    useEffect(() => {
+        fetchWonAuctions();
+    }, [filter, searchTerm]);
+    console.log(auctions);
+
+    const fetchWonAuctions = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const params = {
+                status: filter !== 'all' ? filter : undefined,
+                search: searchTerm || undefined
+            };
+
+            const { data } = await axiosInstance.get('/api/v1/auctions/won-auctions', { params });
+            
+            if (data.success) {
+                setAuctions(data.data.auctions);
+                setStatistics(data.data.statistics);
+            } else {
+                setError('Failed to fetch won auctions');
+            }
+        } catch (err) {
+            setError('Error loading won auctions');
+            console.error('Fetch won auctions error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateAuctionStatus = async (auctionId, status, additionalData = {}) => {
+        try {
+            const { data } = await axiosInstance.put(
+                `/api/v1/auctions/won-auctions/${auctionId}/status`,
+                { status, ...additionalData }
+            );
+
+            if (data.success) {
+                // Update local state
+                setAuctions(prevAuctions => 
+                    prevAuctions.map(auction => 
+                        auction.id === auctionId 
+                            ? { ...auction, status, ...additionalData }
+                            : auction
+                    )
+                );
+            }
+        } catch (err) {
+            console.error('Update auction status error:', err);
+            setError('Failed to update auction status');
+        }
+    };
+
+    const handlePayNow = async (auctionId) => {
+        // Implement payment logic here
+        await updateAuctionStatus(auctionId, 'paid');
+    };
+
+    const handleTrackPackage = (auction) => {
+        // Implement tracking logic here
+        console.log('Track package for:', auction.trackingNumber);
+    };
+
+    const handleLeaveReview = async (auctionId) => {
+        // Implement review logic here
+        await updateAuctionStatus(auctionId, 'delivered');
+    };
 
     const filteredAuctions = auctions
         .filter(auction => {
@@ -202,20 +150,48 @@ function WonAuctions() {
         });
     };
 
-    // Statistics
-    const totalWon = auctions.length;
-    const totalSpent = auctions.reduce((sum, auction) => sum + auction.finalBid, 0);
-    const averageSavings = auctions.reduce((sum, auction) => sum + (auction.startingBid / auction.finalBid), 0) / auctions.length;
-    const recentWins = auctions.filter(auction => {
-        const winDate = new Date(auction.winTime);
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        return winDate > weekAgo;
-    }).length;
-
     const openContactModal = (auction) => {
         setSelectedAuction(auction);
         setShowContactModal(true);
     };
+
+    if (loading) {
+        return (
+            <section className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+                <BidderSidebar />
+                <div className="w-full relative">
+                    <BidderHeader />
+                    <BidderContainer>
+                        <div className="flex justify-center items-center min-h-96">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        </div>
+                    </BidderContainer>
+                </div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+                <BidderSidebar />
+                <div className="w-full relative">
+                    <BidderHeader />
+                    <BidderContainer>
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                            <p className="text-red-600">{error}</p>
+                            <button 
+                                onClick={fetchWonAuctions}
+                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </BidderContainer>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
@@ -239,7 +215,7 @@ function WonAuctions() {
                             </div>
                             <div className="mt-4 md:mt-0">
                                 <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                                    {totalWon} Triumphant Wins!
+                                    {statistics.totalWon} Triumphant Wins!
                                 </span>
                             </div>
                         </div>
@@ -251,7 +227,7 @@ function WonAuctions() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-amber-100 text-sm">Total Wins</p>
-                                    <p className="text-3xl font-bold mt-1">{totalWon}</p>
+                                    <p className="text-3xl font-bold mt-1">{statistics.totalWon}</p>
                                     <p className="text-amber-200 text-xs mt-1">Auctions Won</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-full">
@@ -264,7 +240,7 @@ function WonAuctions() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-green-100 text-sm">Total Investment</p>
-                                    <p className="text-3xl font-bold mt-1">{formatCurrency(totalSpent)}</p>
+                                    <p className="text-3xl font-bold mt-1">{formatCurrency(statistics.totalSpent)}</p>
                                     <p className="text-green-200 text-xs mt-1">In Winning Bids</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-full">
@@ -277,7 +253,7 @@ function WonAuctions() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-blue-100 text-sm">Recent Success</p>
-                                    <p className="text-3xl font-bold mt-1">{recentWins}</p>
+                                    <p className="text-3xl font-bold mt-1">{statistics.recentWins}</p>
                                     <p className="text-blue-200 text-xs mt-1">Wins This Week</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-full">
@@ -290,7 +266,7 @@ function WonAuctions() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-purple-100 text-sm">Avg. Value Gain</p>
-                                    <p className="text-3xl font-bold mt-1">{((1 - averageSavings) * 100).toFixed(1)}%</p>
+                                    <p className="text-3xl font-bold mt-1">{((1 - statistics.averageSavings) * 100).toFixed(1)}%</p>
                                     <p className="text-purple-200 text-xs mt-1">Over Starting Bid</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-full">
@@ -429,17 +405,26 @@ function WonAuctions() {
                                     {/* Action Buttons */}
                                     <div className="flex gap-3">
                                         {auction.status === "payment_pending" && (
-                                            <button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all">
+                                            <button 
+                                                onClick={() => handlePayNow(auction.id)}
+                                                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all"
+                                            >
                                                 Pay Now
                                             </button>
                                         )}
                                         {auction.status === "shipped" && (
-                                            <button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all">
+                                            <button 
+                                                onClick={() => handleTrackPackage(auction)}
+                                                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all"
+                                            >
                                                 Track Package
                                             </button>
                                         )}
                                         {auction.status === "delivered" && (
-                                            <button className="flex-1 bg-gradient-to-r from-gray-500 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-gray-600 hover:to-blue-700 transition-all">
+                                            <button 
+                                                onClick={() => handleLeaveReview(auction.id)}
+                                                className="flex-1 bg-gradient-to-r from-gray-500 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-gray-600 hover:to-blue-700 transition-all"
+                                            >
                                                 Leave Review
                                             </button>
                                         )}
@@ -456,8 +441,15 @@ function WonAuctions() {
                     {filteredAuctions.length === 0 && (
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                             <Award size={64} className="mx-auto text-gray-300 mb-4" />
-                            <h3 className="text-2xl font-semibold text-gray-700 mb-2">No won auctions yet</h3>
-                            <p className="text-gray-500 mb-6">Start bidding on aviation auctions to see your wins here!</p>
+                            <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                                {searchTerm || filter !== 'all' ? 'No matching auctions found' : 'No won auctions yet'}
+                            </h3>
+                            <p className="text-gray-500 mb-6">
+                                {searchTerm || filter !== 'all' 
+                                    ? 'Try adjusting your search or filter criteria'
+                                    : 'Start bidding on aviation auctions to see your wins here!'
+                                }
+                            </p>
                             <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
                                 Browse Active Auctions
                             </button>

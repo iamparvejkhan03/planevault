@@ -20,8 +20,8 @@ function StatCard({ title, value, change, icon, trend = "up", currency }) {
 
             {change && (
                 <div className={`flex items-center mt-4 text-sm ${trend === "up" ? "text-green-600" : "text-red-600"}`}>
-                    <TrendIcon size={16} className="mr-1" />
-                    <span>{change} from previous day</span>
+                    {/* <TrendIcon size={16} className="mr-1" /> */}
+                    <span>{change}</span>
                 </div>
             )}
         </div>

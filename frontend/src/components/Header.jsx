@@ -1,9 +1,9 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { closeMenu, darkLogo, logo, menuIcon } from "../assets";
 import Container from "./Container";
-import { ChevronDown, ChevronRight, LayoutDashboard, LogIn, Search } from "lucide-react";
+import { LayoutDashboard, LogIn, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { usePopUp } from "../contexts/popups";
+import { useAuth } from "../contexts/AuthContext";
 
 const navLinks = [
     {
@@ -29,8 +29,7 @@ function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { pathname } = useLocation();
     const navigate = useNavigate();
-
-    const { popUps, setPopUps } = usePopUp();
+    const { user } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -66,11 +65,17 @@ function Header() {
                                 </li>
                             ))
                         }
-                        <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
-                            <button onClick={() => setPopUps({...popUps, category: true})} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
-                        </li>
+                        {/* <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
+                            <button onClick={() => openPopup('category')} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
+                        </li> */}
                         <li>
-                            <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate('/login')}><LogIn size={20} /> Log In</button>
+                            {
+                                user
+                                    ?
+                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
+                                    :
+                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate('/login')}><LogIn size={20} /> Log In</button>
+                            }
                         </li>
                     </ul>
                 </nav>
@@ -87,11 +92,11 @@ function Header() {
                         }
                         <li>
                             {
-                                <Link to='/user/dashboard' className="inline-flex items-center justify-center gap-1 text-white whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary hover:bg-blue-700">
-                                    <LayoutDashboard size={24} strokeWidth={1.5} />
-
-                                    <span>Dashboard</span>
-                                </Link>
+                                user
+                                    ?
+                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
+                                    :
+                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate('/login')}><LogIn size={20} /> Log In</button>
                             }
                         </li>
                     </ul>

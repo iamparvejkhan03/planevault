@@ -15,12 +15,48 @@ import {
     Clock,
     MapPin,
     Gavel,
-    Youtube
+    Youtube,
+    Plane,
+    Cog,
+    Trophy
 } from "lucide-react";
 import { RTE, SellerContainer, SellerHeader, SellerSidebar } from '../../components';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../utils/axiosInstance.js';
 import { useNavigate } from 'react-router-dom';
+
+// Category-specific field configurations
+const categoryFields = {
+    'Aircraft': [
+        { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Cessna, Piper, Boeing' },
+        { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 172, PA-28, 737' },
+        { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: 2025 },
+        { name: 'registration', label: 'Registration', type: 'text', required: true, placeholder: 'e.g., N12345' },
+        { name: 'totalHours', label: 'Total Hours', type: 'number', required: true, min: 0 },
+        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Avgas', 'Jet A', 'Diesel', 'Electric'] },
+        { name: 'seatingCapacity', label: 'Seating Capacity', type: 'number', required: true, min: 1, max: 1000 },
+        { name: 'maxTakeoffWeight', label: 'Max Takeoff Weight (lbs)', type: 'number', required: false, min: 0 },
+        { name: 'engineType', label: 'Engine Type', type: 'select', required: true, options: ['Piston', 'Turboprop', 'Jet', 'Turbofan'] },
+        { name: 'engineCount', label: 'Number of Engines', type: 'number', required: true, min: 1, max: 10 },
+        { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] }
+    ],
+    'Engines & Parts': [
+        { name: 'partType', label: 'Part Type', type: 'select', required: true, options: ['Engine', 'Propeller', 'Avionics', 'Airframe', 'Interior', 'Other'] },
+        { name: 'partNumber', label: 'Part Number', type: 'text', required: true, placeholder: 'Manufacturer part number' },
+        { name: 'manufacturer', label: 'Manufacturer', type: 'text', required: true, placeholder: 'e.g., Lycoming, Garmin, Honeywell' },
+        { name: 'condition', label: 'Condition', type: 'select', required: true, options: ['New', 'Overhauled', 'Used Serviceable', 'As-Removed'] },
+        { name: 'hoursSinceNew', label: 'Hours Since New/Overhaul', type: 'number', required: false, min: 0 },
+        { name: 'serialNumber', label: 'Serial Number', type: 'text', required: false },
+    ],
+    'Memorabilia': [
+        { name: 'itemType', label: 'Item Type', type: 'select', required: true, options: ['Uniform', 'Document', 'Model', 'Photograph', 'Instrument', 'Other'] },
+        { name: 'era', label: 'Historical Era', type: 'select', required: true, options: ['WWI', 'WWII', 'Cold War', 'Modern', 'Vintage'] },
+        { name: 'authenticity', label: 'Authenticity', type: 'select', required: true, options: ['Certified', 'Documented', 'Unknown'] },
+        { name: 'year', label: 'Year', type: 'number', required: false, min: 1800, max: 2025 },
+        { name: 'dimensions', label: 'Dimensions', type: 'text', required: false, placeholder: 'e.g., 24x36 inches' },
+        { name: 'material', label: 'Material', type: 'text', required: false, placeholder: 'e.g., Brass, Wood, Fabric' }
+    ]
+};
 
 const CreateAuction = () => {
     const [step, setStep] = useState(1);
@@ -47,12 +83,94 @@ const CreateAuction = () => {
     const auctionType = watch('auctionType');
     const startDate = watch('startDate');
     const endDate = watch('endDate');
+    const selectedCategory = watch('category');
+
+    // Get category-specific fields
+    const getCategoryFields = () => {
+        return categoryFields[selectedCategory] || [];
+    };
 
     const categories = [
         'Aircraft',
         'Engines & Parts',
         'Memorabilia'
     ];
+
+    const categoryIcons = {
+        'Aircraft': Plane,
+        'Engines & Parts': Cog,
+        'Memorabilia': Trophy
+    };
+
+    // Render category-specific fields
+    const renderCategoryFields = () => {
+        const fields = getCategoryFields();
+
+        return (
+            <div className="mb-6">
+                <label className="block text-sm font-medium text-secondary mb-4 flex items-center">
+                    {(() => {
+                        const IconComponent = categoryIcons[selectedCategory] || FileText;
+                        return <IconComponent size={20} className="mr-2" />;
+                    })()}
+                    {selectedCategory} Specifications *
+                </label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {fields.map((field) => (
+                        <div key={field.name} className="space-y-2">
+                            <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
+                                {field.label} {field.required && <span className="text-red-500">*</span>}
+                            </label>
+
+                            {field.type === 'select' ? (
+                                <select
+                                    {...register(`specifications.${field.name}`, {
+                                        required: field.required ? `${field.label} is required` : false
+                                    })}
+                                    id={field.name}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                >
+                                    <option value="">Select {field.label}</option>
+                                    {field.options.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                            ) : field.type === 'textarea' ? (
+                                <textarea
+                                    {...register(`specifications.${field.name}`, {
+                                        required: field.required ? `${field.label} is required` : false
+                                    })}
+                                    id={field.name}
+                                    rows={3}
+                                    placeholder={field.placeholder}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                />
+                            ) : (
+                                <input
+                                    {...register(`specifications.${field.name}`, {
+                                        required: field.required ? `${field.label} is required` : false,
+                                        min: field.min ? { value: field.min, message: `Must be at least ${field.min}` } : undefined,
+                                        max: field.max ? { value: field.max, message: `Must be at most ${field.max}` } : undefined
+                                    })}
+                                    id={field.name}
+                                    type={field.type}
+                                    placeholder={field.placeholder}
+                                    min={field.min}
+                                    max={field.max}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                />
+                            )}
+
+                            {errors.specifications?.[field.name] && (
+                                <p className="text-red-500 text-sm">{errors.specifications[field.name].message}</p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
 
     const nextStep = async () => {
         // Validate current step before proceeding
@@ -61,6 +179,17 @@ const CreateAuction = () => {
         if (step === 1) {
             // Trigger validation for all fields
             const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
+
+            // Add category-specific fields to validation
+            if (selectedCategory) {
+                const categoryFields = getCategoryFields();
+                categoryFields.forEach(field => {
+                    if (field.required) {
+                        fieldsToValidate.push(`specifications.${field.name}`);
+                    }
+                });
+            }
+
             const overallValidationPassed = await trigger(fieldsToValidate);
 
             // If overall validation failed, don't proceed
@@ -155,6 +284,11 @@ const CreateAuction = () => {
             formData.append('auctionType', auctionData.auctionType);
             formData.append('startDate', auctionData.startDate);
             formData.append('endDate', auctionData.endDate);
+
+            // Append specifications as JSON
+            if (auctionData.specifications) {
+                formData.append('specifications', JSON.stringify(auctionData.specifications));
+            }
 
             // Append reserve price if applicable
             if (auctionData.auctionType === 'reserve' && auctionData.reservePrice) {
@@ -269,6 +403,9 @@ const CreateAuction = () => {
                                             {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
                                         </div>
                                     </div>
+
+                                    {/* Category-specific fields */}
+                                    {selectedCategory && renderCategoryFields()}
 
                                     <div className="mb-6">
                                         <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1">Description *</label>
@@ -566,6 +703,23 @@ const CreateAuction = () => {
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {selectedCategory && (
+                                                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                                                        <h4 className="font-medium mb-3">{selectedCategory} Specifications</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {getCategoryFields().map((field) => {
+                                                                const value = watch(`specifications.${field.name}`);
+                                                                return value ? (
+                                                                    <div key={field.name}>
+                                                                        <p className="text-xs text-secondary">{field.label}</p>
+                                                                        <p className="font-medium">{value}</p>
+                                                                    </div>
+                                                                ) : null;
+                                                            }).filter(Boolean)}
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 {/* Pricing */}
                                                 <div className="bg-white p-4 rounded-lg shadow-sm">

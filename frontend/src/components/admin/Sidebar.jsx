@@ -23,6 +23,7 @@ import {
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logo } from "../../assets";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const navigation = [
     {
@@ -98,6 +99,7 @@ function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [expandedMenus, setExpandedMenus] = useState([]);
+    const { logout } = useAuth();
 
     // Handle window resize
     useEffect(() => {
@@ -125,15 +127,6 @@ function Sidebar() {
             document.body.style.overflow = 'unset';
         };
     }, [isOpen, isMobile]);
-
-    const logOutHandler = async () => {
-        try {
-            console.log("Admin logging out...");
-            // Your actual logout implementation
-        } catch (error) {
-            console.error("Logout error:", error);
-        }
-    }
 
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
@@ -264,7 +257,7 @@ function Sidebar() {
                         ))}
                         {/* Logout Button */}
                     <button
-                        onClick={logOutHandler}
+                        onClick={logout}
                         className="flex items-center w-full p-3 mt-3 rounded-lg text-white hover:bg-red-600 transition-all duration-200"
                     >
                         <LogOut size={20} className="mr-3" />

@@ -24,6 +24,7 @@ export const createAuction = async (req, res) => {
             title,
             category,
             description,
+            specifications, // This is coming as a JSON string
             location,
             videoLink,
             startPrice,
@@ -40,6 +41,20 @@ export const createAuction = async (req, res) => {
                 success: false,
                 message: 'All required fields must be provided'
             });
+        }
+
+        // Parse specifications from JSON string to object
+        let parsedSpecifications = {};
+        if (specifications) {
+            try {
+                parsedSpecifications = JSON.parse(specifications);
+            } catch (parseError) {
+                console.error('Error parsing specifications:', parseError);
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid specifications format'
+                });
+            }
         }
 
         // Validate dates
@@ -121,6 +136,7 @@ export const createAuction = async (req, res) => {
             title,
             category,
             description,
+            specifications: parsedSpecifications, // Use the parsed object
             location,
             videoLink,
             startPrice: parseFloat(startPrice),
@@ -132,7 +148,7 @@ export const createAuction = async (req, res) => {
             sellerUsername: seller.username,
             photos: uploadedPhotos,
             documents: uploadedDocuments,
-            status: 'draft' // Will be activated based on start date
+            status: 'draft'
         };
 
         // Add reserve price if applicable
@@ -176,7 +192,20 @@ export const getAuctions = async (req, res) => {
             status,
             search,
             sortBy = 'createdAt',
-            sortOrder = 'desc'
+            sortOrder = 'desc',
+            // Add specifications filters
+            make,
+            model,
+            yearMin,
+            yearMax,
+            fuelType,
+            engineType,
+            seatingCapacityMin,
+            seatingCapacityMax,
+            // Price filters
+            priceMin,
+            priceMax,
+            location
         } = req.query;
 
         // Build filter object
@@ -185,11 +214,51 @@ export const getAuctions = async (req, res) => {
         if (category) filter.category = category;
         if (status) filter.status = status;
 
+        // Price filtering
+        if (priceMin || priceMax) {
+            filter.currentPrice = {};
+            if (priceMin) filter.currentPrice.$gte = parseFloat(priceMin);
+            if (priceMax) filter.currentPrice.$lte = parseFloat(priceMax);
+        }
+
+        // Search in title and description
         if (search) {
             filter.$or = [
                 { title: { $regex: search, $options: 'i' } },
                 { description: { $regex: search, $options: 'i' } }
             ];
+        }
+
+        // Location filtering
+        if (location) {
+            filter.location = { $regex: location, $options: 'i' };
+        }
+
+        // Specifications filtering
+        const specsFilter = {};
+        if (make) specsFilter['specifications.make'] = { $regex: make, $options: 'i' };
+        if (model) specsFilter['specifications.model'] = { $regex: model, $options: 'i' };
+        if (fuelType) specsFilter['specifications.fuelType'] = fuelType;
+        if (engineType) specsFilter['specifications.engineType'] = engineType;
+        
+        // Year range filtering
+        if (yearMin || yearMax) {
+            specsFilter['specifications.year'] = {};
+            if (yearMin) specsFilter['specifications.year'].$gte = parseInt(yearMin);
+            if (yearMax) specsFilter['specifications.year'].$lte = parseInt(yearMax);
+        }
+
+        // Seating capacity filtering
+        if (seatingCapacityMin || seatingCapacityMax) {
+            specsFilter['specifications.seatingCapacity'] = {};
+            if (seatingCapacityMin) specsFilter['specifications.seatingCapacity'].$gte = parseInt(seatingCapacityMin);
+            if (seatingCapacityMax) specsFilter['specifications.seatingCapacity'].$lte = parseInt(seatingCapacityMax);
+        }
+
+        // Combine specifications filter with main filter
+        if (Object.keys(specsFilter).length > 0) {
+            filter.$and = filter.$and || [];
+            filter.$and.push(specsFilter);
         }
 
         // Sort options
@@ -465,6 +534,342 @@ export const getUserAuctions = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Internal server error while fetching user auctions'
+        });
+    }
+};
+
+// Detailed bidding stats
+export const getBiddingStats = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+        // Basic counts - FIXED: Remove userId from these queries
+        const activeAuctions = await Auction.countDocuments({
+            status: 'active',
+            endDate: { $gt: now }
+        });
+
+        const endingSoon = await Auction.countDocuments({
+            status: 'active',
+            endDate: { 
+                $gt: now,
+                $lt: new Date(now.getTime() + 24 * 60 * 60 * 1000)
+            }
+        });
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const newToday = await Auction.countDocuments({
+            status: 'active',
+            createdAt: { $gte: today }
+        });
+
+        const totalBidders = await User.countDocuments({ userType: 'bidder' });
+
+        // Bidder-specific analytics - FIXED: Proper aggregation
+        const myTotalBidsResult = await Auction.aggregate([
+            { 
+                $match: { 
+                    'bids.bidder': userId 
+                } 
+            },
+            { 
+                $project: {
+                    userBids: {
+                        $filter: {
+                            input: '$bids',
+                            as: 'bid',
+                            cond: { $eq: ['$$bid.bidder', userId] }
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    bidCount: { $size: '$userBids' }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalBids: { $sum: '$bidCount' }
+                }
+            }
+        ]);
+
+        const myWinningAuctions = await Auction.countDocuments({
+            winner: userId,
+            status: 'sold'
+        });
+
+        const myActiveBids = await Auction.countDocuments({
+            'bids.bidder': userId,
+            status: 'active',
+            endDate: { $gt: now }
+        });
+
+        // Recent activity (last 30 days) - FIXED: Proper aggregation
+        const recentBids = await Auction.aggregate([
+            { 
+                $match: { 
+                    'bids.bidder': userId,
+                    'bids.timestamp': { $gte: thirtyDaysAgo }
+                } 
+            },
+            { $unwind: '$bids' },
+            { 
+                $match: { 
+                    'bids.bidder': userId,
+                    'bids.timestamp': { $gte: thirtyDaysAgo }
+                } 
+            },
+            { 
+                $group: {
+                    _id: {
+                        $dateToString: { format: "%Y-%m-%d", date: "$bids.timestamp" }
+                    },
+                    bidsCount: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        const myTotalBids = myTotalBidsResult[0]?.totalBids || 0;
+        const bidSuccessRate = myTotalBids > 0 ? 
+            ((myWinningAuctions / myTotalBids) * 100).toFixed(1) : 0;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                // Basic stats
+                activeAuctions,
+                newToday,
+                endingSoon,
+                totalBidders,
+                
+                // Bidder personal stats
+                myTotalBids,
+                myWinningAuctions,
+                myActiveBids,
+                
+                // Analytics
+                bidSuccessRate: parseFloat(bidSuccessRate),
+                
+                // Recent activity
+                recentBiddingActivity: recentBids,
+                
+                lastUpdated: new Date()
+            }
+        });
+
+    } catch (error) {
+        console.error('Get bidding stats error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while fetching bidding stats'
+        });
+    }
+};
+
+// Get user's won auctions
+export const getWonAuctions = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { page = 1, limit = 12, status, search } = req.query;
+
+        // Build filter for auctions won by user
+        const filter = {
+            winner: userId,
+            status: { $in: ['sold', 'ended'] } // Include both sold and ended auctions where user won
+        };
+
+        // Add status filter if provided
+        if (status && status !== 'all') {
+            // Map frontend status to backend status
+            const statusMap = {
+                'payment_pending': 'sold',
+                'paid': 'sold',
+                'shipped': 'sold',
+                'delivered': 'sold'
+            };
+            filter.status = statusMap[status] || status;
+        }
+
+        // Add search filter
+        if (search) {
+            filter.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const auctions = await Auction.find(filter)
+            .populate('seller', 'username firstName lastName rating reviews memberSince')
+            .populate('winner', 'username firstName lastName')
+            .populate('currentBidder', 'username firstName')
+            .sort({ endDate: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const total = await Auction.countDocuments(filter);
+
+        // Transform data to match frontend structure
+        const transformedAuctions = auctions.map(auction => ({
+            id: auction._id.toString(),
+            auctionId: `AU${auction._id.toString().slice(-6).toUpperCase()}`,
+            title: auction.title,
+            description: auction.description,
+            category: auction.category,
+            finalBid: auction.finalPrice || auction.currentPrice,
+            startingBid: auction.startPrice,
+            yourMaxBid: getMaxBidForUser(auction.bids, userId),
+            winningBid: auction.finalPrice || auction.currentPrice,
+            bids: auction.bidCount,
+            watchers: auction.watchlistCount,
+            endTime: auction.endDate,
+            winTime: auction.endDate, // Use end date as win time
+            image: auction.photos.length > 0 ? auction.photos[0].url : '/api/placeholder/400/300',
+            location: auction.location,
+            seller: {
+                name: auction.seller.firstName && auction.seller.lastName 
+                    ? `${auction.seller.firstName} ${auction.seller.lastName}`
+                    : auction.seller.username,
+                rating: auction.seller.rating || 4.5,
+                reviews: auction.seller.reviews || 0,
+                memberSince: auction.seller.memberSince || '2020'
+            },
+            condition: auction.specifications.get('condition') || 'Good',
+            shipping: {
+                cost: calculateShippingCost(auction),
+                estimatedDelivery: '5-7 business days',
+                insurance: true
+            },
+            status: getAuctionStatus(auction),
+            congratulatoryMessage: generateCongratulatoryMessage(auction)
+        }));
+
+        // Calculate statistics
+        const totalWon = total;
+        const totalSpent = auctions.reduce((sum, auction) => sum + (auction.finalPrice || auction.currentPrice), 0);
+        const averageSavings = auctions.length > 0 ? 
+            auctions.reduce((sum, auction) => sum + (auction.startPrice / (auction.finalPrice || auction.currentPrice)), 0) / auctions.length : 0;
+        
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const recentWins = auctions.filter(auction => new Date(auction.endDate) > weekAgo).length;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                auctions: transformedAuctions,
+                statistics: {
+                    totalWon,
+                    totalSpent,
+                    averageSavings,
+                    recentWins
+                },
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(total / limit),
+                    totalAuctions: total
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Get won auctions error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while fetching won auctions'
+        });
+    }
+};
+
+// Helper function to get user's max bid
+const getMaxBidForUser = (bids, userId) => {
+    const userBids = bids.filter(bid => bid.bidder.toString() === userId.toString());
+    if (userBids.length === 0) return 0;
+    return Math.max(...userBids.map(bid => bid.amount));
+};
+
+// Helper function to calculate shipping cost
+const calculateShippingCost = (auction) => {
+    // Simple shipping calculation based on category and price
+    const baseCosts = {
+        'Aircraft': 5000,
+        'Engines & Parts': 1200,
+        'Aviation Memorabilia': 45
+    };
+    
+    const baseCost = baseCosts[auction.category] || 100;
+    const priceMultiplier = (auction.finalPrice || auction.currentPrice) / 10000;
+    
+    return Math.round(baseCost * Math.max(1, priceMultiplier));
+};
+
+// Helper function to determine auction status for frontend
+const getAuctionStatus = (auction) => {
+    // This would need to be enhanced based on your payment and shipping tracking
+    // For now, using a simple logic based on time since auction ended
+    const endDate = new Date(auction.endDate);
+    const daysSinceEnd = (Date.now() - endDate) / (1000 * 60 * 60 * 24);
+    
+    if (daysSinceEnd < 1) return 'payment_pending';
+    if (daysSinceEnd < 3) return 'paid';
+    if (daysSinceEnd < 7) return 'shipped';
+    return 'delivered';
+};
+
+// Helper function to generate congratulatory messages
+const generateCongratulatoryMessage = (auction) => {
+    const messages = {
+        'Aircraft': 'Congratulations on winning this magnificent aircraft!',
+        'Engines & Parts': 'Outstanding win! This engine is a fantastic addition to any collection.',
+        'Aviation Memorabilia': 'Fantastic win! This piece is in impeccable condition and holds great historical value.'
+    };
+    
+    return messages[auction.category] || 'Congratulations on your winning bid!';
+};
+
+// Update auction status (for payment, shipping updates)
+export const updateAuctionStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, trackingNumber, deliveredDate } = req.body;
+        const userId = req.user._id;
+
+        const auction = await Auction.findOne({
+            _id: id,
+            winner: userId
+        });
+
+        if (!auction) {
+            return res.status(404).json({
+                success: false,
+                message: 'Auction not found or you are not the winner'
+            });
+        }
+
+        // Update custom status fields
+        const updateData = {};
+        if (status) updateData.wonStatus = status;
+        if (trackingNumber) updateData.trackingNumber = trackingNumber;
+        if (deliveredDate) updateData.deliveredDate = deliveredDate;
+
+        await Auction.findByIdAndUpdate(id, updateData);
+
+        res.status(200).json({
+            success: true,
+            message: 'Auction status updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Update auction status error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while updating auction status'
         });
     }
 };

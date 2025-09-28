@@ -1,16 +1,26 @@
 import { Clock, Plane, Search, Shield } from "lucide-react";
 import { Container } from "../components";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 function Hero() {
-    const searchForm = useForm({
-        defaultValues: {
-        }
-    });
+    const searchForm = useForm();
+    const navigate = useNavigate();
 
     const handleSearchForm = (searchData) => {
         try {
-            console.log(searchData);
+            const params = new URLSearchParams();
+        
+        if (searchData.search) {
+            params.append('search', searchData.search);
+        }
+        
+        if (searchData.category) {
+            params.append('category', searchData.category);
+        }
+        
+        // Navigate to auctions page with query parameters
+        navigate(`/auctions?${params.toString()}`);
         } catch (error) {
             console.error(error);
         }
@@ -32,11 +42,11 @@ function Hero() {
                     </h1>
                     <p className="text-lg text-white leading-relaxed">Bid confidently on verified aircraft and rare aviation collectibles, with real-time auction updates to ensure every bidding experience is seamless, transparent, and trusted.</p>
 
-                    <form onSubmit={searchForm.handleSubmit(handleSearchForm)} className="my-5 w-full">
-                        <div className="bg-white p-6 rounded-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-11 gap-3 sm:gap-4 lg:gap-5 items-end w-full">
+                    <form onSubmit={searchForm.handleSubmit(handleSearchForm)} className="my-5 w-full self-start">
+                        <div className="bg-white p-6 rounded-md grid grid-cols-1 sm:grid-cols-7 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-5 items-end max-w-2xl">
 
                             {/* Search */}
-                            <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-4">
+                            <div className="text-gray-700 col-span-1 sm:col-span-3 lg:col-span-6">
                                 <label htmlFor="search" className="block mb-1">Search</label>
                                 <input
                                     type="text"
@@ -48,7 +58,7 @@ function Hero() {
                             </div>
 
                             {/* Make */}
-                            <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-2">
+                            {/* <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-2">
                                 <label htmlFor="make" className="block mb-1">Make</label>
                                 <select
                                     id="make"
@@ -59,10 +69,10 @@ function Hero() {
                                     <option value="airplane">Airplane</option>
                                     <option value="turbo engine">Turbo Engine</option>
                                 </select>
-                            </div>
+                            </div> */}
 
                             {/* Model */}
-                            <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-2">
+                            {/* <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-2">
                                 <label htmlFor="model" className="block mb-1">Model</label>
                                 <select
                                     id="model"
@@ -73,10 +83,10 @@ function Hero() {
                                     <option value="123">123</option>
                                     <option value="456">456</option>
                                 </select>
-                            </div>
+                            </div> */}
 
                             {/* Year */}
-                            <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-2">
+                            {/* <div className="text-gray-700 col-span-1 sm:col-span-1 lg:col-span-2">
                                 <label htmlFor="year" className="block mb-1">Year</label>
                                 <select
                                     id="year"
@@ -89,15 +99,30 @@ function Hero() {
                                     <option value="2024">2024</option>
                                     <option value="2025">2025</option>
                                 </select>
+                            </div> */}
+
+                            <div className="text-gray-700 col-span-1 sm:col-span-2 lg:col-span-3">
+                                <label htmlFor="category" className="block mb-1">Category</label>
+                                <select
+                                    id="category"
+                                    className="w-full bg-gray-100 text-gray-600 py-2.5 px-4 rounded-md focus:outline-2 focus:outline-primary"
+                                    {...searchForm.register('category')}
+                                >
+                                    <option value="">Select</option>
+                                    <option value="Aircraft">Aircraft</option>
+                                    <option value="Engines & Parts">Engines & Parts</option>
+                                    <option value="Memorabilia">Memorabilia</option>
+                                </select>
                             </div>
 
                             {/* Submit Button */}
-                            <div className="col-span-1 sm:col-span-1 lg:col-span-1">
+                            <div className="col-span-1 sm:col-span-2 lg:col-span-3 mt-2 md:mt-0">
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center items-center py-2.5 px-3.5 rounded-md bg-primary text-white hover:bg-black/90 transition"
+                                    className="w-full flex justify-center items-center gap-2 py-2.5 px-3.5 rounded-md bg-primary text-white hover:bg-black/90 transition"
                                 >
                                     <Search size={20} />
+                                    <span>Search</span>
                                 </button>
                             </div>
                         </div>

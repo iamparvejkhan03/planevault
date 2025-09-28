@@ -1,5 +1,5 @@
 import { CalendarDays, CheckSquare, Clock, Download, File, Fuel, Gauge, Gavel, Heart, MapPin, MessageCircle, PaintBucket, Plane, ShieldCheck, Tag, User, Users, Weight } from "lucide-react";
-import { Container, LoadingSpinner, MobileBidStickyBar, TabSection, TimerDisplay, WatchlistButton } from "../components";
+import { Container, LoadingSpinner, MobileBidStickyBar, SpecificationsSection, TabSection, TimerDisplay, WatchlistButton } from "../components";
 import { Link, useParams } from "react-router-dom";
 import { lazy, Suspense, useRef, useState, useEffect } from "react";
 import useAuctionCountdown from "../hooks/useAuctionCountDown";
@@ -253,6 +253,9 @@ function SingleAuction() {
                             </div>
                         </div> */}
                     </div>
+
+                    {/* Dynamic Specifications Section */}
+            <SpecificationsSection auction={auction} />
                 </div>
 
                 <hr className="my-8" />
@@ -393,10 +396,13 @@ function SingleAuction() {
                         </div>
                     )}
 
-                    <p className="text-center bg-white p-3 text-secondary text-sm flex items-center justify-center gap-2 border border-gray-200 rounded-lg">
-                        <Users className="w-4 h-4" />
-                        <span>{auction.watchlistCount} people are watching</span>
-                    </p>
+                    {/* Watchlist Count */}
+                    {auction.watchlistCount > 0 && (
+                        <p className="text-center bg-white p-3 text-secondary text-sm flex items-center justify-center gap-2 border border-gray-200 rounded-lg">
+                            <Users className="w-4 h-4" />
+                            <span>{auction.watchlistCount} user{auction.watchlistCount !== 1 ? 's' : ''} watching</span>
+                        </p>
+                    )}
 
                     <p className="text-center bg-white p-3 text-secondary text-sm flex items-center justify-center gap-2 border border-gray-200 rounded-lg">
                         <ShieldCheck className="w-4 h-4" />

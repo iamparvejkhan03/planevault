@@ -7,12 +7,14 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showForgotPasswordModel, setShowForgotPasswordModal] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const { register, handleSubmit } = useForm({
         defaultValues: {
@@ -25,19 +27,11 @@ const Login = () => {
         try {
             setIsLoading(true);
 
-            const { data } = await axios.post(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/users/login`, { email: loginData.email, password: loginData.password });
+            const data = await login(loginData);
 
             if (data && data.success) {
-                const accessToken = data.data.accessToken;
-                const refreshToken = data.data.refreshToken;
-                localStorage.setItem('accessToken', accessToken);
-                localStorage.setItem('refreshToken', refreshToken);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
-                // dispatch(toggleIsUserLoggedIn(true));
-                // dispatch(toggleShowUserAuthForm(false));
-                // dispatch(updateUser({...data.data.user, accessToken, refreshToken}));
                 toast.success(data.message);
-                navigate(`/${data.data.user.userType}/dashboard`);
+                navigate(`/${data.userType}/dashboard`);
             }
         } catch (error) {
             toast.error(error?.response?.data?.message);

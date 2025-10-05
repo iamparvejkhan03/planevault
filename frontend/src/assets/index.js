@@ -16,7 +16,7 @@ import bell from './bell.webp';
 import airBus from './airBus.webp';
 import about from './about.webp';
 import parts from './parts.webp';
-import airCrafts from './airCrafts.webp';
+import airCrafts from './aircrafts.webp';
 import memorabilia from './memorabilia.webp';
 import dummyUserImg from './dummyUserImg.webp';
 import liveAuctions from './liveAuctions.webp';

@@ -210,7 +210,6 @@ function AllAuctions() {
             sold: { color: "bg-blue-100 text-blue-800", text: "Sold" },
             cancelled: { color: "bg-red-100 text-red-800", text: "Cancelled" },
             reserve_not_met: { color: "bg-orange-100 text-orange-800", text: "Reserve Not Met" },
-            cancelled: { color: "bg-red-100 text-red-800", text: "Cancelled" }
         };
         const { color, text } = config[status] || { color: "bg-gray-100 text-gray-800", text: status };
         return <span className={`px-2 py-1 rounded-full text-xs font-medium ${color}`}>{text}</span>;

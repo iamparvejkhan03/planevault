@@ -69,7 +69,6 @@ const fieldLabels = {
     itemType: 'Item Type',
     era: 'Historical Era',
     authenticity: 'Authenticity',
-    year: 'Year',
     dimensions: 'Dimensions',
     material: 'Material'
 };

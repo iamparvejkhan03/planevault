@@ -15,6 +15,7 @@ import pilatus from './pilatus.webp';
 import bell from './bell.webp';
 import airBus from './airBus.webp';
 import about from './about.webp';
+import cta from './cta.webp';
 import parts from './parts.webp';
 import airCrafts from './aircrafts.webp';
 import memorabilia from './memorabilia.webp';
@@ -62,6 +63,7 @@ export {
     bell,
     airBus,
     about,
+    cta,
     airCrafts,
     parts,
     memorabilia,

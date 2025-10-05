@@ -1,11 +1,14 @@
 import { Plane, PlaneTakeoff } from "lucide-react";
 import { useNavigate } from "react-router";
+import { cta } from "../assets";
 
 function CTA(){
     const navigate = useNavigate();
     return (
-        <section className="max-w-full bg-[url('src/assets/cta.webp')] bg-center bg-cover text-white rounded-2xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70" />
+        <section 
+        className="max-w-full bg-center bg-cover text-white rounded-2xl relative overflow-hidden"
+        style={{ backgroundImage: `url(${cta})` }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/50 to-black/60" />
             <div className="flex flex-col items-center justify-center text-center py-12 px-2 gap-6">  
                 <div className="flex items-center justify-center bg-white px-3 py-1.5 shadow gap-1 rounded-full text-xs z-10">
                     <Plane size={18} className="text-primary" />

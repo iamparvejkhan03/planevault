@@ -75,7 +75,7 @@ function AuctionCard({ auction }) {
             });
         }
 
-        if (auction.status === 'draft') {
+        if (auction.status === 'approved') {
             badges.push({
                 label: 'Starting Soon',
                 icon: Clock,

@@ -3,8 +3,14 @@ import multer from 'multer';
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-    // Check file types
-    if (file.fieldname === 'photos') {
+    // Check file types - ADD THIS SECTION FOR 'image' FIELD
+    if (file.fieldname === 'image') {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed for profile images'), false);
+        }
+    } else if (file.fieldname === 'photos') {
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {

@@ -19,6 +19,7 @@ const PaymentRefundPolicy = lazy(() => import('./pages/PaymentRefundPolicy'));
 const SellerAgreement = lazy(() => import('./pages/SellerAgreement'));
 const BuyerAgreement = lazy(() => import('./pages/BuyerAgreement'));
 const SingleAuction = lazy(() => import('./pages/SingleAuction'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
 {/* Seller Pages */ }
 const SellerLayout = lazy(() => import('./pages/seller/Layout'));
@@ -26,7 +27,7 @@ const SellerDashboard = lazy(() => import('./pages/seller/Dashboard'));
 const CreateAuction = lazy(() => import('./pages/seller/CreateAuction'));
 const EditAuction = lazy(() => import('./pages/seller/EditAuction'));
 const SellerAllAuctions = lazy(() => import('./pages/seller/AllAuctions'));
-const SellerWonAuctions = lazy(() => import('./pages/seller/WonAuctions'));
+const SoldAuctions = lazy(() => import('./pages/seller/SoldAuctions'));
 const BidHistory = lazy(() => import('./pages/seller/BidHistory'));
 const SellerProfile = lazy(() => import('./pages/seller/Profile'));
 const SellerNotifications = lazy(() => import('./pages/seller/Notifications'));
@@ -37,7 +38,7 @@ const BidderDashboard = lazy(() => import('./pages/bidder/Dashboard'));
 const Watchlist = lazy(() => import('./pages/bidder/Watchlist'));
 const ActiveAuctions = lazy(() => import('./pages/bidder/ActiveAuctions'));
 const MyBids = lazy(() => import('./pages/bidder/MyBids'));
-const BidderWonAuctions = lazy(() => import('./pages/bidder/WonAuctions'));
+const WonAuctions = lazy(() => import('./pages/bidder/WonAuctions'));
 const BidderProfile = lazy(() => import('./pages/bidder/Profile'));
 const BidderNotifications = lazy(() => import('./pages/bidder/Notifications'));
 
@@ -46,11 +47,17 @@ const AdminLayout = lazy(() => import('./pages/admin/Layout'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AllUsers = lazy(() => import('./pages/admin/AllUsers'));
 const AdminAllAuctions = lazy(() => import('./pages/admin/AllAuctions'));
+const AdminEditAuction = lazy(() => import('./pages/admin/EditAuction'));
 const UserQueries = lazy(() => import('./pages/admin/UserQueries'));
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
+const AdminProfile = lazy(() => import('./pages/admin/Profile'));
+const AdminComments = lazy(() => import('./pages/admin/Comments'));
+const Commissions = lazy(() => import('./pages/admin/Commissions'));
+const AdminBidHistory = lazy(() => import('./pages/admin/BidHistory'));
+const Transactions = lazy(() => import('./pages/admin/Transactions'));
 
 createRoot(document.getElementById('root')).render(
-    <StrictMode>
+    // <StrictMode>
         <AuthProvider>
             <PopUpContextProvider>
                 <BrowserRouter>
@@ -79,6 +86,8 @@ createRoot(document.getElementById('root')).render(
                             <Route path='/seller-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><SellerAgreement /></Suspense>} />
 
                             <Route path='/buyer-agreement' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><BuyerAgreement /></Suspense>} />
+
+                            <Route path='/reset-password' index={true} element={<Suspense fallback={<LoadingSpinner height={'725px'} />}><ResetPassword /></Suspense>} />
                         </Route>
 
                         {/* Seller Layout */}
@@ -122,10 +131,10 @@ createRoot(document.getElementById('root')).render(
                             />
                             {/* Seller Won Auctions */}
                             <Route
-                                path='/seller/auctions/won'
+                                path='/seller/auctions/sold'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                        <SellerWonAuctions />
+                                        <SoldAuctions />
                                     </Suspense>
                                 }
                             />
@@ -206,7 +215,7 @@ createRoot(document.getElementById('root')).render(
                                 path='/bidder/auctions/won'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
-                                        <BidderWonAuctions />
+                                        <WonAuctions />
                                     </Suspense>
                                 }
                             />
@@ -264,6 +273,16 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
 
+                            {/* Admin Edit Auction */}
+                            <Route
+                                path='/admin/auctions/edit/:auctionId'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminEditAuction />
+                                    </Suspense>
+                                }
+                            />
+
                             {/* Admin Support */}
                             <Route
                                 path='/admin/support/inquiries'
@@ -283,10 +302,60 @@ createRoot(document.getElementById('root')).render(
                                     </Suspense>
                                 }
                             />
+
+                            {/* Admin Profile */}
+                            <Route
+                                path='/admin/profile'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminProfile />
+                                    </Suspense>
+                                }
+                            />
+
+                            {/* Admin Profile */}
+                            <Route
+                                path='/admin/comments'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminComments />
+                                    </Suspense>
+                                }
+                            />
+
+                            {/* Admin Profile */}
+                            <Route
+                                path='/admin/commissions'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <Commissions />
+                                    </Suspense>
+                                }
+                            />
+
+                            {/* Admin Profile */}
+                            <Route
+                                path='/admin/bids'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminBidHistory />
+                                    </Suspense>
+                                }
+                            />
+
+                            {/* Admin Profile */}
+                            <Route
+                                path='/admin/transactions'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <Transactions />
+                                    </Suspense>
+                                }
+                            />
                         </Route>
                     </Routes>
                 </BrowserRouter>
             </PopUpContextProvider>
         </AuthProvider>
-    </StrictMode>,
+    // </StrictMode>,
 )

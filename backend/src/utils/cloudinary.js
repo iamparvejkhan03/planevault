@@ -76,11 +76,6 @@ export const uploadDocumentToCloudinary = (buffer, originalName, folder = 'aucti
                     console.error('❌ Upload failed:', error);
                     reject(error);
                 } else {
-                    console.log('✅ Upload successful:', {
-                        url: result.secure_url,
-                        bytes: result.bytes,
-                        format: result.format
-                    });
                     resolve(result);
                 }
             }

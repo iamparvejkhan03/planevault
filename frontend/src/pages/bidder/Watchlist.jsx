@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BidderContainer, BidderHeader, BidderSidebar } from "../../components";
+import { BidderContainer, BidderHeader, BidderSidebar, LoadingSpinner } from "../../components";
 import { Eye, Gavel, Clock, DollarSign, Trash2, Bell, BellOff, Search, Filter, SortAsc, Bookmark, MapPin, Award, Loader } from "lucide-react";
 import { about } from "../../assets";
 import axiosInstance from "../../utils/axiosInstance";
@@ -159,7 +159,8 @@ function Watchlist() {
                     <BidderContainer>
                         <div className="flex justify-center items-center min-h-96">
                             <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                                {/* <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div> */}
+                                <LoadingSpinner />
                                 <p className="mt-4 text-gray-600">Loading your watchlist...</p>
                             </div>
                         </div>
@@ -325,7 +326,7 @@ function Watchlist() {
                     </div>
 
                     {/* Load More Button */}
-                    {pagination?.currentPage < pagination?.totalPages && (
+                    {/* {pagination?.currentPage < pagination?.totalPages && (
                         <div className="flex justify-center mt-12">
                             <button
                                 onClick={handleLoadMore}
@@ -347,7 +348,7 @@ function Watchlist() {
                                 )}
                             </button>
                         </div>
-                    )}
+                    )} */}
                 </BidderContainer>
             </div>
         </section>

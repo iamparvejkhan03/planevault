@@ -18,7 +18,10 @@ import {
     Package,
     TrendingUp,
     UserCheck,
-    DollarSign
+    DollarSign,
+    UserCircle,
+    MessageCircle,
+    Hand
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logo } from "../../assets";
@@ -42,27 +45,32 @@ const navigation = [
         icon: <Gavel size={20} />
     },
     {
-        name: 'Finances',
-        path: '/admin/financial',
-        icon: <DollarSign size={20} />,
-        submenu: [
-            { name: 'Transactions', path: '/admin/financial/transactions' },
-            { name: 'Revenue Analytics', path: '/admin/financial/revenue' },
-            { name: 'Commission Reports', path: '/admin/financial/commissions' },
-            { name: 'Payouts', path: '/admin/financial/payouts' },
-            { name: 'Tax Documents', path: '/admin/financial/taxes' }
-        ]
+        name: 'Bids',
+        path: '/admin/bids',
+        icon: <Hand size={20} />
     },
     {
-        name: 'Content',
-        path: '/admin/moderation',
-        icon: <Shield size={20} />,
-        submenu: [
-            { name: 'Reported Content', path: '/admin/moderation/reports' },
-            { name: 'Flagged Listings', path: '/admin/moderation/flagged' },
-            { name: 'User Reports', path: '/admin/moderation/user-reports' },
-            { name: 'Approval Queue', path: '/admin/moderation/approval' }
-        ]
+        name: 'Transactions',
+        path: '/admin/transactions',
+        icon: <DollarSign size={20} />,
+        // submenu: [
+        //     { name: 'Transactions', path: '/admin/financial/transactions' },
+        //     { name: 'Revenue Analytics', path: '/admin/financial/revenue' },
+        //     { name: 'Commission Reports', path: '/admin/financial/commissions' },
+        //     { name: 'Payouts', path: '/admin/financial/payouts' },
+        //     { name: 'Tax Documents', path: '/admin/financial/taxes' }
+        // ]
+    },
+    {
+        name: 'Comments',
+        path: '/admin/comments',
+        icon: <MessageCircle size={20} />,
+        // submenu: [
+        //     { name: 'Reported Content', path: '/admin/moderation/reports' },
+        //     { name: 'Flagged Listings', path: '/admin/moderation/flagged' },
+        //     { name: 'User Reports', path: '/admin/moderation/user-reports' },
+        //     { name: 'Approval Queue', path: '/admin/moderation/approval' }
+        // ]
     },
     {
         name: 'Support',
@@ -76,8 +84,8 @@ const navigation = [
         // ]
     },
     {
-        name: 'Settings',
-        path: '/admin/settings',
+        name: 'Commissions',
+        path: '/admin/commissions',
         icon: <Settings size={20} />,
         // submenu: [
         //     { name: 'Platform Settings', path: '/admin/settings/platform' },
@@ -87,10 +95,15 @@ const navigation = [
         //     { name: 'Backup & Security', path: '/admin/settings/security' }
         // ]
     },
+    // {
+    //     name: 'Notifications',
+    //     path: '/admin/notifications',
+    //     icon: <Bell size={20} />
+    // },
     {
-        name: 'Notifications',
-        path: '/admin/notifications',
-        icon: <Bell size={20} />
+        name: 'Profile',
+        path: '/admin/profile',
+        icon: <UserCircle size={20} />
     }
 ];
 
@@ -162,7 +175,7 @@ function Sidebar() {
 
             {/* Sidebar */}
             <aside className={`
-                fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white min-h-screen p-4 flex flex-col z-40
+                fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white h-screen md:h-auto md:min-h-screen overflow-y-auto z-50 p-4 flex flex-col 
                 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>

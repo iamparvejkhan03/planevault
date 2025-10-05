@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
-import { LoadingSpinner, BidderContainer, BidderHeader, BidderSidebar, AuctionCard } from "../../components";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { Clock, Gavel, TrendingUp, DollarSign, Eye, Award, BarChart3, Search, Filter, SortAsc, MapPin, Users, Star, Loader } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { BidderContainer, BidderHeader, BidderSidebar, AuctionCard } from "../../components";
+import { Clock, Gavel, Award, BarChart3, Search, Filter, SortAsc, Users, Loader } from "lucide-react";
 import { useAuctions } from "../../hooks/useAuctions";
 import { useStats } from "../../hooks/useStats";
 
@@ -18,7 +15,7 @@ function ActiveAuctions() {
     const [filter, setFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
-    const [sortBy, setSortBy] = useState("ending_soon");
+    const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid");
     const { stats } = useStats();
 
@@ -29,33 +26,33 @@ function ActiveAuctions() {
     const auctionStats = [
         {
             title: "Active Auctions",
-            value: stats.activeAuctions.toString(),
+            value: stats.activeAuctions?.toLocaleString(),
             change: "All Time",
             icon: <Gavel size={24} />,
             trend: "up"
         },
         {
             title: "New Today",
-            value: stats.newToday.toString(),
+            value: stats.newToday?.toLocaleString(),
             change: "In Last 24 Hours",
             icon: <Award size={24} />,
             trend: "up"
         },
         {
             title: "Ending Soon",
-            value: stats.endingSoon.toString(),
+            value: stats.endingSoon?.toLocaleString(),
             change: "In Next 24 Hours",
             icon: <Clock size={24} />,
             trend: "down",
             highlight: true
         },
-        {
-            title: "Total Bidders",
-            value: stats.totalBidders.toString(),
-            change: "All Time",
-            icon: <Users size={24} />,
-            trend: "up"
-        }
+        // {
+        //     title: "Total Bidders",
+        //     value: stats.totalBidders.toString(),
+        //     change: "All Time",
+        //     icon: <Users size={24} />,
+        //     trend: "up"
+        // }
     ];
 
     const categories = ["all", ...new Set(auctions.map(auction => auction.category))];
@@ -67,6 +64,44 @@ function ActiveAuctions() {
                 auction.description?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = categoryFilter === "all" || auction.category === categoryFilter;
             return matchesSearch && matchesCategory;
+        })
+        .filter(auction => {
+            switch (filter) {
+                case "ending_soon":
+                    // For ending soon, we still need time calculation
+                    const now = new Date();
+                    const end = new Date(auction.endDate);
+                    const diffHours = (end - now) / (1000 * 60 * 60);
+                    return auction.status === 'active' && diffHours < 24;
+
+                case "active":
+                    return auction.status === 'active';
+
+                case "approved":
+                    return auction.status === 'approved';
+
+                case "upcoming":
+                    // Show both approved and draft auctions as "upcoming"
+                    return auction.status === 'approved' || auction.status === 'draft' || auction.status === 'pending';
+
+                case "ended":
+                    return auction.status === 'ended';
+
+                case "sold":
+                    return auction.status === 'sold';
+
+                case "draft":
+                    return auction.status === 'draft';
+
+                case "cancelled":
+                    return auction.status === 'cancelled';
+
+                case "reserve_not_met":
+                    return auction.status === 'reserve_not_met';
+
+                default: // "all"
+                    return true; // Show all auctions
+            }
         })
         .sort((a, b) => {
             switch (sortBy) {
@@ -81,24 +116,7 @@ function ActiveAuctions() {
                 case "lowest_bid":
                     return (a.currentPrice || 0) - (b.currentPrice || 0);
                 default:
-                    return 0;
-            }
-        })
-        .filter(auction => {
-            // Filter by status based on time remaining
-            const now = new Date();
-            const end = new Date(auction.endDate);
-            const diffHours = (end - now) / (1000 * 60 * 60);
-
-            switch (filter) {
-                case "ending_soon":
-                    return diffHours < 24;
-                case "active":
-                    return diffHours > 0 && diffHours < 168; // Within 7 days and not ended
-                case "upcoming":
-                    return diffHours > 168; // More than 7 days
-                default:
-                    return diffHours > 0; // All active (not ended)
+                    return new Date(a.endDate) - new Date(b.endDate);
             }
         });
 
@@ -185,7 +203,7 @@ function ActiveAuctions() {
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
                                     >
-                                        <option value="ending_soon">Ending Soon</option>
+                                        {/* <option value="ending_soon">Ending Soon</option> */}
                                         <option value="most_bids">Most Bids</option>
                                         <option value="highest_bid">Highest Bid</option>
                                         <option value="lowest_bid">Lowest Bid</option>
@@ -201,7 +219,7 @@ function ActiveAuctions() {
                                 onClick={() => setFilter("all")}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filter === "all" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             >
-                                All Active
+                                All
                             </button>
                             <button
                                 onClick={() => setFilter("ending_soon")}
@@ -215,12 +233,12 @@ function ActiveAuctions() {
                             >
                                 Active This Week
                             </button>
-                            <button
+                            {/* <button
                                 onClick={() => setFilter("upcoming")}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filter === "upcoming" ? "bg-blue-100 text-blue-800 border border-blue-200" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             >
                                 Upcoming
-                            </button>
+                            </button> */}
                         </div>
                     </div>
 
@@ -240,7 +258,7 @@ function ActiveAuctions() {
                             ))}
                         </div>
                     ) : filteredAuctions.length > 0 ? (
-                        <div className={`gap-x-5 gap-y-8 ${viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch" : "space-y-6"}`}>
+                        <div className={`gap-x-5 gap-y-8 mb-16 ${viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch" : "space-y-6"}`}>
                             {filteredAuctions.map((auction) => (
                                 <div key={auction._id} className={viewMode === "list" ? "flex" : ""}>
                                     <AuctionCard
@@ -268,7 +286,7 @@ function ActiveAuctions() {
                     )}
 
                     {/* Load More Button */}
-                    {pagination?.currentPage < pagination?.totalPages && (
+                    {/* {pagination?.currentPage < pagination?.totalPages && (
                         <div className="flex justify-center mt-12">
                             <button
                                 onClick={handleLoadMore}
@@ -290,7 +308,7 @@ function ActiveAuctions() {
                                 )}
                             </button>
                         </div>
-                    )}
+                    )} */}
                 </BidderContainer>
             </div>
         </section>

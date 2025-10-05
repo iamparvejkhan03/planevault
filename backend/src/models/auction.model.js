@@ -116,7 +116,7 @@ const auctionSchema = new Schema({
     // Status
     status: {
         type: String,
-        enum: ['draft', 'active', 'ended', 'cancelled', 'sold', 'reserve_not_met'],
+        enum: ['draft', 'active', 'approved', 'ended', 'cancelled', 'sold', 'reserve_not_met'],
         default: 'draft'
     },
     winner: {
@@ -125,6 +125,15 @@ const auctionSchema = new Schema({
     },
     finalPrice: {
         type: Number
+    },
+
+    commissionAmount: {
+        type: Number,
+        default: 0
+    },
+    bidPaymentRequired: {
+        type: Boolean,
+        default: true
     },
 
     // Metadata
@@ -217,12 +226,21 @@ auctionSchema.methods.placeBid = async function (bidderId, bidderUsername, amoun
         throw new Error('Auction has ended');
     }
 
-    if (amount <= this.currentPrice) {
+    if (amount <= this.currentPrice && this.bidCount > 0) {
         throw new Error(`Bid must be higher than current price: $${this.currentPrice}`);
     }
 
+    // if (amount <= this.currentPrice) {
+    //     throw new Error(`Bid must be higher than current price: $${this.currentPrice}`);
+    // }
+
     // Check bid increment
-    const minBid = this.currentPrice + this.bidIncrement;
+    // const minBid = this.currentPrice + this.bidIncrement;
+    // if (amount < minBid) {
+    //     throw new Error(`Bid must be at least $${minBid}`);
+    // }
+
+    const minBid = this.bidCount === 0 ? this.currentPrice : this.currentPrice + this.bidIncrement;
     if (amount < minBid) {
         throw new Error(`Bid must be at least $${minBid}`);
     }
@@ -243,8 +261,9 @@ auctionSchema.methods.placeBid = async function (bidderId, bidderUsername, amoun
     // Auto-extend if bidding near end time (last 5 minutes)
     if (this.autoExtend) {
         const timeRemaining = this.endDate - now;
-        if (timeRemaining < 5 * 60 * 1000) { // 5 minutes
-            const newEndDate = new Date(this.endDate.getTime() + 5 * 60 * 1000);
+        if (timeRemaining < 2 * 60 * 1000) { // 5 minutes
+            // const newEndDate = new Date(this.endDate.getTime() + 2 * 60 * 1000);
+            const newEndDate = new Date(this.endDate.getTime() + 2 * 60 * 1000);
             this.endDate = newEndDate;
 
             // Reschedule the end job with new time
@@ -263,12 +282,29 @@ auctionSchema.methods.isReserveMet = function () {
 };
 
 // Method to end auction
+// auctionSchema.methods.endAuction = function () {
+//     if (this.status !== 'active') return;
+
+//     this.status = 'ended';
+
+//     if (this.bidCount > 0 && this.isReserveMet()) {
+//         this.status = 'sold';
+//         this.winner = this.currentBidder;
+//         this.finalPrice = this.currentPrice;
+//     } else if (this.auctionType === 'reserve' && !this.isReserveMet()) {
+//         this.status = 'reserve_not_met';
+//     }
+
+//     return this.save();
+// };
+
 auctionSchema.methods.endAuction = function () {
     if (this.status !== 'active') return;
 
     this.status = 'ended';
 
-    if (this.bidCount > 0 && this.isReserveMet()) {
+    // For standard auctions OR reserve auctions that met reserve
+    if (this.bidCount > 0 && (this.auctionType === 'standard' || this.isReserveMet())) {
         this.status = 'sold';
         this.winner = this.currentBidder;
         this.finalPrice = this.currentPrice;

@@ -21,7 +21,7 @@ const navigation = [
     { name: 'Watchlist', path: '/bidder/watchlist', icon: <Bookmark size={20} /> },
     { name: 'My Bids', path: '/bidder/bids', icon: <TrendingUp size={20} /> },
     { name: 'Won Auctions', path: '/bidder/auctions/won', icon: <Award size={20} /> },
-    { name: 'Notifications', path: '/bidder/notifications', icon: <Bell size={20} /> },
+    // { name: 'Notifications', path: '/bidder/notifications', icon: <Bell size={20} /> },
     { name: 'Profile', path: '/bidder/profile', icon: <User size={20} /> },
 ];
 
@@ -66,7 +66,7 @@ function Sidebar() {
             {/* Mobile menu button */}
             <button
                 onClick={toggleSidebar}
-                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-blue-600 text-white`}
+                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-black text-white`}
             >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -81,7 +81,7 @@ function Sidebar() {
 
             {/* Sidebar */}
             <aside className={`
-                fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white min-h-screen p-4 flex flex-col z-40
+                fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white h-screen md:h-auto md:min-h-screen overflow-y-auto p-4 flex flex-col z-50
                 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>

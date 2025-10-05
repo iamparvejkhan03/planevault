@@ -18,6 +18,24 @@ import about from './about.webp';
 import parts from './parts.webp';
 import airCrafts from './airCrafts.webp';
 import memorabilia from './memorabilia.webp';
+import dummyUserImg from './dummyUserImg.webp';
+import liveAuctions from './liveAuctions.webp';
+import soldAuctions from './soldAuctions.webp';
+import endingSoonAuctions from './endingSoonAuctions.webp';
+import upcomingAuctions from './upcomingAuctions.webp';
+import jetsIcon from './jetsIcon.webp';
+import plusIcon from './plusIcon.webp';
+import engineIcon from './engineIcon.webp';
+import helicopterIcon from './helicopterIcon.webp';
+import lightSportIcon from './lightSportIcon.webp';
+import memorabiliaIcon from './memorabiliaIcon.webp';
+import singlePistonIcon from './singlePistonIcon.webp';
+import specialUseIcon from './specialUseIcon.webp';
+import turboPropIcon from './turboPropIcon.webp';
+import warBirdsIcon from './warBirdsIcon.webp';
+import multiEnginePistonIcon from './multiEnginePistonIcon.webp';
+import partsIcon from './partsIcon.webp';
+import spinner from './spinner.webp';
 
 const otherData = {
     phone: '+13477456985',
@@ -47,4 +65,22 @@ export {
     airCrafts,
     parts,
     memorabilia,
+    dummyUserImg,
+    liveAuctions,
+    soldAuctions,
+    endingSoonAuctions,
+    upcomingAuctions,
+    jetsIcon,
+    plusIcon,
+    engineIcon,
+    helicopterIcon,
+    lightSportIcon,
+    memorabiliaIcon,
+    singlePistonIcon,
+    specialUseIcon,
+    turboPropIcon,
+    warBirdsIcon,
+    multiEnginePistonIcon,
+    partsIcon,
+    spinner,
 }

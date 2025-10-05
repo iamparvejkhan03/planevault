@@ -7,7 +7,8 @@ import {
     User,
     X,
     Menu,
-    Bell
+    Bell,
+    Plus
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { logo } from "../../assets";
@@ -17,9 +18,10 @@ import { useAuth } from "../../contexts/AuthContext";
 const navigation = [
     { name: 'Dashboard', path: '/seller/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'All Auctions', path: '/seller/auctions/all', icon: <Gavel size={20} /> },
-    { name: 'Won Auctions', path: '/seller/auctions/won', icon: <Award size={20} /> },
+    { name: 'Create Auction', path: '/seller/auctions/create', icon: <Plus size={20} /> },
+    { name: 'Sold Auctions', path: '/seller/auctions/sold', icon: <Award size={20} /> },
     { name: 'Bid History', path: '/seller/bids/history', icon: <TrendingUp size={20} /> },
-    { name: 'Notifications', path: '/seller/notifications', icon: <Bell size={20} /> },
+    // { name: 'Notifications', path: '/seller/notifications', icon: <Bell size={20} /> },
     { name: 'Profile', path: '/seller/profile', icon: <User size={20} /> },
 ];
 
@@ -79,7 +81,7 @@ function Sidebar() {
 
             {/* Sidebar */}
             <aside className={`
-        fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white min-h-screen p-4 flex flex-col z-40
+        fixed md:relative w-64 bg-gradient-to-b from-black to-black/90 text-white h-screen md:h-auto md:min-h-screen overflow-y-auto p-4 flex flex-col z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>

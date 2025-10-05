@@ -1,5 +1,6 @@
 // utils/axiosInstance.js
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_DOMAIN_URL,
@@ -27,6 +28,14 @@ axiosInstance.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
+
+        // if (error.config.url.includes('/watchlist') && 
+        //     error.response?.data?.message === 'Access token required') {
+        //     // Show your custom message
+        //     // You can use toast here or dispatch an action
+        //     toast.error('You need to login to manage watchlist');
+        //     return Promise.reject(error);
+        // }
 
         // If error is 401 and we haven't tried to refresh yet
         if (error.response?.status === 401 && !originalRequest._retry) {

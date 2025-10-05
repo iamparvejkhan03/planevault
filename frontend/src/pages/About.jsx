@@ -91,7 +91,7 @@ const testimonials = [
 
 function About() {
     return (
-        <section className="pt-32 pb-16 bg-gray-100 max-w-full text-gray-600">
+        <section className="pt-24 md:pt-32 pb-16 bg-gray-100 max-w-full text-gray-600">
             <Container>
                 <h2 className="text-4xl md:text-5xl font-bold my-5 text-primary">About</h2>
                 <p className="text-primary mt-4 mb-10">Every successful auction begins with trust and transparency. Discover how our mission is to provide both, ensuring sellers and buyers are confident at every step.</p>

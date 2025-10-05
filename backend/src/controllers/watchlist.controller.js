@@ -203,7 +203,7 @@ export const getMyWatchlist = async (req, res) => {
             auctionFilter.status = status;
         } else {
             // Default: show active and upcoming auctions
-            auctionFilter.status = { $in: ['draft', 'active'] };
+            auctionFilter.status = { $in: ['draft', 'active', 'approved'] };
         }
 
         const watchlistItems = await Watchlist.find({ user: userId })
@@ -216,8 +216,8 @@ export const getMyWatchlist = async (req, res) => {
                 ]
             })
             .sort({ addedAt: -1 })
-            .limit(limit * 1)
-            .skip((page - 1) * limit);
+            // .limit(limit * 1)
+            // .skip((page - 1) * limit);
 
         // Filter out watchlist items where auction was not found (deleted auctions)
         const validWatchlistItems = watchlistItems.filter(item => item.auction !== null);

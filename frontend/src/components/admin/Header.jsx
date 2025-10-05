@@ -1,12 +1,11 @@
-import {  Bell, Home } from "lucide-react";
-import { useState, useRef } from "react";
+import { Bell, Home } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Header() {
-    const [searchQuery, setSearchQuery] = useState("");
     const [notificationsCount] = useState(3);
-    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-    const searchRef = useRef(null);
+    const { user } = useAuth();
 
     return (
         <header className="bg-white w-full fixed top-0 md:static shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-4 md:px-6 z-20">
@@ -18,27 +17,33 @@ function Header() {
             {/* Right section with icons and user */}
             <div className="flex items-center space-x-4 md:space-x-5">
                 {/* Notifications */}
-                <button className="relative p-2 text-secondary hover:text-black transition-colors">
+                {/* <button className="relative p-2 text-secondary hover:text-black transition-colors">
                     <Bell size={22} />
                     {notificationsCount > 0 && (
                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                             {notificationsCount}
                         </span>
                     )}
-                </button>
+                </button> */}
 
                 {/* User profile */}
                 <div className="flex items-center space-x-3 pl-3 border-l border-gray-200">
                     <div className="text-right hidden md:block">
-                        <p className="text-sm font-medium text-black">John The Bidder</p>
-                        <p className="text-xs text-secondary">john7890</p>
+                        <Link to={`/bidder/profile`} className="text-sm font-medium text-black">{user?.firstName + ' ' + user?.lastName}</Link>
+                        <p className="text-xs text-secondary">{user.username}</p>
                     </div>
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-black/70 to-black flex items-center justify-center text-white font-semibold">
-                        JA
-                    </div>
+                    {
+                        user?.image
+                            ?
+                            <Link to={`/bidder/profile`}><img src={user?.image} alt="userImage" className="h-10 w-10 rounded-full" /></Link>
+                            :
+                            <Link to={`/bidder/profile`} className="h-10 w-10 rounded-full bg-gradient-to-r from-black/70 to-black flex items-center justify-center text-white font-semibold">
+                                {user?.firstName[0] + user?.lastName[0]}
+                            </Link>
+                    }
                 </div>
             </div>
-        </header>
+        </header >
     );
 }
 

@@ -13,8 +13,10 @@ export const useWatchlist = (auctionId) => {
             if (!auctionId) return;
 
             const accessToken = localStorage.getItem('accessToken');
+            const user = localStorage.getItem('user');
+            const parsedUser = JSON.parse(user);
 
-             if (!accessToken) {
+             if (!accessToken || parsedUser.userType !== 'bidder') {
                 setIsWatchlisted(false);
                 setLoading(false);
                 return;

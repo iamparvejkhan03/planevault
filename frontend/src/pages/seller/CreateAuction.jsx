@@ -108,7 +108,7 @@ const CreateAuction = () => {
 
         return (
             <div className="mb-6">
-                <label className="block text-sm font-medium text-secondary mb-4 flex items-center">
+                <label className="text-sm font-medium text-secondary mb-4 flex items-center">
                     {(() => {
                         const IconComponent = categoryIcons[selectedCategory] || FileText;
                         return <IconComponent size={20} className="mr-2" />;
@@ -282,8 +282,10 @@ const CreateAuction = () => {
             formData.append('startPrice', auctionData.startPrice);
             formData.append('bidIncrement', auctionData.bidIncrement);
             formData.append('auctionType', auctionData.auctionType);
-            formData.append('startDate', auctionData.startDate);
-            formData.append('endDate', auctionData.endDate);
+            // formData.append('startDate', auctionData.startDate);
+            // formData.append('endDate', auctionData.endDate);
+            formData.append('startDate', new Date(auctionData.startDate).toISOString());
+            formData.append('endDate', new Date(auctionData.endDate).toISOString());
 
             // Append specifications as JSON
             if (auctionData.specifications) {

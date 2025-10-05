@@ -89,29 +89,13 @@ export class StripeService {
         }
     }
 
-    // Charge customer automatically when they win (using saved card)
-    static async chargeCustomer(customerId, amount, description) {
+    // Update the chargeCustomer method to capture existing payment intents
+    static async capturePaymentIntent(paymentIntentId) {
         try {
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: Math.round(amount * 100),
-                currency: 'usd',
-                customer: customerId,
-                description: description,
-                payment_method_types: ['card'],
-                off_session: true, // Important: charge without customer being present
-                confirm: true, // Auto-confirm and capture
-            });
-
-            if (paymentIntent.status === 'succeeded') {
-                return {
-                    success: true,
-                    paymentIntent: paymentIntent
-                };
-            } else {
-                throw new Error(`Payment failed with status: ${paymentIntent.status}`);
-            }
+            const paymentIntent = await stripe.paymentIntents.capture(paymentIntentId);
+            return paymentIntent;
         } catch (error) {
-            throw new Error(`Charge failed: ${error.message}`);
+            throw new Error(`Payment capture failed: ${error.message}`);
         }
     }
 
@@ -138,6 +122,40 @@ export class StripeService {
             return refund;
         } catch (error) {
             throw new Error(`Refund failed: ${error.message}`);
+        }
+    }
+
+    // Add this method to your existing StripeService class
+
+    static async createBidPaymentIntent(customerId, amount, description) {
+        try {
+            // Get customer's default payment method
+            const customer = await stripe.customers.retrieve(customerId);
+            const defaultPaymentMethod = customer.invoice_settings?.default_payment_method;
+
+            if (!defaultPaymentMethod) {
+                throw new Error('No payment method found for customer');
+            }
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: Math.round(amount * 100),
+                currency: 'usd',
+                customer: customerId,
+                payment_method: defaultPaymentMethod, // Add this line
+                description: description,
+                payment_method_types: ['card'],
+                capture_method: 'manual',
+                setup_future_usage: 'off_session',
+                confirm: true, // Add this line to confirm immediately
+                metadata: {
+                    type: 'bid_commission',
+                    timestamp: new Date().toISOString()
+                }
+            });
+
+            return paymentIntent;
+        } catch (error) {
+            throw new Error(`Payment intent creation failed: ${error.message}`);
         }
     }
 }

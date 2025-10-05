@@ -1,11 +1,11 @@
 import { Container, FAQs } from "../components";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
-// import axios from 'axios';
-// import toast from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { lazy, useState } from "react";
 import { Clock, Gavel, Mail, MapPin, MessageCircleQuestion, Phone, Star, Store, User } from "lucide-react";
 import { contactUs, logo, otherData } from "../assets";
+import axiosInstance from "../utils/axiosInstance";
 
 const faqs = [
     {
@@ -55,26 +55,33 @@ function Contact() {
 
     const submitHandler = async (contactData) => {
         try {
-            console.log(contactData);
-            // setSending(true);
-            // const { data } = await axios.post(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/emails/contact`, { name: contactData.name, email: contactData.email, phone: contactData.phone, userType: contactData.userType, message: contactData.message });
+            setSending(true);
 
-            // if (data && data.success) {
-            //     setSending(false);
-            //     toast.success(data.message);
-            //     reset();
-            //     window.scrollTo({ top: 0, behavior: 'smooth' });
-            // } else {
-            //     toast.error(data.message);
-            // }
+            const { data } = await axiosInstance.post('/api/v1/contact/submit', {
+                name: contactData.name,
+                email: contactData.email,
+                phone: contactData.phone,
+                userType: contactData.userType,
+                message: contactData.message
+            });
+
+            if (data && data.success) {
+                setSending(false);
+                toast.success(data.message);
+                reset();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                toast.error(data.message || 'Failed to submit your query');
+            }
         } catch (error) {
-            console.error(error);
+            console.error('Submit contact form error:', error);
             setSending(false);
+            toast.error(error.response?.data?.message || 'Failed to submit your query. Please try again.');
         }
-    }
+    };
 
     return (
-        <Container className={`pt-32`}>
+        <Container className={`pt-24 md:pt-32`}>
             <h2 className="text-4xl md:text-5xl font-bold my-5 text-primary text-center">Contact</h2>
             <p className="text-center text-primary">Get in touch with our team of experts. We're here to help.</p>
 

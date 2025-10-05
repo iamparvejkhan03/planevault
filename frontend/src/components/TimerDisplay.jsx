@@ -1,6 +1,6 @@
 // Simple status-based timer display
 const TimerDisplay = ({ countdown, auction }) => {
-    if (countdown.status === 'not-started') {
+    if (countdown.status === 'approved') {
         return (
             <div className="text-center py-8">
                 <div className="text-lg font-semibold text-gray-700 mb-4">Auction Starts In</div>
@@ -24,7 +24,7 @@ const TimerDisplay = ({ countdown, auction }) => {
                 </div>
             </div>
         );
-    }
+    } 
 
     if (countdown.status === 'counting-down') {
         return (
@@ -56,6 +56,52 @@ const TimerDisplay = ({ countdown, auction }) => {
         return (
             <div className="text-center py-8">
                 <div className="text-lg font-semibold text-gray-600">Auction Ended</div>
+                {auction?.finalPrice ? (
+                    <div className="text-2xl font-bold text-green-600 mt-2">
+                        Sold for ${auction.finalPrice.toLocaleString()}
+                    </div>
+                ) : auction?.status == 'reserve_not_met' ? (
+                    <div className="text-lg text-orange-600 mt-2">
+                        Reserve price not met
+                    </div>
+                ) : (
+                    <div className="text-lg text-gray-500 mt-2">
+                        No winning bidder
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    if (countdown.status === 'draft') {
+        return (
+            <div className="text-center py-8">
+                <div className="text-lg font-semibold text-gray-600">Auction Pending</div>
+                {auction?.finalPrice ? (
+                    <div className="text-2xl font-bold text-green-600 mt-2">
+                        Sold for ${auction.finalPrice.toLocaleString()}
+                    </div>
+                ) : auction?.status === 'reserve_not_met' ? (
+                    <div className="text-lg text-orange-600 mt-2">
+                        Reserve price not met
+                    </div>
+                ) : auction?.status === 'approved' ? (
+                    <div className="text-lg text-orange-600 mt-2">
+                        Coming Soon
+                    </div>
+                ) : (
+                    <div className="text-lg text-gray-500 mt-2">
+                        Needs Admin Approval
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    if (countdown.status === 'cancelled') {
+        return (
+            <div className="text-center py-8">
+                <div className="text-lg font-semibold text-red-600">Auction Cancelled</div>
                 {auction?.finalPrice ? (
                     <div className="text-2xl font-bold text-green-600 mt-2">
                         Sold for ${auction.finalPrice.toLocaleString()}

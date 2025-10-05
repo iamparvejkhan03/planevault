@@ -11,7 +11,7 @@ export const useAuctions = () => {
     const [pagination, setPagination] = useState(null);
     const [filters, setFilters] = useState({
         category: '',
-        status: '',
+        status: 'active',
         search: '',
         sortBy: 'createdAt',
         sortOrder: 'desc'

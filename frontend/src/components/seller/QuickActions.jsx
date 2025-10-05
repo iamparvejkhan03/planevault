@@ -1,11 +1,12 @@
 import { Plus, Edit, BarChart3, Download } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function QuickActions() {
+    const navigate = useNavigate();
+
     const actions = [
-        { label: 'Create Listing', icon: <Plus size={18} />, action: () => console.log('Create new listing') },
-        { label: 'Manage Listings', icon: <Edit size={18} />, action: () => console.log('Manage listings') },
-        { label: 'View Reports', icon: <BarChart3 size={18} />, action: () => console.log('View reports') },
-        { label: 'Export Data', icon: <Download size={18} />, action: () => console.log('Export data') },
+        { label: 'Create Listing', icon: <Plus size={18} />, action: () => navigate('/seller/auctions/create') },
+        { label: 'Manage Listings', icon: <Edit size={18} />, action: () => navigate('/seller/auctions/all') },
     ];
 
     return (

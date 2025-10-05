@@ -14,7 +14,13 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showForgotPasswordModel, setShowForgotPasswordModal] = useState(false);
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+
+    useEffect(() => {
+        if(user){
+            navigate(`/${user.userType}/profile`);
+        }
+    }, [user])
 
     const { register, handleSubmit } = useForm({
         defaultValues: {

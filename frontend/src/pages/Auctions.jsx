@@ -92,11 +92,6 @@ const FiltersSection = ({
                         onChange={handleFilterChange}
                         placeholder={filter.placeholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                                updateFilters(uiFilters);
-                            }
-                        }}
                     />
                 );
 
@@ -163,7 +158,7 @@ const FiltersSection = ({
 
     const statusOptions = [
         { value: "active", label: "Active" },
-        { value: "draft", label: "Upcoming" },
+        { value: "approved", label: "Upcoming" },
         { value: "ended", label: "Ended" },
         { value: "sold", label: "Sold" }
     ];
@@ -192,11 +187,6 @@ const FiltersSection = ({
                             value={uiFilters.search}
                             onChange={handleFilterChange}
                             name="search"
-                            onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                    updateFilters(uiFilters);
-                                }
-                            }}
                         />
                     </div>
                 </div>
@@ -311,7 +301,7 @@ const FiltersSection = ({
                 )}
             </div>
 
-            {/* Filter Actions */}
+            {/* Filter Actions
             <div className="flex flex-col gap-3 mt-8">
                 <button
                     onClick={applyFilters}
@@ -324,6 +314,15 @@ const FiltersSection = ({
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                     Reset Filters
+                </button>
+            </div> */}
+            {/* Filter Actions */}
+            <div className="flex flex-col gap-3 mt-8">
+                <button
+                    onClick={resetFilters}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    Reset All Filters
                 </button>
             </div>
         </div>
@@ -340,11 +339,6 @@ const MobileSearch = ({ uiFilters, handleFilterChange, updateFilters }) => (
             value={uiFilters.search}
             onChange={handleFilterChange}
             name="search"
-            onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                    updateFilters(uiFilters);
-                }
-            }}
         />
     </div>
 );
@@ -383,6 +377,34 @@ function Auctions() {
         }));
     }, [apiFilters]);
 
+    // const debouncedUpdateFilters = useCallback((newFilters) => {
+    //     if (debounceTimer) {
+    //         clearTimeout(debounceTimer);
+    //     }
+
+    //     const timer = setTimeout(() => {
+    //         updateFilters(newFilters);
+    //     }, 500); // 500ms debounce
+
+    //     setDebounceTimer(timer);
+    // }, [debounceTimer, updateFilters]);
+
+    // const handleFilterChange = (e) => {
+    //     const { name, value } = e.target;
+    //     const newFilters = {
+    //         ...uiFilters,
+    //         [name]: value
+    //     };
+
+    //     setUiFilters(newFilters);
+
+    //     if (['search', 'location', 'make', 'model', 'manufacturer'].includes(name)) {
+    //         debouncedUpdateFilters(newFilters);
+    //     } else {
+    //         updateFilters(newFilters);
+    //     }
+    // };
+
     const debouncedUpdateFilters = useCallback((newFilters) => {
         if (debounceTimer) {
             clearTimeout(debounceTimer);
@@ -404,12 +426,24 @@ function Auctions() {
 
         setUiFilters(newFilters);
 
-        if (['search', 'location', 'make', 'model', 'manufacturer'].includes(name)) {
+        // Auto-apply filters for all fields except search/location (which use debounce)
+        if (['search', 'location'].includes(name)) {
             debouncedUpdateFilters(newFilters);
         } else {
+            // Auto-apply immediately for other filters
             updateFilters(newFilters);
         }
     };
+    // const handleRangeChange = (minName, maxName, minValue, maxValue) => {
+    //     const newFilters = {
+    //         ...uiFilters,
+    //         [minName]: minValue,
+    //         [maxName]: maxValue
+    //     };
+
+    //     setUiFilters(newFilters);
+    //     updateFilters(newFilters);
+    // };
 
     const handleRangeChange = (minName, maxName, minValue, maxValue) => {
         const newFilters = {
@@ -419,6 +453,8 @@ function Auctions() {
         };
 
         setUiFilters(newFilters);
+
+        // Auto-apply range filters immediately
         updateFilters(newFilters);
     };
 
@@ -476,7 +512,7 @@ function Auctions() {
 
     return (
         <Container>
-            <div className="min-h-screen pt-32 pb-16 bg-gray-50">
+            <div className="min-h-screen pt-16 md:pt-32 pb-16 bg-gray-50">
                 {/* Header */}
                 <div className="bg-white border-b border-gray-200 py-8">
                     <div className="container mx-auto">
@@ -490,7 +526,7 @@ function Auctions() {
                     <div className="flex flex-col lg:flex-row gap-8">
                         {/* Filters Sidebar - Visible on large screens */}
                         <div className="hidden lg:block lg:w-1/4 xl:w-1/5">
-                            <FiltersSection 
+                            <FiltersSection
                                 uiFilters={uiFilters}
                                 handleFilterChange={handleFilterChange}
                                 handleRangeChange={handleRangeChange}
@@ -507,7 +543,7 @@ function Auctions() {
                         <div className="w-full lg:w-3/4 xl:w-4/5">
                             {/* Mobile Filter Toggle - FIXED: Now using external MobileSearch */}
                             <div className="flex flex-col md:flex-row gap-4 mb-8 lg:hidden">
-                                <MobileSearch 
+                                <MobileSearch
                                     uiFilters={uiFilters}
                                     handleFilterChange={handleFilterChange}
                                     updateFilters={updateFilters}
@@ -617,7 +653,7 @@ function Auctions() {
                     <div className="fixed inset-0 z-50 lg:hidden">
                         <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMobileFilters(false)}></div>
                         <div className="absolute left-0 top-0 h-full w-4/5 max-w-sm bg-white overflow-y-auto p-6">
-                            <FiltersSection 
+                            <FiltersSection
                                 uiFilters={uiFilters}
                                 handleFilterChange={handleFilterChange}
                                 handleRangeChange={handleRangeChange}

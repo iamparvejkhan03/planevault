@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 export const useComments = (auctionId) => {
     const [comments, setComments] = useState([]);
@@ -38,8 +39,8 @@ export const useComments = (auctionId) => {
                 });
             }
         } catch (error) {
-            console.error('Error fetching comments:', error);
-            toast.error('Failed to load comments');
+            // console.error('Error fetching comments:', error);
+            // toast.error('Failed to load comments');
         } finally {
             loadingState(false);
         }

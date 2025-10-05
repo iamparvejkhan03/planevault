@@ -7,14 +7,10 @@ export const auth = async (req, res, next) => {
         const token = req.cookies?.accessToken ||
             req.header('Authorization')?.replace('Bearer ', '');
 
-        // console.log('Auth middleware - Token received:', !!token);
-        // console.log('Cookies:', req.cookies);
-        // console.log('Auth header:', req.header('Authorization'));
-
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: 'Access token required'
+                message: 'You need to login first'
             });
         }
 
@@ -88,9 +84,20 @@ export const requireBidder = (req, res, next) => {
     next();
 };
 
+export const requireAdmin = (req, res, next) => {
+    if (req.user.userType !== 'admin') {
+        return res.status(403).json({
+            success: false,
+            message: 'Admin access required'
+        });
+    }
+    next();
+};
+
 // Combined middleware for specific user types
 export const authSeller = [auth, requireSeller];
 export const authBidder = [auth, requireBidder];
+export const authAdmin = [auth, requireAdmin];
 
 // Optional: Soft auth middleware (attaches user if available, but doesn't require auth)
 export const optionalAuth = async (req, res, next) => {

@@ -60,6 +60,20 @@ const userSchema = new Schema({
         type: String,
         trim: true
     },
+    address: {
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        zipCode: { type: String, trim: true },
+        country: { type: String, trim: true }
+    },
+    preferences: {
+        bidAlerts: { type: Boolean, default: true },
+        outbidNotifications: { type: Boolean, default: true },
+        newsletter: { type: Boolean, default: true },
+        smsUpdates: { type: Boolean, default: false },
+        favoriteCategories: [{ type: String }]
+    },
 
     // Stripe Payment Info (For Bidders Only)
     stripeCustomerId: {
@@ -84,7 +98,7 @@ const userSchema = new Schema({
     cardExpYear: {
         type: Number
     },
-    
+
     // Payment status
     isPaymentVerified: {
         type: Boolean,

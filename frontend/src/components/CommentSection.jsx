@@ -150,7 +150,7 @@ const CommentSection = ({ auctionId }) => {
             case 'oldest':
                 return commentsCopy.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
             case 'popular':
-                return commentsCopy.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+                return commentsCopy.sort((a, b) => (b.likes.length || 0) - (a.likes.length || 0));
             default:
                 return commentsCopy;
         }

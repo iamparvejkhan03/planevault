@@ -1,138 +1,88 @@
 import { useEffect } from "react";
-import { LoadingSpinner, QuickActions, RecentActivity, StatCard, TopPerformers, SellerContainer, SellerHeader, SellerSidebar } from "../../components";
-import toast from "react-hot-toast";
-import axios from "axios";
-// import { useDispatch, useSelector } from "react-redux";
+import { QuickActions, StatCard, SellerContainer, SellerHeader, SellerSidebar } from "../../components";
 import { useState } from "react";
-import { TrendingUp, TrendingDown, Users, Gavel, Award, Heart, DollarSign, BarChart3, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
-// import useRefreshToken from "../../hooks/useRefreshToken";
-// import { updateUser } from "../../features/forms/UserAuthSlice.js";
-// import cleanFileName from "../../hooks/CleanFileName.jsx";
-
-const statsData = [
-    {
-        title: "Total Revenue",
-        value: "28,452",
-        change: "+1,240",
-        icon: <DollarSign size={24} />,
-        trend: "up",
-        currency: "$"
-    },
-    {
-        title: "Items Sold",
-        value: "42",
-        change: "+8",
-        icon: <Award size={24} />,
-        trend: "up"
-    },
-    {
-        title: "Success Rate",
-        value: "78",
-        change: "+5",
-        icon: <TrendingUp size={24} />,
-        trend: "up",
-        suffix: "%"
-    },
-    {
-        title: "Total Bids",
-        value: "1,452",
-        change: "+210",
-        icon: <Gavel size={24} />,
-        trend: "up"
-    },
-    {
-        title: "Average Sale Price",
-        value: "677",
-        change: "+42",
-        icon: <DollarSign size={24} />,
-        trend: "up",
-        currency: "$"
-    },
-    {
-        title: "Watchlist Items",
-        value: "156",
-        change: "+24",
-        icon: <Heart size={24} />,
-        trend: "up"
-    },
-    {
-        title: "Ending Soon",
-        value: "7",
-        change: "-2",
-        icon: <Clock size={24} />,
-        trend: "down"
-    }
-];
+import { TrendingUp, Gavel, Award, Heart, DollarSign, Clock, Eye } from "lucide-react";
+import axiosInstance from "../../utils/axiosInstance";
 
 function Dashboard() {
-    // const user = useSelector(state => state.user.user);
-    const [userSessions, setUserSessions] = useState(null);
-    const [userAccommodations, setUserAccommodations] = useState(null);
-    // const dispatch = useDispatch();
-    // const refreshAccessToken = useRefreshToken();
+    const [stats, setStats] = useState({});
 
-    // useEffect(() => {
-    //     const getUserSessions = async () => {
-    //         try {
-    //             const { data } = await axios.get(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/sessions/user`, { headers: { Authorization: `Bearer ${user.accessToken}` } });
+    const fetchUserStats = async () => {
+        try {
+            const { data } = await axiosInstance.get('/api/v1/users/stats');
+            if (data.success) {
+                setStats(data.data.statistics);
+            }
+        } catch (err) {
+            console.error('Fetch stats error:', err);
+        }
+    };
 
-    //             if (data.success) {
-    //                 setUserSessions(data.data);
-    //             }
-    //         } catch (error) {
-    //             const message = error?.response?.data?.message;
-    //             if (message === 'accessToken') {
-    //                 try {
-    //                     const newAccessToken = await refreshAccessToken();
+    useEffect(() => {
+        fetchUserStats();
+    }, []);
 
-    //                     const { data } = await axios.get(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/sessions/user`, { headers: { Authorization: `Bearer ${newAccessToken}` } });
-
-    //                     if (data && data.success) {
-    //                         dispatch(updateUser({ ...user, accessToken: newAccessToken }));
-    //                         setUserSessions(data.data);
-    //                     }
-    //                 } catch (error) {
-    //                     const message = error?.response?.data?.message;
-    //                     toast.error(message);
-    //                 }
-    //             } else {
-    //                 toast.error(message);
-    //             }
-    //         }
-    //     }
-    //     getUserSessions();
-
-    //     const getUserAccommodations = async () => {
-    //         try {
-    //             const { data } = await axios.get(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/accommodations/user`, { headers: { Authorization: `Bearer ${user.accessToken}` } });
-
-    //             if (data.success) {
-    //                 setUserAccommodations(data.data);
-    //             }
-    //         } catch (error) {
-    //             const message = error?.response?.data?.message;
-    //             if (message === 'accessToken') {
-    //                 try {
-    //                     const newAccessToken = await refreshAccessToken();
-
-    //                     const { data } = await axios.get(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/accommodations/user`, { headers: { Authorization: `Bearer ${newAccessToken}` } });
-
-    //                     if (data && data.success) {
-    //                         dispatch(updateUser({ ...user, accessToken: newAccessToken }));
-    //                         setUserAccommodations(data.data);
-    //                     }
-    //                 } catch (error) {
-    //                     const message = error?.response?.data?.message;
-    //                     toast.error(message);
-    //                 }
-    //             } else {
-    //                 toast.error(message);
-    //             }
-    //         }
-    //     }
-    //     getUserAccommodations();
-    // }, [])
+    const statsData = [
+        {
+            title: "Total Revenue",
+            value: stats?.totalRevenue?.toLocaleString(),
+            change: "All Time",
+            icon: <DollarSign size={24} />,
+            trend: "up",
+            currency: "$"
+        },
+        {
+            title: "Active Auctions",
+            value: stats?.activeAuctions,
+            change: "Active Right Now",
+            icon: <Clock size={24} />,
+            trend: "up"
+        },
+        {
+            title: "Items Sold",
+            value: stats?.soldAuctions,
+            change: "Previously Sold",
+            icon: <Award size={24} />,
+            trend: "up"
+        },
+        {
+            title: "Success Rate",
+            value: stats && stats?.successRate,
+            change: "Sold%Ended",
+            icon: <TrendingUp size={24} />,
+            trend: "up",
+            suffix: "%"
+        },
+        {
+            title: "Total Bids",
+            value: stats?.totalBidsReceived,
+            change: "All Time",
+            icon: <Gavel size={24} />,
+            trend: "up"
+        },
+        {
+            title: "Avg. Sale Price",
+            value: stats?.avgSalePrice?.toLocaleString(),
+            change: "Per Item Sold",
+            icon: <DollarSign size={24} />,
+            trend: "up",
+            currency: "$"
+        },
+        {
+            title: "Watchlist Items",
+            value: stats?.totalWatchlists,
+            change: "Saved To Watchlist",
+            icon: <Heart size={24} />,
+            trend: "up"
+        },
+        {
+            title: "Total Views",
+            value: stats?.totalViews,
+            change: "All Auctions Views",
+            icon: <Eye size={24} />,
+            trend: "up"
+        },
+    ];
 
     return (
         <section className="flex min-h-[70vh]">
@@ -157,8 +107,6 @@ function Dashboard() {
 
                     <div className="space-y-6 mb-16">
                         <QuickActions />
-                        <TopPerformers />
-                        <RecentActivity />
                     </div>
                 </SellerContainer>
             </div>

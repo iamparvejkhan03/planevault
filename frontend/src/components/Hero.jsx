@@ -2,6 +2,7 @@ import { Clock, Plane, Search, Shield } from "lucide-react";
 import { Container } from "../components";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { heroImg } from "../assets";
 
 function Hero() {
     const searchForm = useForm();
@@ -27,7 +28,11 @@ function Hero() {
     }
 
     return (
-        <section className={`bg-[url('src/assets/heroImg.webp')] min-h-screen max-w-screen py-24 flex items-center bg-center bg-no-repeat bg-cover relative`}>
+        // <section className={`bg-[url('src/assets/heroImg.webp')] min-h-screen max-w-screen py-24 flex items-center bg-center bg-no-repeat bg-cover relative`}>
+        <section 
+            className="min-h-screen max-w-screen py-24 flex items-center bg-center bg-no-repeat bg-cover relative"
+            style={{ backgroundImage: `url(${heroImg})` }} // Use inline style with imported image
+        >
             <Container>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/85 to-black/50" />
 

@@ -1,4 +1,4 @@
-import { CalendarDays, CheckSquare, Clock, Download, File, Fuel, Gauge, Gavel, Heart, MapPin, MessageCircle, PaintBucket, Plane, ShieldCheck, Tag, User, Users, Weight } from "lucide-react";
+import { CalendarDays, CheckSquare, Clock, Download, File, Fuel, Gauge, Gavel, Heart, Loader, MapPin, MessageCircle, PaintBucket, Plane, ShieldCheck, Tag, User, Users, Weight } from "lucide-react";
 import { Container, LoadingSpinner, MobileBidStickyBar, SpecificationsSection, TabSection, TimerDisplay, WatchlistButton } from "../components";
 import { Link, useParams } from "react-router-dom";
 import { lazy, Suspense, useRef, useState, useEffect } from "react";
@@ -6,6 +6,7 @@ import useAuctionCountdown from "../hooks/useAuctionCountDown";
 import axiosInstance from "../utils/axiosInstance";
 import { toast } from "react-hot-toast";
 import { useComments } from "../hooks/useComments";
+import { useWatchlist } from "../hooks/useWatchlist";
 
 const YouTubeEmbed = lazy(() => import('../components/YouTubeEmbed'));
 const ImageLightBox = lazy(() => import('../components/ImageLightBox'));
@@ -22,8 +23,28 @@ function SingleAuction() {
     const countdown = useAuctionCountdown(auction);
     const [activeTab, setActiveTab] = useState('comments');
     const { pagination } = useComments(id);
+    const { isWatchlisted, toggleWatchlist, watchlistCount } = useWatchlist(id);
 
     // Fetch auction data
+    // useEffect(() => {
+    //     const fetchAuction = async () => {
+    //         try {
+    //             setLoading(true);
+    //             const { data } = await axiosInstance.get(`/api/v1/auctions/${id}`);
+    //             if (data.success) {
+    //                 setAuction(data.data.auction);
+    //             }
+    //         } catch (error) {
+    //             toast.error(error?.response?.data?.message || 'Failed to fetch auction');
+    //             console.error('Fetch auction error:', error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchAuction();
+    // }, [id, countdown?.status]);
+
     useEffect(() => {
         const fetchAuction = async () => {
             try {
@@ -40,8 +61,18 @@ function SingleAuction() {
             }
         };
 
-        fetchAuction();
-    }, [id]);
+        // Only refetch if countdown status changes to 'ended' and auction might need update
+        if (countdown?.status === 'ended') {
+            // Add a small delay to ensure backend has processed the auction end
+            const timer = setTimeout(() => {
+                fetchAuction();
+            }, 2000); // 2 seconds delay
+
+            return () => clearTimeout(timer);
+        } else {
+            fetchAuction();
+        }
+    }, [id, countdown?.status]);
 
     const scrollToBidSection = () => {
         bidSectionRef.current?.scrollIntoView({
@@ -65,16 +96,47 @@ function SingleAuction() {
         }
     };
 
-    // Handle bid submission
     const handleBid = async (e) => {
         e.preventDefault();
-        if (!bidAmount || parseFloat(bidAmount) <= auction.currentPrice) {
+
+        if (!bidAmount || (parseFloat(bidAmount) <= auction.currentPrice && auction.bidCount > 0)) {
             toast.error(`Bid must be higher than current price: $${auction.currentPrice}`);
             return;
         }
 
         try {
             setBidding(true);
+
+            // Check if user needs to make payment intent (first bid by this user)
+            const { data: userBidPayments } = await axiosInstance.get(`/api/v1/bid-payments/auction/${id}`);
+            const hasExistingPayment = userBidPayments.data.bidPayments.length > 0;
+
+            if (!hasExistingPayment) {
+                // Get commission amount from backend
+                const { data: commissionData } = await axiosInstance.get(`/api/v1/admin/commissions`);
+                const commission = commissionData.data.commissions.find(c => c.category === auction.category);
+                const commissionAmount = commission ? commission.commissionAmount : 0;
+
+                if (commissionAmount > 0) {
+                    const userConfirmed = window.confirm(
+                        `A commission fee of $${commissionAmount} is required to place your first bid on this auction. Continue?`
+                    );
+
+                    if (!userConfirmed) {
+                        toast.error('Payment is required to place bid');
+                        setBidding(false);
+                        return;
+                    }
+
+                    // Create payment intent only after user confirms
+                    const { data: paymentData } = await axiosInstance.post('/api/v1/bid-payments/create-intent', {
+                        auctionId: id,
+                        bidAmount: parseFloat(bidAmount)
+                    });
+                }
+            }
+
+            // Place the bid after payment is handled
             const { data } = await axiosInstance.post(`/api/v1/auctions/bid/${id}`, {
                 amount: parseFloat(bidAmount)
             });
@@ -90,6 +152,31 @@ function SingleAuction() {
         } finally {
             setBidding(false);
         }
+    };
+
+    // Payment confirmation handler
+    const handlePaymentConfirmation = async (paymentData) => {
+        // You'll need to create a modal component for this
+        // For now, using a simple confirm
+        const userConfirmed = window.confirm(
+            `A commission fee of $${paymentData.totalAmount} is required to place your first bid on this auction. Continue?`
+        );
+
+        if (userConfirmed) {
+            try {
+                // Confirm the payment with Stripe
+                const { data } = await axiosInstance.post('/api/v1/bid-payments/confirm', {
+                    paymentIntentId: paymentData.paymentIntentId
+                });
+
+                return data.success;
+            } catch (error) {
+                console.error('Payment confirmation error:', error);
+                return false;
+            }
+        }
+
+        return false;
     };
 
     // Handle document download
@@ -112,7 +199,9 @@ function SingleAuction() {
     // const auctionTime = useAuctionCountdown(auction ? new Date(auction.endDate) : null);
     // const auctionTime = "";
     const youtubeVideoId = getYouTubeId(auction?.videoLink);
-    const minBidAmount = auction?.currentPrice + auction?.bidIncrement;
+    // const minBidAmount = auction?.currentPrice + auction?.bidIncrement;
+    // const minBidAmount = auction?.bidCount > 0 ?  auction?.currentPrice + auction?.bidIncrement : auction?.startPrice;
+    const minBidAmount = auction?.bidCount > 0 ? auction?.currentPrice + auction?.bidIncrement : auction?.currentPrice;
 
     if (loading) {
         return (
@@ -144,7 +233,14 @@ function SingleAuction() {
                         Category: {auction.category}
                     </Link>
                     <div className="flex items-center gap-3">
-                        <WatchlistButton auctionId={auction._id} />
+                        <p onClick={toggleWatchlist}
+                            className={`flex items-center gap-2 py-1 px-3 border border-gray-200 rounded-full transition-colors ${isWatchlisted
+                                ? 'bg-gray-100 text-black hover:bg-gray-200'
+                                : 'text-secondary hover:bg-gray-200'
+                                } disabled:opacity-50`}>
+                            <Heart size={18} fill={isWatchlisted ? 'currentColor' : 'none'} />
+                            <span>{watchlistCount || auction?.watchlistCount || 0}</span>
+                        </p>
 
                         <p onClick={() => handleTabClick('comments')}
                             className="flex items-center gap-2 border border-gray-200 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-100">
@@ -172,7 +268,7 @@ function SingleAuction() {
 
                 {/* Image section */}
                 {/* <Suspense fallback={<LoadingSpinner />}> */}
-                <ImageLightBox images={auction.photos} />
+                <ImageLightBox images={auction.photos} auctionType={auction?.auctionType} isReserveMet={auction.currentPrice >= auction.reservePrice} />
                 {/* </Suspense> */}
 
                 <hr className="my-8" />
@@ -255,7 +351,7 @@ function SingleAuction() {
                     </div>
 
                     {/* Dynamic Specifications Section */}
-            <SpecificationsSection auction={auction} />
+                    <SpecificationsSection auction={auction} />
                 </div>
 
                 <hr className="my-8" />
@@ -319,10 +415,11 @@ function SingleAuction() {
                 {/* Current bid section */}
                 <div className="p-4 flex flex-col gap-3">
                     <div className="flex flex-col gap-2">
-                        <p className="font-light">Current Bid</p>
-                        <p className="flex items-center text-3xl sm:text-4xl font-medium">
-                            <span>$</span>
-                            <span>{auction.currentPrice.toLocaleString()}</span>
+                        <p className="font-light">{auction.bidCount > 0 ? 'Current Bid' : 'Start Bidding At'}</p>
+                        <p className="flex items-center gap-1 text-3xl sm:text-4xl font-medium">
+                            <span>$ </span>
+                            {/* <span> {auction?.bidCount > 0 ? auction.currentPrice.toLocaleString() : auction.startPrice.toLocaleString()}</span> */}
+                            <span> {auction.currentPrice.toLocaleString()}</span>
                         </p>
                     </div>
 
@@ -334,7 +431,7 @@ function SingleAuction() {
 
                     <p className="flex w-full justify-between border-b pb-2">
                         <span className="text-secondary">Starting Bid</span>
-                        <span className="font-medium">${auction.startPrice.toLocaleString()}</span>
+                        <span className="font-medium">$ {auction.startPrice.toLocaleString()}</span>
                     </p>
 
                     <p className="flex w-full justify-between border-b pb-2">
@@ -355,9 +452,9 @@ function SingleAuction() {
                                 value={bidAmount}
                                 onChange={(e) => setBidAmount(e.target.value)}
                                 className="py-3 px-5 w-full rounded-lg focus:outline-2 focus:outline-primary"
-                                placeholder={`Bid $${minBidAmount} or up`}
+                                placeholder={`Bid $${auction.bidCount > 0 ? minBidAmount : auction.startPrice} or up`}
                                 min={minBidAmount}
-                                step={auction.bidIncrement}
+                            // step={auction.bidIncrement}
                             />
                             <button
                                 type="submit"
@@ -365,7 +462,7 @@ function SingleAuction() {
                                 className="flex items-center justify-center gap-2 w-full bg-primary text-white py-3 px-6 cursor-pointer rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
                             >
                                 {bidding ? (
-                                    <LoadingSpinner size="small" />
+                                    <Loader size={16} className="animate-spin-slow" />
                                 ) : (
                                     <>
                                         <Gavel />
@@ -374,7 +471,7 @@ function SingleAuction() {
                                 )}
                             </button>
                         </form>
-                    ) : countdown.status === 'not-started' ? (
+                    ) : countdown.status === 'approved' ? (
                         <div className="text-center py-4 bg-blue-100 rounded-lg border border-blue-200">
                             <p className="font-medium text-blue-700">Auction Not Started</p>
                             <p className="text-sm text-blue-600 mt-1">Bidding will begin when the auction starts</p>
@@ -386,8 +483,32 @@ function SingleAuction() {
                                 <p className="text-sm text-yellow-600 mt-1">Winner: {auction.winner.username}</p>
                             ) : auction.status === 'sold' ? (
                                 <p className="text-sm text-green-600 mt-1">Item Sold</p>
+                            ) : auction.status === 'reserve_not_met' ? (
+                                <p className="text-sm text-yellow-600 mt-1">Reserve Not Met</p>
                             ) : (
                                 <p className="text-sm text-yellow-600 mt-1">No winning bidder</p>
+                            )}
+                        </div>
+                    ) : countdown.status === 'cancelled' ? (
+                        <div className="text-center py-4 bg-yellow-100 rounded-lg border border-yellow-200">
+                            <p className="font-medium text-yellow-700">Auction Cancelled</p>
+                            {auction.winner ? (
+                                <p className="text-sm text-yellow-600 mt-1">Winner: {auction.winner.username}</p>
+                            ) : auction.status === 'sold' ? (
+                                <p className="text-sm text-green-600 mt-1">Item Sold</p>
+                            ) : (
+                                <p className="text-sm text-yellow-600 mt-1">No winning bidder</p>
+                            )}
+                        </div>
+                    ) : countdown.status === 'draft' ? (
+                        <div className="text-center py-4 bg-yellow-100 rounded-lg border border-yellow-200">
+                            <p className="font-medium text-yellow-700">Auction Pending</p>
+                            {auction.winner ? (
+                                <p className="text-sm text-yellow-600 mt-1">Winner: {auction.winner.username}</p>
+                            ) : auction.status === 'sold' ? (
+                                <p className="text-sm text-green-600 mt-1">Item Sold</p>
+                            ) : (
+                                <p className="text-sm text-yellow-600 mt-1">Needs Admin Approval</p>
                             )}
                         </div>
                     ) : (

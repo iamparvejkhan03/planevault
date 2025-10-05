@@ -1,9 +1,10 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { closeMenu, darkLogo, logo, menuIcon } from "../assets";
 import Container from "./Container";
-import { LayoutDashboard, LogIn, Search } from "lucide-react";
+import { ChevronRight, LayoutDashboard, LogIn, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { usePopUp } from "../contexts/PopUpContextProvider";
 
 const navLinks = [
     {
@@ -30,6 +31,7 @@ function Header() {
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { openPopup } = usePopUp();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -54,7 +56,7 @@ function Header() {
                 <nav className="hidden lg:block">
                     <ul className="flex items-center gap-7">
                         <li>
-                            <Search size={24} className={`${isScrolled ? 'text-black' : 'text-white'} cursor-pointer`} />
+                            <Search onClick={() => openPopup('searchForm')} size={24} className={`${isScrolled ? 'text-black' : 'text-white'} cursor-pointer`} />
                         </li>
                         {
                             navLinks.map(link => (
@@ -65,9 +67,9 @@ function Header() {
                                 </li>
                             ))
                         }
-                        {/* <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
+                        <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
                             <button onClick={() => openPopup('category')} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
-                        </li> */}
+                        </li>
                         <li>
                             {
                                 user
@@ -102,7 +104,7 @@ function Header() {
                     </ul>
                 </nav>
                 <div className="lg:hidden z-50 flex items-center gap-5">
-                    <Search className={`${isMenuOpen || isScrolled ? 'text-black' : 'text-white'}`} onClick={() => ``} />
+                    <Search className={`${isMenuOpen || isScrolled ? 'text-black' : 'text-white'}`} onClick={() => openPopup('searchForm')} />
                     {
                         isMenuOpen ? (<img onClick={() => setIsMenuOpen(!isMenuOpen)} src={closeMenu} alt="menu icon" className={`h-7 cursor-pointer invert-25 z-50 ${isScrolled}`} />) : (<img onClick={() => setIsMenuOpen(!isMenuOpen)} src={menuIcon} alt="menu icon" className={`h-5 cursor-pointer ${isScrolled && 'invert'} z-50`} />)
                     }

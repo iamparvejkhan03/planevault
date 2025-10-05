@@ -14,10 +14,48 @@ import {
     Clock,
     MapPin,
     Gavel,
-    Youtube
+    Youtube,
+    Plane,
+    Cog,
+    Trophy
 } from "lucide-react";
 import { RTE, SellerContainer, SellerHeader, SellerSidebar } from '../../components';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import axiosInstance from '../../utils/axiosInstance';
+
+// Category-specific field configurations
+const categoryFields = {
+    'Aircraft': [
+        { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Cessna, Piper, Boeing' },
+        { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 172, PA-28, 737' },
+        { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: 2025 },
+        { name: 'registration', label: 'Registration', type: 'text', required: true, placeholder: 'e.g., N12345' },
+        { name: 'totalHours', label: 'Total Hours', type: 'number', required: true, min: 0 },
+        { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Avgas', 'Jet A', 'Diesel', 'Electric'] },
+        { name: 'seatingCapacity', label: 'Seating Capacity', type: 'number', required: true, min: 1, max: 1000 },
+        { name: 'maxTakeoffWeight', label: 'Max Takeoff Weight (lbs)', type: 'number', required: false, min: 0 },
+        { name: 'engineType', label: 'Engine Type', type: 'select', required: true, options: ['Piston', 'Turboprop', 'Jet', 'Turbofan'] },
+        { name: 'engineCount', label: 'Number of Engines', type: 'number', required: true, min: 1, max: 10 },
+        { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] }
+    ],
+    'Engines & Parts': [
+        { name: 'partType', label: 'Part Type', type: 'select', required: true, options: ['Engine', 'Propeller', 'Avionics', 'Airframe', 'Interior', 'Other'] },
+        { name: 'partNumber', label: 'Part Number', type: 'text', required: true, placeholder: 'Manufacturer part number' },
+        { name: 'manufacturer', label: 'Manufacturer', type: 'text', required: true, placeholder: 'e.g., Lycoming, Garmin, Honeywell' },
+        { name: 'condition', label: 'Condition', type: 'select', required: true, options: ['New', 'Overhauled', 'Used Serviceable', 'As-Removed'] },
+        { name: 'hoursSinceNew', label: 'Hours Since New/Overhaul', type: 'number', required: false, min: 0 },
+        { name: 'serialNumber', label: 'Serial Number', type: 'text', required: false },
+    ],
+    'Memorabilia': [
+        { name: 'itemType', label: 'Item Type', type: 'select', required: true, options: ['Uniform', 'Document', 'Model', 'Photograph', 'Instrument', 'Other'] },
+        { name: 'era', label: 'Historical Era', type: 'select', required: true, options: ['WWI', 'WWII', 'Cold War', 'Modern', 'Vintage'] },
+        { name: 'authenticity', label: 'Authenticity', type: 'select', required: true, options: ['Certified', 'Documented', 'Unknown'] },
+        { name: 'year', label: 'Year', type: 'number', required: false, min: 1800, max: 2025 },
+        { name: 'dimensions', label: 'Dimensions', type: 'text', required: false, placeholder: 'e.g., 24x36 inches' },
+        { name: 'material', label: 'Material', type: 'text', required: false, placeholder: 'e.g., Brass, Wood, Fabric' }
+    ]
+};
 
 const EditAuction = () => {
     const [step, setStep] = useState(1);
@@ -26,8 +64,13 @@ const EditAuction = () => {
     const [existingPhotos, setExistingPhotos] = useState([]);
     const [existingDocuments, setExistingDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [initialSpecifications, setInitialSpecifications] = useState({});
+    const [removedPhotos, setRemovedPhotos] = useState([]);
+    const [removedDocuments, setRemovedDocuments] = useState([]);
 
-    const { auctionId } = useParams(); // Get auction ID from URL params
+    const { auctionId } = useParams();
+    const navigate = useNavigate();
 
     const {
         register,
@@ -48,6 +91,10 @@ const EditAuction = () => {
     const auctionType = watch('auctionType');
     const startDate = watch('startDate');
     const endDate = watch('endDate');
+    const selectedCategory = watch('category');
+
+    // Watch all specification fields
+    const watchAllFields = watch();
 
     const categories = [
         'Aircraft',
@@ -55,57 +102,203 @@ const EditAuction = () => {
         'Memorabilia'
     ];
 
+    const categoryIcons = {
+        'Aircraft': Plane,
+        'Engines & Parts': Cog,
+        'Memorabilia': Trophy
+    };
+
+    // Get category-specific fields
+    const getCategoryFields = () => {
+        return categoryFields[selectedCategory] || [];
+    };
+
+    // Format date for datetime-local input
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+        return localDate.toISOString().slice(0, 16);
+    };
+
+    // Convert Map to object for form handling
+    const mapToObject = (map) => {
+        if (!map) return {};
+        if (map instanceof Map) {
+            const obj = {};
+            map.forEach((value, key) => {
+                obj[key] = value;
+            });
+            return obj;
+        }
+        return map;
+    };
+
     // Fetch auction data on component mount
     useEffect(() => {
         const fetchAuctionData = async () => {
             try {
                 setIsLoading(true);
-                // Replace with your actual API call
-                const response = await fetch(`/api/auctions/${auctionId}`);
-                const auctionData = await response.json();
+                const { data } = await axiosInstance.get(`/api/v1/auctions/${auctionId}`);
 
-                // Pre-fill form with existing data
-                reset({
-                    title: auctionData.title,
-                    category: auctionData.category,
-                    description: auctionData.description,
-                    location: auctionData.location,
-                    video: auctionData.video,
-                    startDate: auctionData.startDate,
-                    endDate: auctionData.endDate,
-                    startPrice: auctionData.startPrice,
-                    bidIncrement: auctionData.bidIncrement,
-                    auctionType: auctionData.auctionType,
-                    reservePrice: auctionData.reservePrice,
-                });
+                if (data.success) {
+                    const auction = data.data.auction;
+                    const specificationsObj = mapToObject(auction.specifications);
+                    setInitialSpecifications(specificationsObj);
 
-                // Set existing media files
-                setExistingPhotos(auctionData.photos || []);
-                setExistingDocuments(auctionData.documents || []);
+                    // Set basic fields
+                    const formData = {
+                        title: auction.title,
+                        category: auction.category,
+                        description: auction.description,
+                        location: auction.location,
+                        video: auction.videoLink,
+                        startDate: formatDateForInput(auction.startDate),
+                        endDate: formatDateForInput(auction.endDate),
+                        startPrice: auction.startPrice,
+                        bidIncrement: auction.bidIncrement,
+                        auctionType: auction.auctionType,
+                        reservePrice: auction.reservePrice,
+                    };
 
+                    // Reset form first
+                    reset(formData);
+
+                    // Then set specifications individually with a small delay to ensure form is ready
+                    setTimeout(() => {
+                        Object.entries(specificationsObj).forEach(([key, value]) => {
+                            setValue(`specifications.${key}`, value, {
+                                shouldValidate: true,
+                                shouldDirty: false,
+                                shouldTouch: false
+                            });
+                        });
+                    }, 100);
+
+                    setExistingPhotos(auction.photos || []);
+                    setExistingDocuments(auction.documents || []);
+
+                    toast.success('Auction data loaded successfully');
+                }
             } catch (error) {
-                console.error('Error fetching auction data:', error);
-                alert('Failed to load auction data');
+                console.error('Error:', error);
+                toast.error('Failed to load auction data');
+                navigate('/seller/auctions/all');
             } finally {
                 setIsLoading(false);
             }
         };
 
-        if (auctionId) {
-            fetchAuctionData();
-        }
-    }, [auctionId, reset]);
+        if (auctionId) fetchAuctionData();
+    }, [auctionId, reset, setValue, navigate]);
+
+    const renderCategoryFields = () => {
+        const fields = getCategoryFields();
+
+        return (
+            <div className="mb-6">
+                <label className="text-sm font-medium text-secondary mb-4 flex items-center">
+                    {(() => {
+                        const IconComponent = categoryIcons[selectedCategory] || FileText;
+                        return <IconComponent size={20} className="mr-2" />;
+                    })()}
+                    {selectedCategory} Specifications *
+                </label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {fields.map((field) => {
+                        const fieldName = `specifications.${field.name}`;
+                        const fieldValue = watch(fieldName) || ''; // Get current value
+
+                        return (
+                            <div key={field.name} className="space-y-2">
+                                <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
+                                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                                </label>
+
+                                {field.type === 'select' ? (
+                                    <select
+                                        id={field.name}
+                                        value={fieldValue}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            setValue(fieldName, newValue, {
+                                                shouldValidate: true,
+                                                shouldDirty: true
+                                            });
+                                        }}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    >
+                                        <option value="">Select {field.label}</option>
+                                        {field.options.map(option => (
+                                            <option key={option} value={option}>{option}</option>
+                                        ))}
+                                    </select>
+                                ) : field.type === 'textarea' ? (
+                                    <textarea
+                                        id={field.name}
+                                        value={fieldValue}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            console.log(`Changing ${fieldName} from ${fieldValue} to ${newValue}`);
+                                            setValue(fieldName, newValue, {
+                                                shouldValidate: true,
+                                                shouldDirty: true
+                                            });
+                                        }}
+                                        rows={3}
+                                        placeholder={field.placeholder}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    />
+                                ) : (
+                                    <input
+                                        id={field.name}
+                                        type={field.type}
+                                        value={fieldValue}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            console.log(`Changing ${fieldName} from ${fieldValue} to ${newValue}`);
+                                            setValue(fieldName, newValue, {
+                                                shouldValidate: true,
+                                                shouldDirty: true
+                                            });
+                                        }}
+                                        placeholder={field.placeholder}
+                                        min={field.min}
+                                        max={field.max}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    />
+                                )}
+
+                                {errors.specifications?.[field.name] && (
+                                    <p className="text-red-500 text-sm">{errors.specifications[field.name].message}</p>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
 
     const nextStep = async () => {
-        // Validate current step before proceeding
         let isValid = true;
 
         if (step === 1) {
-            // Trigger validation for all fields
             const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
+
+            // Add category-specific fields to validation
+            if (selectedCategory) {
+                const categoryFields = getCategoryFields();
+                categoryFields.forEach(field => {
+                    if (field.required) {
+                        fieldsToValidate.push(`specifications.${field.name}`);
+                    }
+                });
+            }
+
             const overallValidationPassed = await trigger(fieldsToValidate);
 
-            // If overall validation failed, don't proceed
             if (!overallValidationPassed) {
                 isValid = false;
             }
@@ -123,7 +316,6 @@ const EditAuction = () => {
         }
 
         if (step === 2) {
-            // Check pricing fields
             const fieldsToValidate = ['startPrice', 'bidIncrement', 'auctionType'];
             if (watch('auctionType') === 'reserve') {
                 fieldsToValidate.push('reservePrice');
@@ -131,7 +323,6 @@ const EditAuction = () => {
 
             const overallValidationPassed = await trigger(fieldsToValidate);
 
-            // If overall validation failed, don't proceed
             if (!overallValidationPassed) {
                 isValid = false;
             }
@@ -161,6 +352,8 @@ const EditAuction = () => {
 
     const removePhoto = (index, isExisting = false) => {
         if (isExisting) {
+            const removedPhoto = existingPhotos[index];
+            setRemovedPhotos(prev => [...prev, removedPhoto.publicId || removedPhoto._id]);
             setExistingPhotos(existingPhotos.filter((_, i) => i !== index));
         } else {
             setUploadedPhotos(uploadedPhotos.filter((_, i) => i !== index));
@@ -176,40 +369,90 @@ const EditAuction = () => {
 
     const removeDocument = (index, isExisting = false) => {
         if (isExisting) {
+            const removedDoc = existingDocuments[index];
+            setRemovedDocuments(prev => [...prev, removedDoc.publicId || removedDoc._id]);
             setExistingDocuments(existingDocuments.filter((_, i) => i !== index));
         } else {
             setUploadedDocuments(uploadedDocuments.filter((_, i) => i !== index));
         }
     };
 
-    const onSubmit = async (data) => {
+    const updateAuctionHandler = async (formData) => {
         try {
-            const formData = {
-                ...data,
-                photos: [...existingPhotos, ...uploadedPhotos],
-                documents: [...existingDocuments, ...uploadedDocuments],
-                id: auctionId // Include the auction ID for update
-            };
+            setIsSubmitting(true);
 
-            // Replace with your actual API call to update auction
-            const response = await fetch(`/api/auctions/${auctionId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
+            // Create FormData for file uploads
+            const formDataToSend = new FormData();
+
+            // Append all text fields
+            formDataToSend.append('title', formData.title);
+            formDataToSend.append('category', formData.category);
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('location', formData.location || '');
+            formDataToSend.append('videoLink', formData.video || '');
+            formDataToSend.append('startPrice', formData.startPrice);
+            formDataToSend.append('bidIncrement', formData.bidIncrement);
+            formDataToSend.append('auctionType', formData.auctionType);
+            // formDataToSend.append('startDate', formData.startDate);
+            // formDataToSend.append('endDate', formData.endDate);
+            formDataToSend.append('startDate', new Date(formData.startDate).toISOString());
+            formDataToSend.append('endDate', new Date(formData.endDate).toISOString());
+
+            // Get specifications from form data
+            const currentSpecifications = formData.specifications || {};
+
+            // Send the current specifications
+            if (currentSpecifications && Object.keys(currentSpecifications).length > 0) {
+                formDataToSend.append('specifications', JSON.stringify(currentSpecifications));
+            }
+
+            // Add removed photos and documents
+            if (removedPhotos.length > 0) {
+                formDataToSend.append('removedPhotos', JSON.stringify(removedPhotos));
+            }
+
+            if (removedDocuments.length > 0) {
+                formDataToSend.append('removedDocuments', JSON.stringify(removedDocuments));
+            }
+
+            // Add reserve price if applicable
+            if (formData.auctionType === 'reserve' && formData.reservePrice) {
+                formDataToSend.append('reservePrice', formData.reservePrice);
+            }
+
+            // Append new photos
+            uploadedPhotos.forEach((photo) => {
+                formDataToSend.append('photos', photo);
             });
 
-            if (response.ok) {
-                console.log('Auction updated successfully:', formData);
-                alert('Auction updated successfully!');
-                // Redirect to auction list or detail page
+            // Append new documents
+            uploadedDocuments.forEach((doc) => {
+                formDataToSend.append('documents', doc);
+            });
+
+            // Make the API call to update auction with file uploads
+            const { data } = await axiosInstance.put(
+                `/api/v1/auctions/update/${auctionId}`,
+                formDataToSend,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                }
+            );
+
+            if (data.success) {
+                toast.success('Auction updated successfully!');
+                navigate('/seller/auctions/all');
             } else {
-                throw new Error('Failed to update auction');
+                throw new Error(data.message || 'Failed to update auction');
             }
         } catch (error) {
             console.error('Error updating auction:', error);
-            alert('Failed to update auction');
+            const errorMessage = error?.response?.data?.message || 'Failed to update auction';
+            toast.error(errorMessage);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -263,8 +506,8 @@ const EditAuction = () => {
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                            {/* Step 1: Auction Information - Same as CreateAuction but with pre-filled values */}
+                        <form onSubmit={handleSubmit(updateAuctionHandler)} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                            {/* Step 1: Auction Information */}
                             {step === 1 && (
                                 <div>
                                     <h2 className="text-xl font-semibold mb-6 flex items-center">
@@ -272,7 +515,6 @@ const EditAuction = () => {
                                         Auction Details
                                     </h2>
 
-                                    {/* Form fields are the same as CreateAuction but will be pre-filled */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div>
                                             <label htmlFor="title" className="block text-sm font-medium text-secondary mb-1">Item Name *</label>
@@ -302,6 +544,9 @@ const EditAuction = () => {
                                         </div>
                                     </div>
 
+                                    {/* Category-specific fields */}
+                                    {selectedCategory && renderCategoryFields()}
+
                                     <div className="mb-6">
                                         <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1">Description *</label>
                                         <RTE
@@ -309,6 +554,9 @@ const EditAuction = () => {
                                             control={control}
                                             label="Description:"
                                             defaultValue={getValues('description') || ''}
+                                            onBlur={(value) => {
+                                                setValue('description', value, { shouldValidate: true });
+                                            }}
                                         />
                                         {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
                                     </div>
@@ -415,7 +663,7 @@ const EditAuction = () => {
                                                     {existingPhotos.map((photo, index) => (
                                                         <div key={`existing-${index}`} className="relative">
                                                             <img
-                                                                src={photo.url || URL.createObjectURL(photo)}
+                                                                src={photo.url}
                                                                 alt={`Existing ${index + 1}`}
                                                                 className="w-full h-32 object-cover rounded-lg"
                                                             />
@@ -482,7 +730,7 @@ const EditAuction = () => {
                                                 <div className="space-y-2">
                                                     {existingDocuments.map((doc, index) => (
                                                         <div key={`existing-doc-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                                                            <span className="text-sm truncate">{doc.name || doc.filename}</span>
+                                                            <span className="text-sm truncate">{doc.filename || doc.originalName}</span>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => removeDocument(index, true)}
@@ -653,6 +901,23 @@ const EditAuction = () => {
                                                     </div>
                                                 </div>
 
+                                                {selectedCategory && (
+                                                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                                                        <h4 className="font-medium mb-3">{selectedCategory} Specifications</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {getCategoryFields().map((field) => {
+                                                                const value = watch(`specifications.${field.name}`);
+                                                                return value ? (
+                                                                    <div key={field.name}>
+                                                                        <p className="text-xs text-secondary">{field.label}</p>
+                                                                        <p className="font-medium">{value}</p>
+                                                                    </div>
+                                                                ) : null;
+                                                            }).filter(Boolean)}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Pricing */}
                                                 <div className="bg-white p-4 rounded-lg shadow-sm">
                                                     <h4 className="font-medium mb-3">Pricing</h4>
@@ -707,7 +972,13 @@ const EditAuction = () => {
                                                     <h4 className="font-medium mb-3">Media & Documents</h4>
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between items-center">
-                                                            <p className="text-xs text-secondary">Photos</p>
+                                                            <p className="text-xs text-secondary">Existing Photos</p>
+                                                            <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                                {existingPhotos.length} photos
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <p className="text-xs text-secondary">New Photos</p>
                                                             <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
                                                                 {uploadedPhotos.length} uploaded
                                                             </span>
@@ -715,7 +986,7 @@ const EditAuction = () => {
                                                         <div className="flex justify-between items-center">
                                                             <p className="text-xs text-secondary">Documents</p>
                                                             <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
-                                                                {uploadedDocuments.length} uploaded
+                                                                {existingDocuments.length + uploadedDocuments.length} total
                                                             </span>
                                                         </div>
                                                         {watch('video') && (
@@ -791,10 +1062,11 @@ const EditAuction = () => {
                                 ) : (
                                     <button
                                         type="submit"
-                                        className="flex items-center px-6 py-2 bg-black text-white rounded-lg hover:bg-black/90 transition-colors"
+                                        disabled={isSubmitting}
+                                        className="flex items-center px-6 py-2 bg-black text-white rounded-lg hover:bg-black/90 transition-colors disabled:opacity-50"
                                     >
                                         <Gavel size={18} className="mr-2" />
-                                        Update Auction
+                                        {isSubmitting ? 'Updating Auction...' : 'Update Auction'}
                                     </button>
                                 )}
                             </div>

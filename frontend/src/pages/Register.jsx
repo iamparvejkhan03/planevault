@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Gavel, Store, CreditCard, MapPin, Phone, Building, ChevronDown } from 'lucide-react';
@@ -7,32 +7,34 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useStripe, useElements, CardElement, Elements } from '@stripe/react-stripe-js';
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useAuth } from '../contexts/AuthContext';
+import useCountryStates from '../hooks/useCountryStates';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const countries = [
-    { name: 'United States', code: 'US' },
-    { name: 'India', code: 'IN' },
-    { name: 'United Kingdom', code: 'GB' },
-    { name: 'Canada', code: 'CA' },
-    { name: 'Australia', code: 'AU' },
-    { name: 'Germany', code: 'DE' },
-    { name: 'France', code: 'FR' },
-    { name: 'Japan', code: 'JP' },
-    { name: 'China', code: 'CN' },
-    { name: 'Brazil', code: 'BR' },
-    { name: 'Mexico', code: 'MX' },
-    { name: 'Italy', code: 'IT' },
-    { name: 'Spain', code: 'ES' },
-    { name: 'South Korea', code: 'KR' },
-    { name: 'Russia', code: 'RU' },
-    { name: 'Netherlands', code: 'NL' },
-    { name: 'Switzerland', code: 'CH' },
-    { name: 'Sweden', code: 'SE' },
-    { name: 'Norway', code: 'NO' },
-    { name: 'Denmark', code: 'DK' },
-];
+// const countries = [
+//     { name: 'United States', code: 'US' },
+//     { name: 'India', code: 'IN' },
+//     { name: 'United Kingdom', code: 'GB' },
+//     { name: 'Canada', code: 'CA' },
+//     { name: 'Australia', code: 'AU' },
+//     { name: 'Germany', code: 'DE' },
+//     { name: 'France', code: 'FR' },
+//     { name: 'Japan', code: 'JP' },
+//     { name: 'China', code: 'CN' },
+//     { name: 'Brazil', code: 'BR' },
+//     { name: 'Mexico', code: 'MX' },
+//     { name: 'Italy', code: 'IT' },
+//     { name: 'Spain', code: 'ES' },
+//     { name: 'South Korea', code: 'KR' },
+//     { name: 'Russia', code: 'RU' },
+//     { name: 'Netherlands', code: 'NL' },
+//     { name: 'Switzerland', code: 'CH' },
+//     { name: 'Sweden', code: 'SE' },
+//     { name: 'Norway', code: 'NO' },
+//     { name: 'Denmark', code: 'DK' },
+// ];
 
 
 // CardSection component that uses Stripe hooks
@@ -90,6 +92,18 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [userType, setUserType] = useState('');
     const navigate = useNavigate();
+    const { setUser, setLoading } = useAuth();
+    const countriesAPI = useCountryStates();
+    const [countries, setCountries] = useState([]);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            setCountries(await countriesAPI())
+        }
+        fetchCountries()
+    }, [])
+
+    console.log(countries);
 
     // Stripe hooks - these must be used at the top level of the component
     const stripe = useStripe();
@@ -188,12 +202,10 @@ const Register = () => {
                 localStorage.setItem('accessToken', accessToken);
                 localStorage.setItem('refreshToken', refreshToken);
                 localStorage.setItem('user', JSON.stringify(data.data.user));
-                // dispatch(updateUser({ ...data.data.user, accessToken }));
-                // dispatch(toggleIsUserLoggedIn(true));
-                // dispatch(toggleShowUserAuthForm(false));
 
-                // Redirect based on user type
-                const redirectPath = registrationData.userType === 'seller'
+                setUser(data.data.user);
+
+                const redirectPath = data.data.user.userType === 'seller'
                     ? '/seller/dashboard'
                     : '/bidder/dashboard';
 

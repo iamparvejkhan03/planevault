@@ -1,12 +1,15 @@
 import User from '../models/user.model.js';
 import { StripeService } from '../services/stripeService.js';
 import jwt from "jsonwebtoken";
+import { newUserRegistrationEmail, resetPasswordEmail, welcomeEmail } from '../utils/nodemailer.js';
+import crypto from "crypto";
 
 // Helper function to generate tokens and set cookies
-const generateTokensAndRespond = async (user, res, message) => {
+const generateTokensAndRespond = async (user, req, res, message) => {
     try {
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
+        const resetToken = user.generateResetPasswordToken();
 
         // Save refresh token to user document
         user.refreshToken = refreshToken;
@@ -14,6 +17,8 @@ const generateTokensAndRespond = async (user, res, message) => {
 
         // Remove sensitive data from user object
         const safeUser = user.toSafeObject();
+
+        // await loginUser(req, res);
 
         // Set cookies and send response
         res.status(201)
@@ -149,7 +154,16 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        await generateTokensAndRespond(user, res, 'Registration successful');
+        // await generateTokensAndRespond(user, res, 'Registration successful');
+        await generateTokensAndRespond(user, req, res, 'Registration successful');
+
+        //send registration email
+        await welcomeEmail(user);
+
+        const adminUsers = await User.find({ userType: 'admin' });
+        for (const admin of adminUsers) {
+            await newUserRegistrationEmail(admin.email, user);
+        }
 
     } catch (error) {
         console.error('Registration error:', error);
@@ -198,7 +212,8 @@ export const loginUser = async (req, res) => {
             });
         }
 
-        await generateTokensAndRespond(user, res, 'Login successful');
+        // await generateTokensAndRespond(user, res, 'Login successful');
+        await generateTokensAndRespond(user, req, res, 'Login successful');
 
     } catch (error) {
         console.error('Login error:', error);
@@ -276,14 +291,14 @@ export const refreshAccessToken = async (req, res) => {
 
     } catch (error) {
         console.error('Token refresh error:', error);
-        
+
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid refresh token'
             });
         }
-        
+
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({
                 success: false,
@@ -297,3 +312,64 @@ export const refreshAccessToken = async (req, res) => {
         });
     }
 };
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(200).json({ success: true, message: 'If an account with that email exists, a reset link has been sent.' });
+        }
+
+        const resetToken = await user.generateResetPasswordToken();
+        await user.save({ validateBeforeSave: false });
+
+        const url = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+        const emailSent = await resetPasswordEmail(user.email, url);
+
+        if (!emailSent) {
+            user.resetPasswordToken = null;
+            user.resetPasswordTokenExpiry = null;
+            await user.save({ validateBeforeSave: false });
+            return res.status(500).json({ success: false, message: 'Could not send email' });
+        }
+
+        return res.status(200).json({ success: true, message: 'If an account with that email exists, a reset link has been sent.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        const { newPassword } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ success: false, message: 'Token is required' });
+        }
+
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        const user = await User.findOne({ resetPasswordToken: hashedToken, resetPasswordTokenExpiry: { $gt: Date.now() } })
+
+        if (!user) {
+            return res.status(200).json({ success: true, message: 'Token is invalid or has expired' });
+        }
+
+        user.password = newPassword;
+        await user.save({ validateBeforeSave: false });
+
+        return res.status(200).json({ success: true, message: 'Password updated' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Failed to get user' });
+    }
+}

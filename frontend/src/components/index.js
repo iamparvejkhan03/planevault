@@ -41,6 +41,8 @@ import AdminContainer from "./admin/Container";
 import TimerDisplay from "./TimerDisplay";
 import WatchlistButton from "./WatchlistButton";
 import SpecificationsSection from "./SpecificationsSection";
+import SearchFormPopUp from "./SearchFormPopUp";
+import CategoryImagesSection from "./CategoryImagesSection";
 
 export {
     Container,
@@ -86,4 +88,6 @@ export {
     TimerDisplay,
     WatchlistButton,
     SpecificationsSection,
+    SearchFormPopUp,
+    CategoryImagesSection,
 }

@@ -1,6 +1,6 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 
-function StatCard({ title, value, change, icon, trend = "up", currency }) {
+function StatCard({ title, value, change, icon, trend = "up", currency, suffix }) {
     const TrendIcon = trend === "up" ? TrendingUp : TrendingDown;
 
     return (
@@ -11,6 +11,7 @@ function StatCard({ title, value, change, icon, trend = "up", currency }) {
                     <div className="flex items-end">
                         {currency && <span className="text-lg font-semibold mr-1">{currency}</span>}
                         <h3 className="text-2xl font-bold text-gray-800">{value}</h3>
+                        <h3 className="text-2xl font-bold text-gray-800">{suffix}</h3>
                     </div>
                 </div>
                 <div className="p-3 rounded-lg bg-gray-200">

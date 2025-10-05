@@ -9,6 +9,11 @@ import auctionRouter from "./routes/auction.route.js";
 import agendaService from './services/agendaService.js';
 import watchlistRouter from "./routes/watchlist.route.js";
 import commentRouter from "./routes/comment.route.js";
+import bidRouter from "./routes/bid.route.js";
+import AdminRouter from "./routes/admin.route.js";
+import commissionRouter from "./routes/commission.routes.js";
+import bidPaymentRouter from "./routes/bidPayment.route.js";
+import contactQueryRouter from "./routes/contactQuery.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +56,11 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/auctions', auctionRouter);
 app.use('/api/v1/watchlist', watchlistRouter);
 app.use('/api/v1/comments', commentRouter);
+app.use('/api/v1/bids', bidRouter);
+app.use('/api/v1/admin', AdminRouter);
+app.use('/api/v1/admin/commissions', commissionRouter);
+app.use('/api/v1/bid-payments', bidPaymentRouter);
+app.use('/api/v1/contact', contactQueryRouter);
 
 // 404 handler - SIMPLIFIED VERSION
 app.use((req, res, next) => {

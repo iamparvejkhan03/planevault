@@ -1,155 +1,70 @@
-import { useState } from "react";
-import { BidderContainer, BidderHeader, BidderSidebar, AuctionCard } from "../../components";
-import { Search, Filter, SortAsc, Gavel, Award, Clock, DollarSign, TrendingUp, TrendingDown, Eye, MapPin, Star, Calendar, AlertCircle, CheckCircle, XCircle, Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import { BidderContainer, BidderHeader, BidderSidebar, LoadingSpinner } from "../../components";
+import {
+    Search,
+    Filter,
+    Gavel,
+    Award,
+    Clock,
+    DollarSign,
+    TrendingUp,
+    TrendingDown,
+    Eye,
+    Calendar,
+    CheckCircle,
+    XCircle,
+    Zap
+} from "lucide-react";
 import { about } from "../../assets";
-
-// Mock data for bidder's bidding activity
-const myBidsData = [
-    {
-        id: "AV267400",
-        auctionId: "AU267400",
-        title: "Vintage Boeing 747 Control Panel",
-        description: "Fully restored cockpit control panel from a 1978 Boeing 747-200",
-        category: "Aviation Memorabilia",
-        myBidAmount: 17500,
-        currentBid: 18500,
-        startingBid: 5000,
-        status: "outbid", // outbid, winning, lost, won
-        bidTime: "2023-12-10T14:30:00",
-        endTime: "2023-12-19T15:30:00",
-        bids: 24,
-        watchers: 42,
-        image: about,
-        location: "Seattle, WA",
-        sellerRating: 4.8,
-        timeLeft: "3d 2h",
-        bidIncrement: 500,
-        nextMinBid: 19000
-    },
-    {
-        id: "AV351289",
-        auctionId: "AU351289",
-        title: "Pratt & Whitney JT9D Engine",
-        description: "Used Pratt & Whitney JT9D-7R4 turbofan engine, 50,000 hours total time",
-        category: "Engines & Parts",
-        myBidAmount: 42750,
-        currentBid: 42750,
-        startingBid: 25000,
-        status: "winning",
-        bidTime: "2023-12-15T13:55:00",
-        endTime: "2023-12-20T14:00:00",
-        bids: 12,
-        watchers: 18,
-        image: about,
-        location: "Miami, FL",
-        sellerRating: 4.5,
-        timeLeft: "4d 6h",
-        bidIncrement: 1000,
-        nextMinBid: 43750
-    },
-    {
-        id: "AV498712",
-        auctionId: "AU498712",
-        title: "Rare WWII P-51 Mustang Propeller",
-        description: "Authentic Hamilton Standard propeller from a North American P-51 Mustang",
-        category: "Aviation Memorabilia",
-        myBidAmount: 22000,
-        currentBid: 22500,
-        startingBid: 8000,
-        status: "outbid",
-        bidTime: "2023-12-05T16:38:00",
-        endTime: "2023-12-10T16:45:00",
-        bids: 31,
-        watchers: 56,
-        image: about,
-        location: "New York, NY",
-        sellerRating: 4.9,
-        timeLeft: "12h 45m",
-        bidIncrement: 250,
-        nextMinBid: 22750
-    },
-    {
-        id: "AV672341",
-        auctionId: "AU672341",
-        title: "Vintage Pilot Uniform Collection",
-        description: "Complete set of 1960s pilot uniform with hat, jacket, and accessories",
-        category: "Aviation Memorabilia",
-        myBidAmount: 3000,
-        currentBid: 3200,
-        startingBid: 1500,
-        status: "outbid",
-        bidTime: "2023-12-12T11:20:00",
-        endTime: "2023-12-15T12:00:00",
-        bids: 15,
-        watchers: 23,
-        image: about,
-        location: "Los Angeles, CA",
-        sellerRating: 4.7,
-        timeLeft: "2d 4h",
-        bidIncrement: 100,
-        nextMinBid: 3300
-    },
-    {
-        id: "AV783452",
-        auctionId: "AU783452",
-        title: "Aircraft Navigation System",
-        description: "Vintage aircraft navigation system from 1970s commercial airliner",
-        category: "Aircraft Parts",
-        myBidAmount: 8500,
-        currentBid: 8900,
-        startingBid: 5000,
-        status: "outbid",
-        bidTime: "2023-12-14T15:45:00",
-        endTime: "2023-12-17T20:45:00",
-        bids: 8,
-        watchers: 14,
-        image: about,
-        location: "Chicago, IL",
-        sellerRating: 4.2,
-        timeLeft: "5d 2h",
-        bidIncrement: 200,
-        nextMinBid: 9100
-    },
-    {
-        id: "AV894563",
-        auctionId: "AU894563",
-        title: "Rare Aviation Books Collection",
-        description: "Collection of 15 rare aviation books from 1940s-1960s, first editions",
-        category: "Aviation Memorabilia",
-        myBidAmount: 1800,
-        currentBid: 1850,
-        startingBid: 800,
-        status: "outbid",
-        bidTime: "2023-12-13T10:15:00",
-        endTime: "2023-12-22T09:30:00",
-        bids: 9,
-        watchers: 32,
-        image: about,
-        location: "Dallas, TX",
-        sellerRating: 4.6,
-        timeLeft: "8d 3h",
-        bidIncrement: 50,
-        nextMinBid: 1900
-    }
-];
+import axiosInstance from "../../utils/axiosInstance";
+import { Link } from "react-router-dom";
+import { useDebounce } from "../../hooks/useDebounce"; // Create this hook as shown earlier
 
 function MyBids() {
-    const [bids, setBids] = useState(myBidsData);
+    const [bids, setBids] = useState([]);
+    const [allBids, setAllBids] = useState([]);
     const [filter, setFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
     const [sortBy, setSortBy] = useState("recent");
-    const [viewMode, setViewMode] = useState("detailed"); // detailed or compact
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [statistics, setStatistics] = useState({
+        totalBids: 0,
+        totalActiveBids: 0,
+        totalWinning: 0,
+        totalWonAmount: 0,
+        successRate: 0,
+        avgBidAmount: 0
+    });
 
-    const filteredBids = bids
-        .filter(bid => {
-            const matchesStatus = filter === "all" || bid.status === filter;
-            const matchesSearch = searchTerm === "" || 
-                bid.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                bid.description.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesStatus && matchesSearch;
-        })
-        .sort((a, b) => {
-            switch(sortBy) {
+    // Fetch all bids on component mount
+    useEffect(() => {
+        fetchMyBids();
+    }, []);
+
+    // Apply client-side filtering when filters change
+    useEffect(() => {
+        if (allBids.length === 0) return;
+
+        let filtered = [...allBids];
+
+        // Apply status filter
+        if (filter !== "all") {
+            filtered = filtered.filter(bid => bid.status === filter);
+        }
+
+        // Apply search filter
+        if (debouncedSearchTerm) {
+            filtered = filtered.filter(bid =>
+                bid.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                bid.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+            );
+        }
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+            switch (sortBy) {
                 case "recent":
                     return new Date(b.bidTime) - new Date(a.bidTime);
                 case "ending_soon":
@@ -163,33 +78,58 @@ function MyBids() {
             }
         });
 
+        setBids(filtered);
+    }, [filter, debouncedSearchTerm, sortBy, allBids]);
+
+    const fetchMyBids = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const { data } = await axiosInstance.get("/api/v1/bids/my-bids");
+
+            if (data.success) {
+                setAllBids(data.data.bids);
+                setBids(data.data.bids);
+                setStatistics(data.data.statistics);
+            } else {
+                setError("Failed to fetch your bids");
+            }
+        } catch (err) {
+            setError("Error loading your bids");
+            console.error("Fetch my bids error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const getStatusConfig = (status) => {
         const config = {
-            winning: { 
-                icon: <Award className="text-green-600" size={16} />, 
-                text: "Winning Bid", 
-                bgColor: "bg-green-50", 
+            winning: {
+                icon: <Award className="text-green-600" size={16} />,
+                text: "Winning Bid",
+                bgColor: "bg-green-50",
                 textColor: "text-green-700",
                 borderColor: "border-green-200"
             },
-            outbid: { 
-                icon: <TrendingDown className="text-red-600" size={16} />, 
-                text: "Outbid", 
-                bgColor: "bg-red-50", 
+            outbid: {
+                icon: <TrendingDown className="text-red-600" size={16} />,
+                text: "Outbid",
+                bgColor: "bg-red-50",
                 textColor: "text-red-700",
                 borderColor: "border-red-200"
             },
-            won: { 
-                icon: <CheckCircle className="text-blue-600" size={16} />, 
-                text: "Auction Won", 
-                bgColor: "bg-blue-50", 
+            won: {
+                icon: <CheckCircle className="text-blue-600" size={16} />,
+                text: "Auction Won",
+                bgColor: "bg-blue-50",
                 textColor: "text-blue-700",
                 borderColor: "border-blue-200"
             },
-            lost: { 
-                icon: <XCircle className="text-gray-600" size={16} />, 
-                text: "Auction Lost", 
-                bgColor: "bg-gray-50", 
+            lost: {
+                icon: <XCircle className="text-gray-600" size={16} />,
+                text: "Auction Lost",
+                bgColor: "bg-gray-50",
                 textColor: "text-gray-700",
                 borderColor: "border-gray-200"
             }
@@ -198,6 +138,7 @@ function MyBids() {
     };
 
     const getUrgencyColor = (timeLeft) => {
+        if (timeLeft === 'Ended') return 'text-gray-600 bg-gray-50 border-gray-200';
         if (timeLeft.includes('h') && !timeLeft.includes('d')) return 'text-red-600 bg-red-50 border-red-200';
         if (timeLeft.includes('d') && parseInt(timeLeft) <= 1) return 'text-amber-600 bg-amber-50 border-amber-200';
         return 'text-green-600 bg-green-50 border-green-200';
@@ -221,17 +162,52 @@ function MyBids() {
         });
     };
 
-    const totalActiveBids = bids.filter(bid => bid.status === 'winning' || bid.status === 'outbid').length;
-    const totalWinning = bids.filter(bid => bid.status === 'winning').length;
-    const totalAmountBid = bids.reduce((sum, bid) => sum + bid.myBidAmount, 0);
+    if (loading) {
+        return (
+            <section className="flex min-h-screen">
+                <BidderSidebar />
+                <div className="w-full relative">
+                    <BidderHeader />
+                    <BidderContainer>
+                        <div className="flex justify-center items-center min-h-96">
+                            {/* <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div> */}
+                            <LoadingSpinner />
+                        </div>
+                    </BidderContainer>
+                </div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="flex min-h-screen">
+                <BidderSidebar />
+                <div className="w-full relative">
+                    <BidderHeader />
+                    <BidderContainer>
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                            <p className="text-red-600">{error}</p>
+                            <button
+                                onClick={fetchMyBids}
+                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </BidderContainer>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="flex min-h-screen">
             <BidderSidebar />
-            
+
             <div className="w-full relative">
                 <BidderHeader />
-                
+
                 <BidderContainer>
                     {/* Header Section */}
                     <div className="max-w-full pt-16 pb-7 md:pt-0">
@@ -242,19 +218,19 @@ function MyBids() {
                             </div>
                             <div className="mt-4 md:mt-0">
                                 <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    {filteredBids.length} bids found
+                                    {bids.length} participated auctions
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Stats Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {/* Stats Overview - Add Won Auctions card */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-blue-100 text-sm">Active Bids</p>
-                                    <p className="text-2xl font-bold mt-1">{totalActiveBids}</p>
+                                    <p className="text-2xl font-bold mt-1">{statistics.totalActiveBids}</p>
                                     <p className="text-blue-200 text-xs mt-1">Currently participating</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-lg">
@@ -262,12 +238,12 @@ function MyBids() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-green-100 text-sm">Winning Bids</p>
-                                    <p className="text-2xl font-bold mt-1">{totalWinning}</p>
+                                    <p className="text-2xl font-bold mt-1">{statistics.totalWinning}</p>
                                     <p className="text-green-200 text-xs mt-1">Currently leading</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-lg">
@@ -275,12 +251,25 @@ function MyBids() {
                                 </div>
                             </div>
                         </div>
-                        
+
+                        <div className="bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-xl p-6 shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-amber-100 text-sm">Won Auctions</p>
+                                    <p className="text-2xl font-bold mt-1">{statistics.totalWon}</p>
+                                    <p className="text-amber-200 text-xs mt-1">Successful bids</p>
+                                </div>
+                                <div className="p-3 bg-white/20 rounded-lg">
+                                    <CheckCircle size={24} />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-purple-100 text-sm">Total Bid Amount</p>
-                                    <p className="text-2xl font-bold mt-1">{formatCurrency(totalAmountBid)}</p>
+                                    <p className="text-2xl font-bold mt-1">{formatCurrency(statistics.totalWonAmount)}</p>
                                     <p className="text-purple-200 text-xs mt-1">Across all auctions</p>
                                 </div>
                                 <div className="p-3 bg-white/20 rounded-lg">
@@ -305,11 +294,11 @@ function MyBids() {
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <div className="flex items-center gap-2">
                                     <Filter size={18} className="text-gray-500" />
-                                    <select 
+                                    <select
                                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
@@ -320,62 +309,54 @@ function MyBids() {
                                         <option value="auction_value">Auction Value</option>
                                     </select>
                                 </div>
-
-                                <div className="flex border border-gray-300 rounded-lg overflow-hidden">
-                                    <button 
-                                        onClick={() => setViewMode("detailed")}
-                                        className={`p-2 ${viewMode === "detailed" ? "bg-blue-100 text-blue-600" : "text-gray-600"}`}
-                                    >
-                                        Detailed
-                                    </button>
-                                    <button 
-                                        onClick={() => setViewMode("compact")}
-                                        className={`p-2 ${viewMode === "compact" ? "bg-blue-100 text-blue-600" : "text-gray-600"}`}
-                                    >
-                                        Compact
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
-                        {/* Status Filters */}
+                        {/* Status Filters - Add Won filter */}
                         <div className="flex flex-wrap gap-3">
-                            <button 
-                                onClick={() => setFilter("all")} 
+                            <button
+                                onClick={() => setFilter("all")}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filter === "all" ? "bg-blue-600 text-white shadow-lg" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             >
                                 All Bids
                             </button>
-                            <button 
-                                onClick={() => setFilter("winning")} 
+                            <button
+                                onClick={() => setFilter("winning")}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filter === "winning" ? "bg-green-100 text-green-800 border border-green-200 shadow-lg" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             >
                                 <Award size={14} className="inline mr-1" />
-                                Winning ({totalWinning})
+                                Winning ({statistics.totalWinning})
                             </button>
-                            <button 
-                                onClick={() => setFilter("outbid")} 
+                            <button
+                                onClick={() => setFilter("outbid")}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filter === "outbid" ? "bg-red-100 text-red-800 border border-red-200 shadow-lg" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                             >
                                 <TrendingDown size={14} className="inline mr-1" />
                                 Outbid
+                            </button>
+                            <button
+                                onClick={() => setFilter("won")}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filter === "won" ? "bg-blue-100 text-blue-800 border border-blue-200 shadow-lg" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                            >
+                                <CheckCircle size={14} className="inline mr-1" />
+                                Won ({statistics.totalWon})
                             </button>
                         </div>
                     </div>
 
                     {/* Bids List */}
                     <div className="space-y-6">
-                        {filteredBids.length > 0 ? (
-                            filteredBids.map((bid) => (
+                        {bids.length > 0 ? (
+                            bids.map((bid) => (
                                 <div key={bid.id} className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-lg ${getStatusConfig(bid.status).borderColor}`}>
                                     <div className="p-6">
                                         <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                                             {/* Auction Image and Basic Info */}
                                             <div className="flex-shrink-0">
                                                 <div className="relative">
-                                                    <img 
-                                                        src={bid.image} 
-                                                        alt={bid.title} 
+                                                    <img
+                                                        src={bid.image}
+                                                        alt={bid.title}
                                                         className="w-48 h-32 object-cover rounded-lg border border-gray-200"
                                                     />
                                                     <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${getUrgencyColor(bid.timeLeft)}`}>
@@ -384,7 +365,7 @@ function MyBids() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Bid Details */}
                                             <div className="flex-1">
                                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -398,10 +379,10 @@ function MyBids() {
                                                                 {getStatusConfig(bid.status).text}
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <h3 className="text-xl font-semibold text-gray-900 mb-2">{bid.title}</h3>
-                                                        <p className="text-gray-600 text-sm mb-4">{bid.description}</p>
-                                                        
+                                                        {/* <p className="text-gray-600 text-sm mb-4">{bid.description}</p> */}
+
                                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                                             <div>
                                                                 <p className="text-gray-500">Your Bid</p>
@@ -412,8 +393,12 @@ function MyBids() {
                                                                 <p className="font-semibold text-lg">{formatCurrency(bid.currentBid)}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-gray-500">Next Min. Bid</p>
-                                                                <p className="font-semibold text-lg text-green-600">{formatCurrency(bid.nextMinBid)}</p>
+                                                                <p className="text-gray-500">
+                                                                    {bid.status === 'won' ? 'Winning Bid' : bid.auctionStatus === 'active' ? 'Next Min. Bid' : 'Final Bid'}
+                                                                </p>
+                                                                <p className="font-semibold text-lg text-green-600">
+                                                                    {bid.status === 'won' ? formatCurrency(bid.currentBid) : formatCurrency(bid.nextMinBid)}
+                                                                </p>
                                                             </div>
                                                             <div>
                                                                 <p className="text-gray-500">Bid Placed</p>
@@ -421,46 +406,66 @@ function MyBids() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    
+
                                                     {/* Action Buttons */}
                                                     <div className="flex flex-col gap-3">
-                                                        {bid.status === "outbid" && (
-                                                            <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                                        {bid.status === "outbid" && bid.auctionStatus === "active" && (
+                                                            <Link
+                                                                to={`/auction/${bid.id}`}
+                                                                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center"
+                                                            >
                                                                 <Zap size={16} />
                                                                 Re-bid Now
-                                                            </button>
+                                                            </Link>
                                                         )}
                                                         {bid.status === "winning" && (
-                                                            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                                            <Link
+                                                                to={`/auction/${bid.id}`}
+                                                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center"
+                                                            >
                                                                 <Award size={16} />
                                                                 Increase Bid
-                                                            </button>
+                                                            </Link>
                                                         )}
-                                                        <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                                        <Link
+                                                            to={`/auction/${bid.id}`}
+                                                            target="_blank"
+                                                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                                                        >
                                                             <Eye size={16} />
                                                             View Auction
-                                                        </button>
-                                                        <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                                                            <Calendar size={16} />
-                                                            Add Reminder
-                                                        </button>
+                                                        </Link>
+                                                        {bid.status === "won" && (
+                                                            <Link
+                                                                to="/bidder/auctions/won"
+                                                                target="_blank"
+                                                                className="flex items-center gap-2 px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors text-center"
+                                                            >
+                                                                <CheckCircle size={16} />
+                                                                View Win
+                                                            </Link>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Progress Bar for Winning/Outbid Status */}
-                                    <div className={`h-1 ${bid.status === "winning" ? "bg-green-500" : "bg-red-500"} w-full`}></div>
+                                    <div className={`h-1 ${bid.status === "winning" ? "bg-green-500" : bid.status === "outbid" ? "bg-red-500" : "bg-gray-300"} w-full`}></div>
                                 </div>
                             ))
                         ) : (
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                                 <Gavel size={64} className="mx-auto text-gray-300 mb-4" />
                                 <h3 className="text-2xl font-semibold text-gray-700 mb-2">No bids found</h3>
-                                <p className="text-gray-500 mb-6">You haven't placed any bids yet or no bids match your current filters.</p>
+                                <p className="text-gray-500 mb-6">
+                                    {searchTerm || filter !== "all"
+                                        ? "No bids match your current filters. Try adjusting your search criteria."
+                                        : "You haven't placed any bids yet. Start bidding on auctions to see them here!"}
+                                </p>
                                 <div className="flex gap-4 justify-center">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setFilter("all");
                                             setSearchTerm("");
@@ -469,36 +474,40 @@ function MyBids() {
                                     >
                                         Clear Filters
                                     </button>
-                                    <button className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <Link
+                                        to="/auctions"
+                                        target="_blank"
+                                        className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
                                         Browse Auctions
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Quick Stats Footer */}
-                    {filteredBids.length > 0 && (
+                    {bids.length > 0 && (
                         <div className="mt-8 mb-16 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
                                 <div>
                                     <p className="text-sm text-gray-600">Total Bids Placed</p>
-                                    <p className="text-2xl font-bold text-gray-900">{bids.length}</p>
+                                    <p className="text-2xl font-bold text-gray-900">{statistics.totalBids}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">Active Participation</p>
-                                    <p className="text-2xl font-bold text-green-600">{totalActiveBids}</p>
+                                    <p className="text-2xl font-bold text-green-600">{statistics.totalActiveBids}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">Success Rate</p>
                                     <p className="text-2xl font-bold text-blue-600">
-                                        {Math.round((totalWinning / bids.length) * 100)}%
+                                        {statistics.successRate}%
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">Avg. Bid Amount</p>
                                     <p className="text-2xl font-bold text-purple-600">
-                                        {formatCurrency(totalAmountBid / bids.length)}
+                                        {formatCurrency(statistics.avgBidAmount)}
                                     </p>
                                 </div>
                             </div>

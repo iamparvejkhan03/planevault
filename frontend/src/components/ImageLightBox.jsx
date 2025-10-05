@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, LayoutGrid, Shield, Clock } from 'lucide-react';
 
-const ImageLightBox = ({ images = [] }) => {
+const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mainImage, setMainImage] = useState(images[0]?.url || '');
@@ -36,6 +36,76 @@ const ImageLightBox = ({ images = [] }) => {
         );
     }
 
+    const getStatusBadges = () => {
+        const badges = [];
+
+        if (auctionType === 'reserve' && isReserveMet) {
+            badges.push({
+                label: 'Reserve Met',
+                icon: Shield,
+                color: 'bg-green-100 text-green-700 border-green-200'
+            });
+        } else if (auctionType === 'reserve') {
+            badges.push({
+                label: 'Reserve',
+                icon: Shield,
+                color: 'bg-orange-100 text-orange-700 border-orange-200'
+            });
+        }
+
+        if (auctionType === 'standard') {
+            badges.push({
+                label: 'No Reserve',
+                icon: Shield,
+                color: 'bg-green-100 text-green-700 border-green-200'
+            });
+        }
+
+        // if (autoExtend) {
+        //     badges.push({
+        //         label: 'Auto Extend',
+        //         icon: Zap,
+        //         color: 'bg-blue-100 text-blue-700 border-blue-200'
+        //     });
+        // }
+
+        if (status === 'active') {
+            badges.push({
+                label: 'Live',
+                icon: Clock,
+                color: 'bg-green-100 text-green-700 border-green-200'
+            });
+        }
+
+        if (status === 'approved') {
+            badges.push({
+                label: 'Starting Soon',
+                icon: Clock,
+                color: 'bg-orange-100 text-orange-700 border-orange-200'
+            });
+        }
+
+        if (status === 'ended') {
+            badges.push({
+                label: 'Ended',
+                icon: Clock,
+                color: 'bg-red-100 text-red-700 border-red-200'
+            });
+        }
+
+        if (status === 'sold') {
+            badges.push({
+                label: 'Sold',
+                icon: Clock,
+                color: 'bg-green-100 text-green-700 border-green-200'
+            });
+        }
+
+        return badges;
+    };
+
+    const statusBadges = getStatusBadges();
+
     return (
         <div className="flex flex-col gap-3 md:gap-5">
             {/* Main Image Section */}
@@ -53,6 +123,21 @@ const ImageLightBox = ({ images = [] }) => {
                     <LayoutGrid strokeWidth={1.5} className="w-4 h-4 md:w-5 md:h-5" />
                     <span>See all photos ({images.length})</span>
                 </button>
+                {/* Status Badges */}
+                <div className="absolute top-3 right-3 flex flex-wrap gap-2">
+                    {statusBadges.map((badge, index) => {
+                        const IconComponent = badge.icon;
+                        return (
+                            <span
+                                key={index}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badge.color}`}
+                            >
+                                <IconComponent size={12} />
+                                {badge.label}
+                            </span>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Thumbnail Grid */}
@@ -68,13 +153,12 @@ const ImageLightBox = ({ images = [] }) => {
                                 setMainImage(image.url);
                                 setCurrentIndex(index);
                             }}
-                            className={`object-cover h-24 lg:h-36 w-full rounded-xl cursor-pointer hover:opacity-80 transition-opacity ${
-                                mainImage === image.url ? 'border-2 border-primary shadow-md' : ''
-                            }`}
+                            className={`object-cover h-24 lg:h-36 w-full rounded-xl cursor-pointer hover:opacity-80 transition-opacity ${mainImage === image.url ? 'border-2 border-primary shadow-md' : ''
+                                }`}
                         />
                     ))}
                     {images.length > 3 && (
-                        <div 
+                        <div
                             className="relative cursor-pointer group"
                             onClick={() => openLightbox(3)}
                         >
@@ -147,11 +231,10 @@ const ImageLightBox = ({ images = [] }) => {
                                         setCurrentIndex(index);
                                         setMainImage(image.url);
                                     }}
-                                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${
-                                        currentIndex === index 
-                                            ? 'border-white border-3' 
+                                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${currentIndex === index
+                                            ? 'border-white border-3'
                                             : 'border-transparent opacity-60 hover:opacity-100'
-                                    }`}
+                                        }`}
                                 />
                             ))}
                         </div>
@@ -167,7 +250,7 @@ const ImageLightBox = ({ images = [] }) => {
 
             {/* Keyboard Event Handler */}
             {isOpen && (
-                <div 
+                <div
                     tabIndex={0}
                     onKeyDown={(e) => {
                         if (e.key === 'ArrowRight') nextImage();

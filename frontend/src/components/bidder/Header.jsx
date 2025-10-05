@@ -1,14 +1,10 @@
 import { Bell, Home } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { about } from "../../assets";
 
 function Header() {
-    const [searchQuery, setSearchQuery] = useState("");
     const [notificationsCount] = useState(3);
-    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-    const searchRef = useRef(null);
     const { user } = useAuth();
 
     return (
@@ -21,14 +17,14 @@ function Header() {
             {/* Right section with icons and user */}
             <div className="flex items-center space-x-4 md:space-x-5">
                 {/* Notifications */}
-                <button className="relative p-2 text-secondary hover:text-black transition-colors">
+                {/* <button className="relative p-2 text-secondary hover:text-black transition-colors">
                     <Bell size={22} />
                     {notificationsCount > 0 && (
                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                             {notificationsCount}
                         </span>
                     )}
-                </button>
+                </button> */}
 
                 {/* User profile */}
                 <div className="flex items-center space-x-3 pl-3 border-l border-gray-200">

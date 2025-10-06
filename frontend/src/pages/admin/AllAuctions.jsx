@@ -391,7 +391,7 @@ function AllAuctions() {
                                                         />
                                                         <div className="min-w-0 flex-1">
                                                             <div
-                                                                className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 truncate"
+                                                                className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 truncate w-48"
                                                                 onClick={() => openAuctionModal(auction)}
                                                                 title={auction.title}
                                                             >

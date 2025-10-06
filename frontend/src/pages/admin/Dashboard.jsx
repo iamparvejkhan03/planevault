@@ -47,7 +47,7 @@ function Dashboard() {
         },
         {
             title: "Total Bidders",
-            value: adminStats?.userTypeStats?.bidder?.toLocaleString(),
+            value: adminStats?.userTypeStats?.bidder?.toLocaleString() || 0,
             change: `+${adminStats.recentUsers || 0} this week`,
             icon: <Hand size={24} />,
             trend: "up",

@@ -8,8 +8,8 @@ const TermsOfUse = () => {
             <Container>
                 <h1 className="text-4xl md:text-5xl font-bold my-5 text-black">Terms of Use</h1>
 
-                <p className="mb-2">Effective Date: September 14, 2025</p>
-                <p className="mb-4">Last Updated: September 14, 2025</p>
+                <p className="mb-2">Effective Date: October 6, 2025</p>
+                <p className="mb-4">Last Updated: October 6, 2025</p>
                 <p className="mb-4">
                     Welcome to Plane Vault ("we," "our," "us"). These Terms of Use ("Terms") govern your access to and
                     use of the Plane Vault website, services, listings, and auction-style listings (collectively, the "Services").

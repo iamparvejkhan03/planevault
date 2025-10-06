@@ -42,7 +42,7 @@ function Hero() {
 
                         Trusted Auctions, Anytime
                     </p>
-                    <h1 className="text-5xl lg:text-6xl font-bold text-white !leading-tight tracking-tight">
+                    <h1 className="text-4xl lg:text-6xl font-bold text-white !leading-tight tracking-tight">
                         Exclusive <span className="text-white text-shadow-sm">Aircraft Auctions</span>
                     </h1>
                     <p className="text-lg text-white leading-relaxed">Bid confidently on verified aircraft and rare aviation collectibles, with real-time auction updates to ensure every bidding experience is seamless, transparent, and trusted.</p>

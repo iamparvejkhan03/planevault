@@ -8,8 +8,8 @@ const PrivacyPolicy = () => {
             <Container>
                 <h1 className="text-4xl md:text-5xl font-bold my-5 text-black">Privacy Policy</h1>
 
-                <p className="mb-2">Effective Date: September 14, 2025</p>
-                <p className="mb-4">Last Updated: September 14, 2025</p>
+                <p className="mb-2">Effective Date: October 6, 2025</p>
+                <p className="mb-4">Last Updated: October 6, 2025</p>
                 <p className="mb-4">
                     Plane Vault ("we," "our," "us") values your privacy. This Privacy Policy explains how we collect,
                     use, disclose, and safeguard your information when you use our website and services (the "Services").

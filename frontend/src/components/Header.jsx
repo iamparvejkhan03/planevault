@@ -98,7 +98,7 @@ function Header() {
                                     ?
                                     <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
                                     :
-                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate('/login')}><LogIn size={20} /> Log In</button>
+                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => {navigate('/login'); setIsMenuOpen(false)}}><LogIn size={20} /> Log In</button>
                             }
                         </li>
                     </ul>

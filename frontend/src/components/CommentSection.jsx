@@ -287,8 +287,8 @@ const CommentSection = ({ auctionId }) => {
                             <div key={comment._id} className="flex gap-2 sm:gap-4 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                 {/* User Avatar */}
                                 <img
-                                    src={comment.user.avatar || `https://ui-avatars.com/api/?name=${comment.userName}&background=random`}
-                                    alt={comment.userName}
+                                    src={comment?.user?.avatar || `https://ui-avatars.com/api/?name=${comment?.userName}&background=random`}
+                                    alt={comment?.userName}
                                     className="w-10 h-10 rounded-full flex-shrink-0"
                                 />
 

@@ -553,13 +553,13 @@ function AllUsers() {
                                                                 <div className="font-medium">{selectedUser.stats.activeListings || 0}</div>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-3">
+                                                        {/* <div className="flex items-center gap-3">
                                                             <Award size={18} className="text-amber-500" />
                                                             <div>
                                                                 <div className="text-sm text-gray-500">Seller Rating</div>
                                                                 <div className="font-medium">{selectedUser.stats.rating || 'N/A'}/5.0</div>
                                                             </div>
-                                                        </div>
+                                                        </div> */}
                                                         <div className="flex items-center gap-3">
                                                             <TrendingUp size={18} className="text-green-500" />
                                                             <div>

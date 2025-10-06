@@ -39,7 +39,7 @@ import partsIcon from './partsIcon.webp';
 import spinner from './spinner.webp';
 
 const otherData = {
-    phone: '+13477456985',
+    phone: '+19413911070',
     email: 'admin@planevault.com',
     address: 'United States of America'
 }

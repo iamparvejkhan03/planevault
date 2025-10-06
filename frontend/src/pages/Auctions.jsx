@@ -514,7 +514,7 @@ function Auctions() {
         <Container>
             <div className="min-h-screen pt-16 md:pt-32 pb-16 bg-gray-50">
                 {/* Header */}
-                <div className="bg-white border-b border-gray-200 py-8">
+                <div className="bg-white border-b border-gray-200 px-8 py-8">
                     <div className="container mx-auto">
                         <h1 className="text-3xl font-bold text-gray-900">All Auctions</h1>
                         <p className="text-gray-600 mt-2">Browse through our selection of premium aircraft, parts, engine, and memorabilias' auctions</p>

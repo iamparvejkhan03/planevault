@@ -284,7 +284,7 @@ function Home() {
         'approved': 'Get ready for exciting new aircraft listings — preview upcoming auctions and prepare your bids for these premium aviation assets.'
     };
 
-    const fetchAuctions = async (tab = activeTab, category = null, limit = 3, sortBy = 'highestBid') => {
+    const fetchAuctions = async (tab = activeTab, category = null, limit = 4, sortBy = 'highestBid') => {
         setLoading(true);
         try {
             const status = tabStatusMap[tab];

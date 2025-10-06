@@ -8,8 +8,8 @@ const PaymentRefundPolicy = () => {
             <Container>
                 <h1 className="text-4xl md:text-5xl font-bold my-5 text-black">Payment & Refund Policy</h1>
 
-                <p className="mb-2">Effective Date: September 14, 2025</p>
-                <p className="mb-4">Last Updated: September 14, 2025</p>
+                <p className="mb-2">Effective Date: October 6, 2025</p>
+                <p className="mb-4">Last Updated: October 6, 2025</p>
                 <p className="mb-4">
                     This Payment & Refund Policy governs fees, deposits, payments, and refunds on Plane Vault.
                 </p>

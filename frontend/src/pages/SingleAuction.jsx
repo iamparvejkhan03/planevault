@@ -24,8 +24,8 @@ function SingleAuction() {
     const [activeTab, setActiveTab] = useState('comments');
     const { pagination } = useComments(id);
     const { isWatchlisted, toggleWatchlist, watchlistCount } = useWatchlist(id);
+    const hasFetchedRef = useRef(false);
 
-    // Fetch auction data
     // useEffect(() => {
     //     const fetchAuction = async () => {
     //         try {
@@ -42,7 +42,17 @@ function SingleAuction() {
     //         }
     //     };
 
-    //     fetchAuction();
+    //     // Only refetch if countdown status changes to 'ended' and auction might need update
+    //     if (countdown?.status === 'ended') {
+    //         // Add a small delay to ensure backend has processed the auction end
+    //         const timer = setTimeout(() => {
+    //             fetchAuction();
+    //         }, 2000); // 2 seconds delay
+
+    //         return () => clearTimeout(timer);
+    //     } else {
+    //         fetchAuction();
+    //     }
     // }, [id, countdown?.status]);
 
     useEffect(() => {
@@ -61,15 +71,13 @@ function SingleAuction() {
             }
         };
 
-        // Only refetch if countdown status changes to 'ended' and auction might need update
         if (countdown?.status === 'ended') {
-            // Add a small delay to ensure backend has processed the auction end
             const timer = setTimeout(() => {
                 fetchAuction();
-            }, 2000); // 2 seconds delay
-
+            }, 2000);
             return () => clearTimeout(timer);
-        } else {
+        } else if (!hasFetchedRef.current) {
+            hasFetchedRef.current = true;
             fetchAuction();
         }
     }, [id, countdown?.status]);

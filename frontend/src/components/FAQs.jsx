@@ -8,7 +8,7 @@ const FAQs = ({ faqs }) => {
 
     return (
         <>
-            <div className="w-full grid grid-cols-1 gap-10 md:grid-cols-7 lg:gap-10 xl:gap-16 items-stretch px-4 md:px-0">
+            <div className="w-full grid grid-cols-1 gap-10 md:grid-cols-7 lg:gap-10 xl:gap-16 items-stretch md:px-0">
                 <img
                     className="w-full object-cover rounded-xl h-[350px] sm:h-[500px] md:h-[625px] lg:h-[575px] md:col-span-3"
                     src={faqImg}

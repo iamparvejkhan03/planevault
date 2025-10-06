@@ -57,7 +57,7 @@ const AdminBidHistory = lazy(() => import('./pages/admin/BidHistory'));
 const Transactions = lazy(() => import('./pages/admin/Transactions'));
 
 createRoot(document.getElementById('root')).render(
-    // <StrictMode>
+    //<StrictMode>
         <AuthProvider>
             <PopUpContextProvider>
                 <BrowserRouter>
@@ -357,5 +357,5 @@ createRoot(document.getElementById('root')).render(
                 </BrowserRouter>
             </PopUpContextProvider>
         </AuthProvider>
-    // </StrictMode>,
+    //</StrictMode>,
 )

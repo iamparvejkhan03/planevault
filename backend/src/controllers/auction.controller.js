@@ -432,7 +432,7 @@ export const getTopLiveAuctions = async (req, res) => {
         const {
             category,
             status = 'active', // Default to active auctions
-            limit = 3,
+            limit = 4,
             sortBy = 'highestBid' // highestBid, mostBids, endingSoon, newest
         } = req.query;
 

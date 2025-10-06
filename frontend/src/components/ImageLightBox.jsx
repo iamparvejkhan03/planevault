@@ -4,11 +4,14 @@ import { X, ChevronLeft, ChevronRight, LayoutGrid, Shield, Clock } from 'lucide-
 const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [mainImage, setMainImage] = useState(images[0]?.url || '');
+    
+    // Reverse the images array to show newest first
+    const reversedImages = [...images].reverse();
+    const [mainImage, setMainImage] = useState(reversedImages[0]?.url || '');
 
     const openLightbox = (index = 0) => {
         setCurrentIndex(index);
-        setMainImage(images[index]?.url || '');
+        setMainImage(reversedImages[index]?.url || '');
         setIsOpen(true);
     };
 
@@ -17,18 +20,18 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
     };
 
     const nextImage = () => {
-        const nextIndex = (currentIndex + 1) % images.length;
+        const nextIndex = (currentIndex + 1) % reversedImages.length;
         setCurrentIndex(nextIndex);
-        setMainImage(images[nextIndex]?.url || '');
+        setMainImage(reversedImages[nextIndex]?.url || '');
     };
 
     const prevImage = () => {
-        const prevIndex = (currentIndex - 1 + images.length) % images.length;
+        const prevIndex = (currentIndex - 1 + reversedImages.length) % reversedImages.length;
         setCurrentIndex(prevIndex);
-        setMainImage(images[prevIndex]?.url || '');
+        setMainImage(reversedImages[prevIndex]?.url || '');
     };
 
-    if (images.length === 0) {
+    if (reversedImages.length === 0) {
         return (
             <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
                 <p className="text-gray-500">No images available</p>
@@ -60,14 +63,6 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                 color: 'bg-green-100 text-green-700 border-green-200'
             });
         }
-
-        // if (autoExtend) {
-        //     badges.push({
-        //         label: 'Auto Extend',
-        //         icon: Zap,
-        //         color: 'bg-blue-100 text-blue-700 border-blue-200'
-        //     });
-        // }
 
         if (status === 'active') {
             badges.push({
@@ -121,7 +116,7 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                     className="flex items-center gap-2 absolute bottom-3 right-3 md:bottom-5 md:right-5 bg-white py-2 px-3 md:py-3 md:px-5 rounded-md cursor-pointer text-sm md:text-base shadow-lg hover:bg-gray-50 transition-colors"
                 >
                     <LayoutGrid strokeWidth={1.5} className="w-4 h-4 md:w-5 md:h-5" />
-                    <span>See all photos ({images.length})</span>
+                    <span>See all photos ({reversedImages.length})</span>
                 </button>
                 {/* Status Badges */}
                 <div className="absolute top-3 right-3 flex flex-wrap gap-2">
@@ -141,9 +136,9 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
             </div>
 
             {/* Thumbnail Grid */}
-            {images.length > 1 && (
+            {reversedImages.length > 1 && (
                 <div className="hidden md:grid w-full grid-cols-3 gap-3">
-                    {images.slice(0, 2).map((image, index) => (
+                    {reversedImages.slice(0, 2).map((image, index) => (
                         <img
                             loading='lazy'
                             key={index}
@@ -153,23 +148,24 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                                 setMainImage(image.url);
                                 setCurrentIndex(index);
                             }}
-                            className={`object-cover h-24 lg:h-36 w-full rounded-xl cursor-pointer hover:opacity-80 transition-opacity ${mainImage === image.url ? 'border-2 border-primary shadow-md' : ''
-                                }`}
+                            className={`object-cover h-24 lg:h-36 w-full rounded-xl cursor-pointer hover:opacity-80 transition-opacity ${
+                                mainImage === image.url ? 'border-2 border-primary shadow-md' : ''
+                            }`}
                         />
                     ))}
-                    {images.length > 3 && (
+                    {reversedImages.length > 3 && (
                         <div
                             className="relative cursor-pointer group"
                             onClick={() => openLightbox(3)}
                         >
                             <img
                                 loading='lazy'
-                                src={images[3].url}
+                                src={reversedImages[3].url}
                                 alt="More photos"
                                 className="object-cover h-24 lg:h-36 w-full rounded-xl opacity-80"
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-50 rounded-xl flex items-center justify-center">
-                                <span className="text-white font-semibold">+{images.length - 3} more</span>
+                                <span className="text-white font-semibold">+{reversedImages.length - 3} more</span>
                             </div>
                         </div>
                     )}
@@ -188,7 +184,7 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                     </button>
 
                     {/* Navigation Buttons */}
-                    {images.length > 1 && (
+                    {reversedImages.length > 1 && (
                         <>
                             <button
                                 onClick={prevImage}
@@ -216,13 +212,13 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
 
                     {/* Image Counter */}
                     <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-50 px-4 py-2 rounded-full">
-                        {currentIndex + 1} / {images.length}
+                        {currentIndex + 1} / {reversedImages.length}
                     </div>
 
                     {/* Thumbnail Strip */}
-                    {images.length > 1 && (
+                    {reversedImages.length > 1 && (
                         <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-4 py-2">
-                            {images.map((image, index) => (
+                            {reversedImages.map((image, index) => (
                                 <img
                                     key={index}
                                     src={image.url}
@@ -231,10 +227,11 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                                         setCurrentIndex(index);
                                         setMainImage(image.url);
                                     }}
-                                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${currentIndex === index
+                                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${
+                                        currentIndex === index
                                             ? 'border-white border-3'
                                             : 'border-transparent opacity-60 hover:opacity-100'
-                                        }`}
+                                    }`}
                                 />
                             ))}
                         </div>

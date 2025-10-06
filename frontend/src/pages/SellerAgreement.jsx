@@ -8,8 +8,8 @@ const SellerAgreement = () => {
             <Container>
                 <h1 className="text-4xl md:text-5xl font-bold my-5 text-black">Seller Agreement</h1>
 
-                <p className="mb-2">Effective Date: September 14, 2025</p>
-                <p className="mb-4">Last Updated: September 14, 2025</p>
+                <p className="mb-2">Effective Date: October 6, 2025</p>
+                <p className="mb-4">Last Updated: October 6, 2025</p>
                 <p className="mb-4">
                     This Seller Agreement outlines the responsibilities of sellers listing items on Plane Vault.
                 </p>

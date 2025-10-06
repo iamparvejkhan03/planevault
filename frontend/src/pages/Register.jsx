@@ -103,8 +103,6 @@ const Register = () => {
         fetchCountries()
     }, [])
 
-    console.log(countries);
-
     // Stripe hooks - these must be used at the top level of the component
     const stripe = useStripe();
     const elements = useElements();

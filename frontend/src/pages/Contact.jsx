@@ -222,7 +222,7 @@ function Contact() {
                         </div>
                     </div>
 
-                    <img className="w-full h-full sm:max-h-[600px] md:max-h-[750px] lg:max-h-full xl:max-h-[760px] object-cover" loading="lazy" src={contactUs} alt="Contact Us" />
+                    <img className="w-full min-h-full sm:max-h-[600px] md:max-h-[750px] lg:max-h-full xl:max-h-[760px] object-cover" loading="lazy" src={contactUs} alt="Contact Us" />
                 </div>
             </section>
 
@@ -243,7 +243,7 @@ function Contact() {
                                 <h3 className="font-semibold text-gray-900 mb-1 text-lg">
                                     Phone
                                 </h3>
-                                <Link to={`tel:${otherData.phone}`} className="text-primary hover:underline">(347) 745-6985</Link>
+                                <Link to={`tel:${otherData.phone}`} className="text-primary hover:underline">(941) 391-1070</Link>
                                 <p className="text-sm text-gray-500">
                                     We respond within 24 hours
                                 </p>

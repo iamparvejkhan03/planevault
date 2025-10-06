@@ -132,7 +132,7 @@ function Footer() {
                     <p>
                         <span>© {new Date().getFullYear()} &nbsp;</span>
                         <Link to="/" className="underline">
-                        JD Mentors.
+                        PlaneVault.
                         </Link> 
                         &nbsp; All rights reserved. &nbsp;
                     </p>

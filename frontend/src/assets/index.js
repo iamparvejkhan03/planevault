@@ -7,6 +7,7 @@ import closeMenu from './closeMenu.svg';
 import faqImg from './faqImg.webp';
 import aboutUs from './aboutUs.webp';
 import cessna from './cessna.webp';
+import cirrus from './cirrus.webp';
 import piper from './piper.webp';
 import beechCraft from './beechCraft.webp';
 import mooney from './mooney.webp';
@@ -24,19 +25,8 @@ import liveAuctions from './liveAuctions.webp';
 import soldAuctions from './soldAuctions.webp';
 import endingSoonAuctions from './endingSoonAuctions.webp';
 import upcomingAuctions from './upcomingAuctions.webp';
-import jetsIcon from './jetsIcon.webp';
-import plusIcon from './plusIcon.webp';
-import engineIcon from './engineIcon.webp';
-import helicopterIcon from './helicopterIcon.webp';
-import lightSportIcon from './lightSportIcon.webp';
-import memorabiliaIcon from './memorabiliaIcon.webp';
-import singlePistonIcon from './singlePistonIcon.webp';
-import specialUseIcon from './specialUseIcon.webp';
-import turboPropIcon from './turboPropIcon.webp';
-import warBirdsIcon from './warBirdsIcon.webp';
-import multiEnginePistonIcon from './multiEnginePistonIcon.webp';
-import partsIcon from './partsIcon.webp';
 import spinner from './spinner.webp';
+import engineCategoryIcon from './engineCategoryIcon.webp';
 
 const otherData = {
     phone: '+19413911070',
@@ -55,6 +45,7 @@ export {
     faqImg,
     aboutUs,
     cessna,
+    cirrus,
     piper,
     beechCraft,
     mooney,
@@ -72,17 +63,6 @@ export {
     soldAuctions,
     endingSoonAuctions,
     upcomingAuctions,
-    jetsIcon,
-    plusIcon,
-    engineIcon,
-    helicopterIcon,
-    lightSportIcon,
-    memorabiliaIcon,
-    singlePistonIcon,
-    specialUseIcon,
-    turboPropIcon,
-    warBirdsIcon,
-    multiEnginePistonIcon,
-    partsIcon,
     spinner,
+    engineCategoryIcon,
 }

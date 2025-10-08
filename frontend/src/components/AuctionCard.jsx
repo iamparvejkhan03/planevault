@@ -200,7 +200,7 @@ function AuctionCard({ auction }) {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     {/* Current Bid */}
                     <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <div className="text-xs text-gray-600 mb-1">Current Bid</div>
+                        <div className="text-xs text-gray-600 mb-1">{auction.status === 'sold' ? 'Final Bid' : 'Current Bid'}</div>
                         <div className="font-bold text-lg text-green-600">
                             ${(auction.currentPrice || auction.startPrice).toLocaleString()}
                         </div>

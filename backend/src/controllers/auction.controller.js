@@ -32,12 +32,12 @@ export const createAuction = async (req, res) => {
             bidIncrement,
             auctionType,
             reservePrice,
-            startDate,
-            endDate
+            // startDate,
+            // endDate
         } = req.body;
 
         // Basic validation
-        if (!title || !category || !description || !startPrice || !bidIncrement || !auctionType || !startDate || !endDate) {
+        if (!title || !category || !description || !startPrice || !bidIncrement || !auctionType) {
             return res.status(400).json({
                 success: false,
                 message: 'All required fields must be provided'
@@ -59,23 +59,23 @@ export const createAuction = async (req, res) => {
         }
 
         // Validate dates
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        // const start = new Date(startDate);
+        // const end = new Date(endDate);
 
-        if (end <= start) {
-            return res.status(400).json({
-                success: false,
-                message: 'End date must be after start date'
-            });
-        }
+        // if (end <= start) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'End date must be after start date'
+        //     });
+        // }
 
-        // Validate start date is in future
-        if (start <= new Date()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Start date must be in the future'
-            });
-        }
+        // // Validate start date is in future
+        // if (start <= new Date()) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Start date must be in the future'
+        //     });
+        // }
 
         // Validate reserve price for reserve auctions
         if (auctionType === 'reserve' && (!reservePrice || reservePrice < startPrice)) {
@@ -143,8 +143,8 @@ export const createAuction = async (req, res) => {
             startPrice: parseFloat(startPrice),
             bidIncrement: parseFloat(bidIncrement),
             auctionType,
-            startDate: start,
-            endDate: end,
+            // startDate: start,
+            // endDate: end,
             seller: seller._id,
             sellerUsername: seller.username,
             photos: uploadedPhotos,
@@ -161,7 +161,7 @@ export const createAuction = async (req, res) => {
 
         // Schedule activation and ending jobs
         // await agendaService.scheduleAuctionActivation(auction._id, auction.startDate);
-        await agendaService.scheduleAuctionEnd(auction._id, auction.endDate);
+        // await agendaService.scheduleAuctionEnd(auction._id, auction.endDate);
 
         // Populate seller info for response
         await auction.populate('seller', 'username firstName lastName');

@@ -1,10 +1,12 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Container } from "../components";
 import { logo, otherData } from "../assets";
 import { Facebook, Instagram, Linkedin, Mail, Phone, Twitter, X, Youtube } from "lucide-react";
 
 
 function Footer() {
+    const navigate = useNavigate();
+
     const quickLinks = [
         { name: 'Home', href: '/' },
         { name: 'About', href: '/about' },
@@ -27,6 +29,25 @@ function Footer() {
         { name: 'Aviation Memorabilia', href: '/memorabilia' },
     ];
 
+    const categoryImg = [
+        {
+            title: 'Aircraft',
+        },
+        {
+            title: 'Engines & Parts',
+        },
+        {
+            title: 'Memorabilia',
+        }
+    ];
+
+    const handleSearchByCategory = (title) => {
+        const params = new URLSearchParams();
+        params.append('category', title);
+
+        navigate(`/auctions?${params.toString()}`);
+    }
+
     return (
         <footer className="bg-primary text-gray-200 font-light py-12">
             <Container className=' px-6 md:px-16 lg:px-24 xl:px-32'>
@@ -39,25 +60,25 @@ function Footer() {
                             Bid confidently on verified aircraft and rare aviation collectibles, with real-time auction updates to ensure every bidding experience is seamless, transparent, and trusted.
                         </p>
                         <div className='flex items-center gap-3 mt-4'>
-                                {/* Instagram */}
-                                <Link to="https://www.instagram.com/" target="_blank">
-                                    <Instagram strokeWidth={1.25} />
-                                </Link>
+                            {/* Instagram */}
+                            <Link to="https://www.instagram.com/" target="_blank">
+                                <Instagram strokeWidth={1.25} />
+                            </Link>
 
-                                {/* Facebook */}
-                                <Link to="https://www.facebook.com/" target="_blank">
-                                    <Facebook strokeWidth={1.25} />
-                                </Link>
+                            {/* Facebook */}
+                            <Link to="https://www.facebook.com/" target="_blank">
+                                <Facebook strokeWidth={1.25} />
+                            </Link>
 
-                                {/* LinkedIn */}
-                                <Link to="https://www.linkedin.com/" target="_blank">
-                                    <Linkedin strokeWidth={1.25} />
-                                </Link>
+                            {/* LinkedIn */}
+                            <Link to="https://www.linkedin.com/" target="_blank">
+                                <Linkedin strokeWidth={1.25} />
+                            </Link>
 
-                                {/* YouTube */}
-                                <Link to="https://www.youtube.com/" target="_blank">
-                                    <Youtube strokeWidth={1.25} />
-                                </Link>
+                            {/* YouTube */}
+                            <Link to="https://www.youtube.com/" target="_blank">
+                                <Youtube strokeWidth={1.25} />
+                            </Link>
                         </div>
                     </div>
 
@@ -82,10 +103,8 @@ function Footer() {
                         </p>
                         <ul className='mt-3 flex flex-col gap-2 '>
                             {
-                                categories.map(service => (
-                                    <li className="relative py-1" key={service.name}>
-                                        <NavLink className={({ isActive }) => `text-white after:bg-white hover:underline`} to={service.href}>{service.name}</NavLink>
-                                    </li>
+                                categoryImg.map(category => (
+                                    <li key={category.title} title={category.title} onClick={() => handleSearchByCategory(category.title)} className="cursor-pointer hover:underline" >{category.title}</li>
                                 ))
                             }
                         </ul>
@@ -132,8 +151,8 @@ function Footer() {
                     <p>
                         <span>© {new Date().getFullYear()} &nbsp;</span>
                         <Link to="/" className="underline">
-                        PlaneVault.
-                        </Link> 
+                            PlaneVault.
+                        </Link>
                         &nbsp; All rights reserved. &nbsp;
                     </p>
                     <div className="flex flex-wrap flex-row gap-4 items-center">

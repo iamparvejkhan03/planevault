@@ -42,7 +42,7 @@ function About() {
             <div className="col-span-4">
                 <h5 className="font-semibold text-secondary">About Us</h5>
                 <h2 className="text-2xl md:text-3xl font-semibold my-4 text-primary">Who We Are</h2>
-                <p className="text-secondary">PlaneVault is a trusted aircraft auction platform where you can sell or bid on aircrafts, parts, and memorabilia. We make every transaction simple and reliable with secure technology and dedicated support.</p>
+                <p className="text-secondary">PlaneVault is a trusted aircraft auction platform where you can sell or bid on aircraft, parts, and memorabilia. We make every transaction simple and reliable with secure technology and dedicated support.</p>
 
                 <div className="space-y-5 my-5">
                     <div className="flex items-start gap-4">

@@ -67,6 +67,9 @@ function Header() {
                                 </li>
                             ))
                         }
+                        <li>
+                            <NavLink className={({ isActive }) => `${isActive && isScrolled ? 'text-secondary' : isActive && !isScrolled ? 'text-secondary' : isScrolled ? 'text-black' : 'text-white'} hover:underline`} to={user && user.userType == 'seller' ? '/seller/auctions/create' : '/register'}>Sell with Us</NavLink>
+                        </li>
                         <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
                             <button onClick={() => openPopup('category')} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
                         </li>
@@ -92,13 +95,16 @@ function Header() {
                                 </li>
                             ))
                         }
+                        <li onClick={() => setIsMenuOpen(false)} className="mx-5 py-2">
+                            <Link to={user && user.userType == 'seller' ? '/seller/auctions/create' : '/register'}>Sell with Us</Link>
+                        </li>
                         <li>
                             {
                                 user
                                     ?
                                     <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => navigate(`/${user.userType}/dashboard`)}><LayoutDashboard size={20} /> Dashboard</button>
                                     :
-                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => {navigate('/login'); setIsMenuOpen(false)}}><LogIn size={20} /> Log In</button>
+                                    <button className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-md cursor-pointer" onClick={() => { navigate('/login'); setIsMenuOpen(false) }}><LogIn size={20} /> Log In</button>
                             }
                         </li>
                     </ul>

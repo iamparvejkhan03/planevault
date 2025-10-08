@@ -71,11 +71,11 @@ const auctionSchema = new Schema({
     // Timing
     startDate: {
         type: Date,
-        required: true
+        required: false
     },
     endDate: {
         type: Date,
-        required: true
+        required: false
     },
 
     // Media

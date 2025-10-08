@@ -26,19 +26,62 @@ import axiosInstance from '../../utils/axiosInstance.js';
 import { useNavigate } from 'react-router-dom';
 
 // Category-specific field configurations
+// const categoryFields = {
+//     'Aircraft': [
+//         { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Cessna, Piper, Boeing' },
+//         { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 172, PA-28, 737' },
+//         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: 2025 },
+//         { name: 'registration', label: 'Registration', type: 'text', required: true, placeholder: 'e.g., N12345' },
+//         { name: 'totalHours', label: 'Total Hours', type: 'number', required: true, min: 0 },
+//         { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Avgas', 'Jet A', 'Diesel', 'Electric'] },
+//         { name: 'seatingCapacity', label: 'Seating Capacity', type: 'number', required: true, min: 1, max: 1000 },
+//         { name: 'maxTakeoffWeight', label: 'Max Takeoff Weight (lbs)', type: 'number', required: false, min: 0 },
+//         { name: 'engineType', label: 'Engine Type', type: 'select', required: true, options: ['Piston', 'Turboprop', 'Jet', 'Turbofan'] },
+//         { name: 'engineCount', label: 'Number of Engines', type: 'number', required: true, min: 1, max: 10 },
+//         { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] }
+//     ],
+//     'Engines & Parts': [
+//         { name: 'partType', label: 'Part Type', type: 'select', required: true, options: ['Engine', 'Propeller', 'Avionics', 'Airframe', 'Interior', 'Other'] },
+//         { name: 'partNumber', label: 'Part Number', type: 'text', required: true, placeholder: 'Manufacturer part number' },
+//         { name: 'manufacturer', label: 'Manufacturer', type: 'text', required: true, placeholder: 'e.g., Lycoming, Garmin, Honeywell' },
+//         { name: 'condition', label: 'Condition', type: 'select', required: true, options: ['New', 'Overhauled', 'Used Serviceable', 'As-Removed'] },
+//         { name: 'hoursSinceNew', label: 'Hours Since New/Overhaul', type: 'number', required: false, min: 0 },
+//         { name: 'serialNumber', label: 'Serial Number', type: 'text', required: false },
+//     ],
+//     'Memorabilia': [
+//         { name: 'itemType', label: 'Item Type', type: 'select', required: true, options: ['Uniform', 'Document', 'Model', 'Photograph', 'Instrument', 'Other'] },
+//         { name: 'era', label: 'Historical Era', type: 'select', required: true, options: ['WWI', 'WWII', 'Cold War', 'Modern', 'Vintage'] },
+//         { name: 'authenticity', label: 'Authenticity', type: 'select', required: true, options: ['Certified', 'Documented', 'Unknown'] },
+//         { name: 'year', label: 'Year', type: 'number', required: false, min: 1800, max: 2025 },
+//         { name: 'dimensions', label: 'Dimensions', type: 'text', required: false, placeholder: 'e.g., 24x36 inches' },
+//         { name: 'material', label: 'Material', type: 'text', required: false, placeholder: 'e.g., Brass, Wood, Fabric' }
+//     ]
+// };
+
 const categoryFields = {
     'Aircraft': [
         { name: 'make', label: 'Make', type: 'text', required: true, placeholder: 'e.g., Cessna, Piper, Boeing' },
         { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., 172, PA-28, 737' },
         { name: 'year', label: 'Year', type: 'number', required: true, min: 1900, max: 2025 },
         { name: 'registration', label: 'Registration', type: 'text', required: true, placeholder: 'e.g., N12345' },
-        { name: 'totalHours', label: 'Total Hours', type: 'number', required: true, min: 0 },
+        { name: 'totalTime', label: 'Total Time', type: 'number', required: true, min: 0 },
+        { name: 'engineTimeSMOH', label: 'Engine Time SMOH', type: 'number', required: false, min: 0 },
+        { name: 'lastAnnualDate', label: 'Last Annual Inspection Date', type: 'date', required: false },
+        { name: 'usefulLoad', label: 'Useful Load (lbs)', type: 'number', required: false, min: 0 },
         { name: 'fuelType', label: 'Fuel Type', type: 'select', required: true, options: ['Avgas', 'Jet A', 'Diesel', 'Electric'] },
         { name: 'seatingCapacity', label: 'Seating Capacity', type: 'number', required: true, min: 1, max: 1000 },
         { name: 'maxTakeoffWeight', label: 'Max Takeoff Weight (lbs)', type: 'number', required: false, min: 0 },
         { name: 'engineType', label: 'Engine Type', type: 'select', required: true, options: ['Piston', 'Turboprop', 'Jet', 'Turbofan'] },
         { name: 'engineCount', label: 'Number of Engines', type: 'number', required: true, min: 1, max: 10 },
-        { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] }
+        { name: 'aircraftCondition', label: 'Condition', type: 'select', required: true, options: ['Excellent', 'Good', 'Fair', 'Project'] },
+
+        // Conditional fields based on engine type
+        { name: 'propellerTime', label: 'Propeller Total Time', type: 'number', required: false, min: 0, condition: { engineType: 'Piston' } },
+        { name: 'propellerModel', label: 'Propeller Model', type: 'text', required: false, placeholder: 'e.g., McCauley 1A170', condition: { engineType: 'Piston' } },
+        { name: 'engineTotalCycles', label: 'Engine Total Cycles', type: 'number', required: false, min: 0, condition: { engineType: 'Jet' } },
+        { name: 'tbo', label: 'Time Between Overhaul (TBO)', type: 'number', required: false, min: 0, condition: { engineType: 'Turboprop' } },
+
+        // { name: 'avionicsDetails', label: 'Avionics Details', type: 'textarea', required: false, placeholder: 'Describe avionics package, GPS, radios, autopilot, etc.' }
     ],
     'Engines & Parts': [
         { name: 'partType', label: 'Part Type', type: 'select', required: true, options: ['Engine', 'Propeller', 'Avionics', 'Airframe', 'Interior', 'Other'] },
@@ -81,8 +124,8 @@ const CreateAuction = () => {
     });
 
     const auctionType = watch('auctionType');
-    const startDate = watch('startDate');
-    const endDate = watch('endDate');
+    // const startDate = watch('startDate');
+    // const endDate = watch('endDate');
     const selectedCategory = watch('category');
 
     // Get category-specific fields
@@ -103,8 +146,90 @@ const CreateAuction = () => {
     };
 
     // Render category-specific fields
+    // const renderCategoryFields = () => {
+    //     const fields = getCategoryFields();
+
+    //     return (
+    //         <div className="mb-6">
+    //             <label className="text-sm font-medium text-secondary mb-4 flex items-center">
+    //                 {(() => {
+    //                     const IconComponent = categoryIcons[selectedCategory] || FileText;
+    //                     return <IconComponent size={20} className="mr-2" />;
+    //                 })()}
+    //                 {selectedCategory} Specifications *
+    //             </label>
+
+    //             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    //                 {fields.map((field) => (
+    //                     <div key={field.name} className="space-y-2">
+    //                         <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
+    //                             {field.label} {field.required && <span className="text-red-500">*</span>}
+    //                         </label>
+
+    //                         {field.type === 'select' ? (
+    //                             <select
+    //                                 {...register(`specifications.${field.name}`, {
+    //                                     required: field.required ? `${field.label} is required` : false
+    //                                 })}
+    //                                 id={field.name}
+    //                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+    //                             >
+    //                                 <option value="">Select {field.label}</option>
+    //                                 {field.options.map(option => (
+    //                                     <option key={option} value={option}>{option}</option>
+    //                                 ))}
+    //                             </select>
+    //                         ) : field.type === 'textarea' ? (
+    //                             <textarea
+    //                                 {...register(`specifications.${field.name}`, {
+    //                                     required: field.required ? `${field.label} is required` : false
+    //                                 })}
+    //                                 id={field.name}
+    //                                 rows={3}
+    //                                 placeholder={field.placeholder}
+    //                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+    //                             />
+    //                         ) : (
+    //                             <input
+    //                                 {...register(`specifications.${field.name}`, {
+    //                                     required: field.required ? `${field.label} is required` : false,
+    //                                     min: field.min ? { value: field.min, message: `Must be at least ${field.min}` } : undefined,
+    //                                     max: field.max ? { value: field.max, message: `Must be at most ${field.max}` } : undefined
+    //                                 })}
+    //                                 id={field.name}
+    //                                 type={field.type}
+    //                                 placeholder={field.placeholder}
+    //                                 min={field.min}
+    //                                 max={field.max}
+    //                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+    //                             />
+    //                         )}
+
+    //                         {errors.specifications?.[field.name] && (
+    //                             <p className="text-red-500 text-sm">{errors.specifications[field.name].message}</p>
+    //                         )}
+    //                     </div>
+    //                 ))}
+    //             </div>
+    //         </div>
+    //     );
+    // };
+
     const renderCategoryFields = () => {
         const fields = getCategoryFields();
+
+        // Filter fields based on conditions (engine type for aircraft)
+        const filteredFields = fields.filter(field => {
+            if (!field.condition) return true;
+
+            // For aircraft fields with engine type conditions
+            if (field.condition.engineType) {
+                const engineTypeValue = watch('specifications.engineType');
+                return engineTypeValue === field.condition.engineType;
+            }
+
+            return true;
+        });
 
         return (
             <div className="mb-6">
@@ -117,7 +242,7 @@ const CreateAuction = () => {
                 </label>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {fields.map((field) => (
+                    {filteredFields.map((field) => (
                         <div key={field.name} className="space-y-2">
                             <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
                                 {field.label} {field.required && <span className="text-red-500">*</span>}
@@ -144,6 +269,15 @@ const CreateAuction = () => {
                                     id={field.name}
                                     rows={3}
                                     placeholder={field.placeholder}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                />
+                            ) : field.type === 'date' ? (
+                                <input
+                                    {...register(`specifications.${field.name}`, {
+                                        required: field.required ? `${field.label} is required` : false
+                                    })}
+                                    id={field.name}
+                                    type="date"
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                                 />
                             ) : (
@@ -178,7 +312,8 @@ const CreateAuction = () => {
 
         if (step === 1) {
             // Trigger validation for all fields
-            const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
+            // const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
+            const fieldsToValidate = ['title', 'category', 'description'];
 
             // Add category-specific fields to validation
             if (selectedCategory) {
@@ -282,10 +417,8 @@ const CreateAuction = () => {
             formData.append('startPrice', auctionData.startPrice);
             formData.append('bidIncrement', auctionData.bidIncrement);
             formData.append('auctionType', auctionData.auctionType);
-            // formData.append('startDate', auctionData.startDate);
-            // formData.append('endDate', auctionData.endDate);
-            formData.append('startDate', new Date(auctionData.startDate).toISOString());
-            formData.append('endDate', new Date(auctionData.endDate).toISOString());
+            // formData.append('startDate', new Date(auctionData.startDate).toISOString());
+            // formData.append('endDate', new Date(auctionData.endDate).toISOString());
 
             // Append specifications as JSON
             if (auctionData.specifications) {
@@ -456,7 +589,7 @@ const CreateAuction = () => {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div>
                                             <label htmlFor="startDate" className="block text-sm font-medium text-secondary mb-1">Start Date & Time *</label>
                                             <div className="relative">
@@ -493,7 +626,7 @@ const CreateAuction = () => {
                                             </div>
                                             {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <div className="mb-6">
                                         <label htmlFor="photo-upload" className="block text-sm font-medium text-secondary mb-1">Attach Photos *</label>
@@ -509,7 +642,7 @@ const CreateAuction = () => {
                                             <label htmlFor="photo-upload" className="cursor-pointer">
                                                 <Image size={40} className="mx-auto text-gray-400 mb-2" />
                                                 <p className="text-gray-600">Browse photo(s) to upload</p>
-                                                <p className="text-sm text-secondary">Recommended: at least 3-5 high-quality photos</p>
+                                                <p className="text-sm text-secondary">Recommended: at least 40 high-quality photos</p>
                                             </label>
                                         </div>
                                         {errors.photos && <p className="text-red-500 text-sm mt-1">{errors.photos.message}</p>}
@@ -757,7 +890,7 @@ const CreateAuction = () => {
                                                                 {watch('auctionType') === 'reserve' && 'Reserve Price Auction'}
                                                             </p>
                                                         </div>
-                                                        <div>
+                                                        {/* <div>
                                                             <p className="text-xs text-secondary">Start Date</p>
                                                             <p className="font-medium">
                                                                 {watch('startDate') ? new Date(watch('startDate')).toLocaleString() : 'Not provided'}
@@ -768,7 +901,7 @@ const CreateAuction = () => {
                                                             <p className="font-medium">
                                                                 {watch('endDate') ? new Date(watch('endDate')).toLocaleString() : 'Not provided'}
                                                             </p>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                 </div>
 

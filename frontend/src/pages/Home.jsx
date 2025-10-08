@@ -1,9 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Hero, Container, Testimonial, HowItWorksCard, LoadingSpinner, About, AuctionCard } from "../components";
 import Marquee from "react-fast-marquee";
-import { BadgeCheck, Gavel, Tag, Upload, Filter, Loader } from "lucide-react";
-import { airBus, beechCraft, bell, diamond, engineIcon, jetsIcon, lightSportIcon, memorabiliaIcon, mooney, multiEnginePistonIcon, partsIcon, pilatus, piper, plusIcon, singlePistonIcon, specialUseIcon, turboPropIcon, warBirdsIcon } from "../assets";
-import { useAuctions } from '../hooks/useAuctions';
+import { BadgeCheck, Gavel, Tag, Upload, Filter, UserCog2, LucideVerified, UserPlus, Clock } from "lucide-react";
+import { airBus, beechCraft, bell, cessna, cirrus, diamond, engineCategoryIcon, mooney, pilatus, piper } from "../assets";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import axiosInstance from "../utils/axiosInstance";
@@ -87,34 +86,61 @@ const testimonials = [
     }
 ];
 
-const HowItWorks = [
+const HowItWorksSelling = [
     {
         icon: <Upload />,
-        title: 'Create Your Listing',
-        description: 'Upload details, photos, and documents for your aircraft, parts, or memorabilia.'
+        title: 'Submit Your Listing',
+        description: 'Begin by submitting your aircraft, aviation parts, or memorabilia through our secure online form. Upload clear photos, accurate details, and any supporting documents to showcase your aircraft or aviation related item.'
     },
     {
-        icon: <Tag />,
-        title: 'Set Terms & Reserve',
-        description: 'Choose your reserve price and auction settings with full control.'
+        icon: <UserCog2 />,
+        title: 'Expert Curation',
+        description: `Our aviation specialists carefully review and refine each submission to ensure it's presented in the most compelling way possible. Every listing is tailored for maximum visibility, credebility, and results - giving both you and the buyer confidence in every transaction.`
     },
     {
         icon: <Gavel />,
-        title: 'Engage Bidders',
-        description: 'Buyers compete in real time, driving the best possible outcome.'
+        title: 'Go Live and Engage',
+        description: `Once approved, your listing is published on PlaneVault for our global audience of qualified buyers. You'll have the opportunity to answer questions, share insights, and help your auction reach its highest potential.`
     },
     {
         icon: <BadgeCheck />,
-        title: 'Finalize the Sale',
-        description: 'Complete secure transfer with verified documents and support every step.'
+        title: 'Complete the Sale',
+        description: 'When the auction closes, PlaneVault connects the winning bidder and seller directly. From there, both parties finalize the transaction on their own terms. For security and convenience, we recommend completing payment through wire transfer or a trusted escrow service'
+    }
+];
+
+const HowItWorksBuying = [
+    {
+        icon: <UserPlus />,
+        title: 'Register to Bid',
+        description: 'Create your PlaneVault account and register witha valid credit card. A temporaty authorization hold verifies bidder commitment and ensures a trustworthy marketplace for all participants.'
+    },
+    {
+        icon: <Clock />,
+        title: 'Explore Auctions',
+        description: 'Explore the live and timed auctions in a secure online environment. Follow active listings, place competitive bids, and monitor results in real time. Our platform ensures fairness and transparency.'
+    },
+    {
+        icon: <Gavel />,
+        title: 'Place Your Bid',
+        description: `Once verified, you can place bids on any active listing. A hold is placed for the buyer's fee amount - this is only captured if you win. When the auction ends, all holds for non-winning bidders are automatically released.`
+    },
+    {
+        icon: <BadgeCheck />,
+        title: 'Finalize the Purchase',
+        description: `Once approved, your listing is published on PlaneVault for our global audience of qualified buyers. You'll have the opportunity to answer questions, share insights, and help your auction reach its highest potential.`
     }
 ];
 
 const trustedBrands = [
-    // {
-    //     src: cessna,
-    //     alt: 'Cessna'
-    // },
+    {
+        src: cessna,
+        alt: 'Cessna'
+    },
+    {
+        src: cirrus,
+        alt: 'Cirrus'
+    },
     {
         src: piper,
         alt: 'Piper'
@@ -225,30 +251,8 @@ const categoryIcons = [
     },
     {
         name: 'Engines',
-        icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 121.3 121.3" fill="black">
-
-            <circle cx="60.7" cy="60.7" r="15" fill="white" stroke="black" strokeWidth="2" />
-            <circle cx="60.7" cy="60.7" r="8" fill="black" />
-            <circle cx="60.7" cy="60.7" r="3" fill="white" />
-
-            <circle cx="60.7" cy="60.7" r="50" fill="none" stroke="black" strokeWidth="2" />
-
-            <g>
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(30 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(60 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(90 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(120 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(150 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(180 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(210 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(240 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(270 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(300 60.7 60.7)" />
-                <path d="M60.7,60.7 L68,20 Q60.7,22 53.4,20 Z" transform="rotate(330 60.7 60.7)" />
-            </g>
-        </svg>
-        ,
+        icon: engineCategoryIcon,
+        type: 'img'
     },
     {
         name: 'Explore',
@@ -359,7 +363,7 @@ function Home() {
                     {
                         categoryIcons.map(categoryIcon => (
                             <div onClick={() => handleSearchByTitle(categoryIcon.name)} key={categoryIcon.name} className="flex flex-col gap- items-center justify-center p-3 rounded-lg shadow-md max-h-28 cursor-pointer">
-                                {categoryIcon.icon}
+                                {categoryIcon.type && categoryIcon.type === 'img' ? <img className="max-h-16" src={categoryIcon.icon} alt={categoryIcon.name} /> : categoryIcon.icon}
                                 <p className="text-base sm:text-lg font-medium">{categoryIcon.name}</p>
                             </div>
                         ))
@@ -454,21 +458,40 @@ function Home() {
                 )}
             </Container>
 
-            {/* Rest of your components remain the same */}
+            {/* Who we are section */}
             <Container className="my-14">
                 <About />
             </Container>
 
             <Container className="my-14">
                 <section className="">
-                    <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works - Selling on PlaneVault</h2>
                     <p className="text-sm md:text-base text-gray-500 mt-3 mb-8">
-                        Simple steps, seamless auctions — see how Plane Vault makes selling and buying aviation assets effortless.
+                        Simple steps, seamless auctions — see how Plane Vault makes listing and selling aviation assets effortless.
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 xl:gap-8">
                         {
-                            HowItWorks && HowItWorks.map((howItWork, i) => {
+                            HowItWorksSelling && HowItWorksSelling.map((howItWork, i) => {
+                                return (
+                                    <HowItWorksCard key={howItWork.title} index={i} icon={howItWork.icon} title={howItWork.title} description={howItWork.description} />
+                                )
+                            })
+                        }
+                    </div>
+                </section>
+            </Container>
+
+            <Container className="my-14">
+                <section className="">
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works - Buying on PlaneVault</h2>
+                    <p className="text-sm md:text-base text-gray-500 mt-3 mb-8">
+                        Simple steps, seamless auctions — see how Plane Vault makes bidding and buying aviation assets effortless.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 xl:gap-8">
+                        {
+                            HowItWorksBuying && HowItWorksBuying.map((howItWork, i) => {
                                 return (
                                     <HowItWorksCard key={howItWork.title} index={i} icon={howItWork.icon} title={howItWork.title} description={howItWork.description} />
                                 )

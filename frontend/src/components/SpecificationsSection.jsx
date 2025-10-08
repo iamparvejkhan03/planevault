@@ -11,8 +11,85 @@ import {
     FileText,
     Award,
     Clock,
-    MapPin
+    MapPin,
+    RefreshCw,
+    Cpu
 } from "lucide-react";
+
+// Icon mapping for specification fields
+// const specificationIcons = {
+//     // Aircraft fields
+//     make: Plane,
+//     model: Settings,
+//     year: Calendar,
+//     registration: FileText,
+//     totalHours: Clock,
+//     fuelType: Fuel,
+//     seatingCapacity: Users,
+//     maxTakeoffWeight: Weight,
+//     engineType: Cog,
+//     engineCount: Settings,
+//     aircraftCondition: Award,
+    
+//     // Engines & Parts fields
+//     partType: Cog,
+//     partNumber: FileText,
+//     manufacturer: Settings,
+//     condition: Award,
+//     hoursSinceNew: Clock,
+//     serialNumber: FileText,
+    
+//     // Memorabilia fields
+//     itemType: Trophy,
+//     era: Calendar,
+//     authenticity: Award,
+//     dimensions: Gauge,
+//     material: Settings
+// };
+
+// // Field labels mapping
+// const fieldLabels = {
+//     make: 'Make',
+//     model: 'Model', 
+//     year: 'Year',
+//     registration: 'Registration',
+//     totalHours: 'Total Hours',
+//     fuelType: 'Fuel Type',
+//     seatingCapacity: 'Seating Capacity',
+//     maxTakeoffWeight: 'Max Takeoff Weight',
+//     engineType: 'Engine Type',
+//     engineCount: 'Number of Engines',
+//     aircraftCondition: 'Condition',
+    
+//     partType: 'Part Type',
+//     partNumber: 'Part Number',
+//     manufacturer: 'Manufacturer',
+//     condition: 'Condition',
+//     hoursSinceNew: 'Hours Since New',
+//     serialNumber: 'Serial Number',
+    
+//     itemType: 'Item Type',
+//     era: 'Historical Era',
+//     authenticity: 'Authenticity',
+//     dimensions: 'Dimensions',
+//     material: 'Material'
+// };
+
+// // Category-specific field groupings
+// const categoryFieldGroups = {
+//     'Aircraft': {
+//         'Basic Info': ['make', 'model', 'year', 'registration'],
+//         'Technical Specs': ['totalHours', 'fuelType', 'seatingCapacity', 'maxTakeoffWeight', 'engineType', 'engineCount', 'aircraftCondition'],
+//     },
+//     'Engines & Parts': {
+//         'Part Details': ['partType', 'partNumber', 'manufacturer', 'condition'],
+//         'Additional Info': ['serialNumber', 'hoursSinceNew']
+//     },
+//     'Memorabilia': {
+//         'Item Details': ['itemType', 'era', 'authenticity', 'year'],
+//         'Description': ['dimensions', 'material']
+//     }
+// };
 
 // Icon mapping for specification fields
 const specificationIcons = {
@@ -21,13 +98,21 @@ const specificationIcons = {
     model: Settings,
     year: Calendar,
     registration: FileText,
-    totalHours: Clock,
+    totalTime: Clock,
+    engineTimeSMOH: Clock,
+    lastAnnualDate: Calendar,
+    usefulLoad: Weight,
     fuelType: Fuel,
     seatingCapacity: Users,
     maxTakeoffWeight: Weight,
     engineType: Cog,
     engineCount: Settings,
     aircraftCondition: Award,
+    propellerTime: Clock,
+    propellerModel: Settings,
+    engineTotalCycles: RefreshCw,
+    tbo: Clock,
+    avionicsDetails: Cpu,
     
     // Engines & Parts fields
     partType: Cog,
@@ -51,13 +136,21 @@ const fieldLabels = {
     model: 'Model', 
     year: 'Year',
     registration: 'Registration',
-    totalHours: 'Total Hours',
+    totalTime: 'Total Time',
+    engineTimeSMOH: 'Engine Time SMOH',
+    lastAnnualDate: 'Last Annual Inspection',
+    usefulLoad: 'Useful Load',
     fuelType: 'Fuel Type',
     seatingCapacity: 'Seating Capacity',
     maxTakeoffWeight: 'Max Takeoff Weight',
     engineType: 'Engine Type',
     engineCount: 'Number of Engines',
     aircraftCondition: 'Condition',
+    propellerTime: 'Propeller Time',
+    propellerModel: 'Propeller Model',
+    engineTotalCycles: 'Engine Cycles',
+    tbo: 'Time Between Overhaul',
+    avionicsDetails: 'Avionics',
     
     partType: 'Part Type',
     partNumber: 'Part Number',
@@ -76,8 +169,14 @@ const fieldLabels = {
 // Category-specific field groupings
 const categoryFieldGroups = {
     'Aircraft': {
-        'Basic Info': ['make', 'model', 'year', 'registration'],
-        'Technical Specs': ['totalHours', 'fuelType', 'seatingCapacity', 'maxTakeoffWeight', 'engineType', 'engineCount', 'aircraftCondition'],
+        'Basic Info': ['make', 'model', 'year', 'registration', 'aircraftCondition'],
+        'Time & Inspections': ['totalTime', 'engineTimeSMOH', 'lastAnnualDate'],
+        'Weight & Capacity': ['usefulLoad', 'seatingCapacity', 'maxTakeoffWeight'],
+        'Engine Details': ['engineType', 'engineCount', 'fuelType'],
+        'Propeller Details': ['propellerTime', 'propellerModel'],
+        'Jet Engine Details': ['engineTotalCycles'],
+        'Turboprop Details': ['tbo'],
+        'Avionics': ['avionicsDetails']
     },
     'Engines & Parts': {
         'Part Details': ['partType', 'partNumber', 'manufacturer', 'condition'],

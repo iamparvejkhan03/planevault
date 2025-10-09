@@ -1079,7 +1079,7 @@ const auctionWonAdminEmail = async (adminEmail, auction, winner) => {
                             
                             <div class="footer">
                                 <p>This is an automated notification from PlaneVault Auctions System.</p>
-                                <p>You're receiving this because you're listed as an administrator.</p>
+                                <p>You're receiving this because you're as an administrator.</p>
                                 <p>&copy; ${new Date().getFullYear()} PlaneVault. All rights reserved.</p>
                             </div>
                         </div>
@@ -1484,7 +1484,7 @@ const flaggedCommentAdminEmail = async (adminEmail, reason, comment, auction, re
                             
                             <div class="footer">
                                 <p>This is an automated notification from PlaneVault Moderation System.</p>
-                                <p>You're receiving this because you're listed as a moderator/administrator.</p>
+                                <p>You're receiving this because you're as a moderator/administrator.</p>
                                 <p>&copy; ${new Date().getFullYear()} PlaneVault. All rights reserved.</p>
                             </div>
                         </div>
@@ -1725,6 +1725,521 @@ const newCommentBidderEmail = async (bidder, auction, comment, commentAuthor) =>
     }
 };
 
+const auctionSubmittedForApprovalEmail = async (adminEmail, auction, seller) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
+            to: adminEmail,
+            subject: `📝 New Auction Submitted for Approval - ${auction.title}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; border-left: 4px solid #ffc107; }
+                        .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
+                        .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #17a2b8; }
+                        .seller-card { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; }
+                        .action-card { background: #d4edda; padding: 15px; border-radius: 8px; margin: 15px 0; }
+                        .detail { margin: 8px 0; }
+                        .label { font-weight: bold; color: #555; display: inline-block; width: 150px; }
+                        .status-badge { 
+                            background: #ffc107; 
+                            color: #212529;
+                            padding: 6px 16px; 
+                            border-radius: 20px; 
+                            font-size: 14px; 
+                            font-weight: bold; 
+                            display: inline-block; 
+                            margin: 10px 0;
+                        }
+                        .cta-button { 
+                            background: #000; 
+                            color: #fff !important; 
+                            padding: 12px 24px; 
+                            text-decoration: none; 
+                            border-radius: 5px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            margin: 5px;
+                        }
+                        .approve-btn { 
+                            background: #28a745; 
+                            color: #fff !important; 
+                            padding: 12px 24px; 
+                            text-decoration: none; 
+                            border-radius: 5px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            margin: 5px;
+                        }
+                        .reject-btn { 
+                            background: #dc3545; 
+                            color: #fff !important; 
+                            padding: 12px 24px; 
+                            text-decoration: none; 
+                            border-radius: 5px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            margin: 5px;
+                        }
+                        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+                        .priority { background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                        .images-info { background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h2>📝 New Auction Awaiting Approval</h2>
+                            <p>A seller has submitted a new auction for review</p>
+                            <div class="status-badge">AWAITING APPROVAL</div>
+                        </div>
+                        
+                        <div class="content">
+                            <p><strong>Hello Admin,</strong></p>
+                            <p>A new auction listing has been submitted and requires your approval before it can go live.</p>
+
+                            <div class="auction-card">
+                                <h3>🛩️ Auction Details</h3>
+                                <div class="detail">
+                                    <span class="label">Title:</span>
+                                    ${auction.title}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Auction ID:</span>
+                                    ${auction._id}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Category:</span>
+                                    ${auction.category}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Starting Price:</span>
+                                    $${auction.startPrice?.toLocaleString()}
+                                </div>
+                                ${auction.reservePrice ? `
+                                <div class="detail">
+                                    <span class="label">Reserve Price:</span>
+                                    $${auction.reservePrice?.toLocaleString()}
+                                </div>
+                                ` : ''}
+                                <div class="detail">
+                                    <span class="label">Auction Type:</span>
+                                    ${auction.auctionType}
+                                </div>
+                                ${auction.location ? `
+                                <div class="detail">
+                                    <span class="label">Location:</span>
+                                    ${auction.location}
+                                </div>
+                                ` : ''}
+                                ${auction.description ? `
+                                <div class="detail">
+                                    <span class="label">Description:</span>
+                                    <div style="margin-top: 8px; padding: 10px; background: white; border-radius: 5px; border: 1px solid #ddd;">
+                                        ${auction.description.substring(0, 200)}${auction.description.length > 200 ? '...' : ''}
+                                    </div>
+                                </div>
+                                ` : ''}
+                                <div class="detail">
+                                    <span class="label">Submitted:</span>
+                                    ${new Date(auction.createdAt).toLocaleString()}
+                                </div>
+                            </div>
+
+                            <div class="seller-card">
+                                <h3>👤 Seller Information</h3>
+                                <div class="detail">
+                                    <span class="label">Name:</span>
+                                    ${seller.firstName} ${seller.lastName}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Username:</span>
+                                    ${seller.username}
+                                </div>
+                            </div>
+
+                            ${auction.requiresImmediateAttention ? `
+                            <div class="priority">
+                                <h4>🚨 Priority Review Required</h4>
+                                <p>This auction has been flagged for immediate attention due to:</p>
+                                <ul>
+                                    ${auction.requiresImmediateAttention.reason ? `<li>${auction.requiresImmediateAttention.reason}</li>` : ''}
+                                    ${auction.highValueItem ? `<li>High-value item ($${auction.startPrice?.toLocaleString()}+)</li>` : ''}
+                                    ${auction.specialCategory ? `<li>Special category item</li>` : ''}
+                                </ul>
+                            </div>
+                            ` : ''}
+
+                            <div class="action-card">
+                                <h4>✅ Approval Checklist</h4>
+                                <ul>
+                                    <li>✓ Verify item description accuracy</li>
+                                    <li>✓ Check image quality and relevance</li>
+                                    <li>✓ Review pricing appropriateness</li>
+                                    <li>✓ Ensure category classification is correct</li>
+                                    <li>✓ Confirm seller compliance with terms</li>
+                                </ul>
+                            </div>
+
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="${process.env.FRONTEND_URL}/admin/auctions/all" class="cta-button">Review Full Auction Details</a>
+                            </div>
+
+                            <p><strong>Action Required:</strong> Please review this auction within 24 hours to ensure timely listing.</p>
+                            
+                            <div class="footer">
+                                <p>This is an automated notification from PlaneVault Auction Approval System.</p>
+                                <p>You're receiving this because you're an administrator.</p>
+                                <p>&copy; ${new Date().getFullYear()} PlaneVault. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `,
+        });
+
+        console.log(`✅ Auction submission email sent to admin for auction ${auction._id}`);
+        return !!info;
+    } catch (error) {
+        console.error(`❌ Failed to send auction submission email:`, error);
+        return false;
+    }
+};
+
+const auctionApprovedEmail = async (seller, auction) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
+            to: seller.email,
+            subject: `✅ Your Auction is Approved: ${auction.title}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background: #d4edda; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+                        .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
+                        .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                        .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
+                        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h2>✅ Auction Approved!</h2>
+                            <p>Your auction is now live and accepting bids</p>
+                        </div>
+                        
+                        <div class="content">
+                            <p>Dear <strong>${seller.firstName || seller.username}</strong>,</p>
+                            
+                            <p>Great news! Your auction listing has been approved and is now live on PlaneVault.</p>
+
+                            <div class="auction-card">
+                                <h4>🛩️ Your Live Auction</h4>
+                                <p><strong>Title:</strong> ${auction.title}</p>
+                                <p><strong>Starting Price:</strong> $${auction.startPrice?.toLocaleString()}</p>
+                                <p><strong>Auction Ends:</strong> ${new Date(auction.endDate).toLocaleString()}</p>
+                                <p><strong>Auction URL:</strong> <a href="${process.env.FRONTEND_URL}/auctions/${auction._id}">View Your Live Auction</a></p>
+                            </div>
+
+                            <p><strong>Next Steps:</strong></p>
+                            <ul>
+                                <li>Share your auction link with potential buyers</li>
+                                <li>Monitor bids and respond to questions</li>
+                                <li>Be prepared for the auction end date</li>
+                            </ul>
+
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="${process.env.FRONTEND_URL}/auctions/${auction._id}" class="cta-button">View Your Live Auction</a>
+                            </div>
+
+                            <p>Good luck with your sale! If you have any questions, our support team is here to help.</p>
+                            
+                            <div class="footer">
+                                <p>This is an automated notification from PlaneVault.</p>
+                                <p>&copy; ${new Date().getFullYear()} PlaneVault. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `,
+        });
+
+        console.log(`✅ Auction approved email sent to seller ${seller.email}`);
+        return !!info;
+    } catch (error) {
+        console.error(`❌ Failed to send auction approved email:`, error);
+        return false;
+    }
+};
+
+const newAuctionNotificationEmail = async (bidder, auction, seller) => {
+    try {
+        // Determine auction status and appropriate wording
+        const isLive = auction.status === 'active' || auction.status === 'live';
+        const auctionStatus = isLive ? 'Live Now' : 'Coming Soon';
+        const statusColor = isLive ? '#28a745' : '#17a2b8';
+        const actionText = isLive ? 'Place Your Bid Now' : 'Add to Watch Later';
+        const urgencyText = isLive ? 'Bidding is now open!' : 'Get ready to bid when it goes live!';
+        const timeInfo = isLive ? 
+            `Ends: ${new Date(auction.endDate).toLocaleString()}` : 
+            `Starts: ${new Date(auction.startDate).toLocaleString()}`;
+
+        const info = await transporter.sendMail({
+            from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
+            to: bidder.email,
+            subject: `🛩️ New Auction: ${auction.title}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; color: white; }
+                        .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
+                        .auction-card { background: #f8f9fa; padding: 25px; border-radius: 10px; margin: 20px 0; border-left: 5px solid ${statusColor}; }
+                        .status-badge { 
+                            background: ${statusColor}; 
+                            color: white;
+                            padding: 8px 20px; 
+                            border-radius: 25px; 
+                            font-size: 14px; 
+                            font-weight: bold; 
+                            display: inline-block; 
+                            margin: 10px 0;
+                        }
+                        .detail { margin: 12px 0; display: flex; }
+                        .label { font-weight: bold; color: #555; min-width: 140px; }
+                        .value { flex: 1; }
+                        .cta-button { 
+                            background: #000; 
+                            color: #fff !important; 
+                            padding: 15px 30px; 
+                            text-decoration: none; 
+                            border-radius: 8px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            font-size: 16px;
+                            margin: 10px 5px;
+                            text-align: center;
+                        }
+                        .live-button { 
+                            background: #dc3545; 
+                            color: white !important; 
+                            padding: 15px 30px; 
+                            text-decoration: none; 
+                            border-radius: 8px; 
+                            display: inline-block; 
+                            font-weight: bold; 
+                            font-size: 16px;
+                            margin: 10px 5px;
+                        }
+                        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+                        .features { display: flex; justify-content: space-between; margin: 25px 0; text-align: center; }
+                        .feature { flex: 1; padding: 15px; }
+                        .feature-icon { font-size: 24px; margin-bottom: 10px; }
+                        .urgency-banner { background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; border-left: 4px solid #ffc107; }
+                        .seller-info { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; }
+                        .price-highlight { font-size: 28px; font-weight: bold; color: #2c5530; text-align: center; margin: 15px 0; }
+                        .time-remaining { background: #f8f9fa; padding: 10px; border-radius: 5px; text-align: center; margin: 15px 0; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>✈️ New Auction Available</h1>
+                            <p>Something matching your interests has been listed</p>
+                            <div class="status-badge">${auctionStatus}</div>
+                        </div>
+                        
+                        <div class="content">
+                            <p>Dear <strong>${bidder.firstName || bidder.username}</strong>,</p>
+                            
+                            <p>We're excited to let you know about a new auction that's just been listed on PlaneVault and matches your bidding preferences!</p>
+
+                            <div class="auction-card">
+                                <h2 style="margin-top: 0; color: #2c5530;">${auction.title}</h2>
+                                
+                                <div class="price-highlight">
+                                    $${auction.startPrice?.toLocaleString()}
+                                </div>
+
+                                <div class="detail">
+                                    <span class="label">Category:</span>
+                                    <span class="value">${auction.category}</span>
+                                </div>
+                                ${auction.make && auction.model ? `
+                                <div class="detail">
+                                    <span class="label">Make & Model:</span>
+                                    <span class="value">${auction.make} ${auction.model}</span>
+                                </div>
+                                ` : ''}
+                                ${auction.year ? `
+                                <div class="detail">
+                                    <span class="label">Year:</span>
+                                    <span class="value">${auction.year}</span>
+                                </div>
+                                ` : ''}
+                                ${auction.location ? `
+                                <div class="detail">
+                                    <span class="label">Location:</span>
+                                    <span class="value">${auction.location}</span>
+                                </div>
+                                ` : ''}
+                                <div class="detail">
+                                    <span class="label">Auction Type:</span>
+                                    <span class="value">${auction.auctionType}</span>
+                                </div>
+                                ${auction.reservePrice ? `
+                                <div class="detail">
+                                    <span class="label">Reserve Price:</span>
+                                    <span class="value">$${auction.reservePrice?.toLocaleString()}</span>
+                                </div>
+                                ` : ''}
+                                <div class="detail">
+                                    <span class="label">${isLive ? 'Auction Ends' : 'Auction Starts'}:</span>
+                                    <span class="value">${new Date(isLive ? auction.endDate : auction.startDate).toLocaleString()}</span>
+                                </div>
+
+                                ${auction.description ? `
+                                <div class="detail">
+                                    <span class="label">Description:</span>
+                                    <span class="value" style="margin-top: 8px; display: block;">
+                                        ${auction.description.substring(0, 150)}${auction.description.length > 150 ? '...' : ''}
+                                    </span>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            ${isLive ? `
+                            <div class="urgency-banner">
+                                <h3>⏰ Bidding is Live!</h3>
+                                <p>This auction is currently active and accepting bids. Don't miss your chance to place your bid!</p>
+                            </div>
+                            ` : `
+                            <div class="urgency-banner">
+                                <h3>📅 Auction Coming Soon</h3>
+                                <p>This auction will be starting shortly. Set your reminder and get ready to bid when it goes live!</p>
+                            </div>
+                            `}
+
+                            <div class="seller-info">
+                                <h4>👤 Seller Information</h4>
+                                <div class="detail">
+                                    <span class="label">Seller:</span>
+                                    <span class="value">${seller.username}</span>
+                                </div>
+                            </div>
+
+                            <div class="features">
+                                <div class="feature">
+                                    <div class="feature-icon">📸</div>
+                                    <strong>Multiple Photos</strong>
+                                    <p>Detailed images available</p>
+                                </div>
+                                <div class="feature">
+                                    <div class="feature-icon">📋</div>
+                                    <strong>Full Documentation</strong>
+                                    <p>Complete auction records</p>
+                                </div>
+                                <div class="feature">
+                                    <div class="feature-icon">🛡️</div>
+                                    <strong>Secure Transaction</strong>
+                                    <p>PlaneVault protected</p>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" 
+                                   class="${isLive ? 'live-button' : 'cta-button'}">
+                                   ${isLive ? '🚀 Place Your Bid Now' : '⭐ Save to Watchlist'}
+                                </a>
+                                <br>
+                                <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" class="cta-button">
+                                    🔍 View Full Details
+                                </a>
+                            </div>
+
+                            <p><strong>Happy Bidding!</strong><br>
+                            The PlaneVault Team</p>
+
+                            <div class="footer">
+                                <p>You're receiving this email because you're a registered bidder on PlaneVault.</p>
+                                <p>
+                                    <a href="${process.env.FRONTEND_URL}/preferences/notifications" style="color: #666; text-decoration: underline;">
+                                        Manage your notification preferences
+                                    </a>
+                                </p>
+                                <p>&copy; ${new Date().getFullYear()} PlaneVault. The premier platform for aircraft auctions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `,
+        });
+
+        console.log(`✅ New auction notification sent to bidder ${bidder.email} for auction ${auction._id}`);
+        return !!info;
+    } catch (error) {
+        console.error(`❌ Failed to send new auction notification:`, error);
+        return false;
+    }
+};
+
+// Bulk notification function for multiple bidders
+const sendBulkAuctionNotifications = async (bidders, auction, seller) => {
+    try {
+        const notificationPromises = bidders.map(async (bidder) => {
+            try {
+                // Check if bidder has notifications enabled for new auctions
+                if (bidder.preferences?.newAuctionNotifications !== false) {
+                    await newAuctionNotificationEmail(bidder, auction, seller);
+                    return { success: true, email: bidder.email };
+                }
+                return { success: false, email: bidder.email, reason: 'Notifications disabled' };
+            } catch (error) {
+                console.error(`❌ Failed to send notification to ${bidder.email}:`, error.message);
+                return { success: false, email: bidder.email, error: error.message };
+            }
+        });
+
+        const results = await Promise.allSettled(notificationPromises);
+        
+        // Log summary
+        const successful = results.filter(result => 
+            result.status === 'fulfilled' && result.value.success
+        ).length;
+        const failed = results.filter(result => 
+            result.status === 'fulfilled' && !result.value.success
+        ).length;
+        const errors = results.filter(result => result.status === 'rejected').length;
+
+        console.log(`📧 Bulk auction notifications completed: ${successful} successful, ${failed} skipped/failed, ${errors} errors`);
+
+        return {
+            total: bidders.length,
+            successful,
+            failed,
+            errors
+        };
+    } catch (error) {
+        console.error('❌ Error in bulk auction notifications:', error);
+        throw error;
+    }
+};
+
 export {
     contactEmail,
     contactConfirmationEmail,
@@ -1745,4 +2260,7 @@ export {
     flaggedCommentAdminEmail,
     newCommentSellerEmail,
     newCommentBidderEmail,
+    auctionSubmittedForApprovalEmail,
+    auctionApprovedEmail,
+    sendBulkAuctionNotifications,
 };

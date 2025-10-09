@@ -267,7 +267,7 @@ function Home() {
     const [auctions, setAuctions] = useState([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('sold'); // 'sold', 'active', 'approved'
+    const [activeTab, setActiveTab] = useState('active'); // 'sold', 'active', 'approved'
 
     // Map tab values to API status values
     const tabStatusMap = {
@@ -277,14 +277,14 @@ function Home() {
     };
 
     const tabTitles = {
-        'sold': 'Sold Auctions',
         'active': 'Live Auctions',
+        'sold': 'Sold Auctions',
         'approved': 'Upcoming Auctions'
     };
 
     const tabDescriptions = {
-        'sold': 'Explore completed aircraft sales and final bid prices — gain valuable market insights and pricing trends for your next aviation purchase.',
         'active': 'Browse through our selection of premium aircraft auctions — find your perfect plane with transparent bidding and expert verification.',
+        'sold': 'Explore completed aircraft sales and final bid prices — gain valuable market insights and pricing trends for your next aviation purchase.',
         'approved': 'Get ready for exciting new aircraft listings — preview upcoming auctions and prepare your bids for these premium aviation assets.'
     };
 
@@ -318,7 +318,7 @@ function Home() {
     };
 
     useEffect(() => {
-        fetchAuctions('sold'); // Load sold auctions by default
+        fetchAuctions('active'); // Load sold auctions by default
     }, []);
 
     const handleLoadByStatus = () => {
@@ -384,19 +384,6 @@ function Home() {
                                 <input
                                     type="radio"
                                     name="options"
-                                    id="sold"
-                                    className="hidden peer"
-                                    checked={activeTab === 'sold'}
-                                    onChange={() => handleTabChange('sold')}
-                                />
-                                <label htmlFor="sold" className="cursor-pointer rounded py-2 px-4 sm:px-8 text-gray-500 transition-colors duration-200 peer-checked:bg-black peer-checked:text-white">
-                                    Sold
-                                </label>
-                            </div>
-                            <div className="flex items-center">
-                                <input
-                                    type="radio"
-                                    name="options"
                                     id="active"
                                     className="hidden peer"
                                     checked={activeTab === 'active'}
@@ -404,6 +391,19 @@ function Home() {
                                 />
                                 <label htmlFor="active" className="cursor-pointer rounded py-2 px-4 sm:px-8 text-gray-500 transition-colors duration-200 peer-checked:bg-black peer-checked:text-white">
                                     Live
+                                </label>
+                            </div>
+                            <div className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="options"
+                                    id="sold"
+                                    className="hidden peer"
+                                    checked={activeTab === 'sold'}
+                                    onChange={() => handleTabChange('sold')}
+                                />
+                                <label htmlFor="sold" className="cursor-pointer rounded py-2 px-4 sm:px-8 text-gray-500 transition-colors duration-200 peer-checked:bg-black peer-checked:text-white">
+                                    Sold
                                 </label>
                             </div>
                             <div className="flex items-center">

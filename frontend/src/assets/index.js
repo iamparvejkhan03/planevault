@@ -27,6 +27,7 @@ import endingSoonAuctions from './endingSoonAuctions.webp';
 import upcomingAuctions from './upcomingAuctions.webp';
 import spinner from './spinner.webp';
 import engineCategoryIcon from './engineCategoryIcon.webp';
+import whoWeAre from './whoWeAre.webp';
 
 const otherData = {
     phone: '+19413911070',
@@ -65,4 +66,5 @@ export {
     upcomingAuctions,
     spinner,
     engineCategoryIcon,
+    whoWeAre
 }

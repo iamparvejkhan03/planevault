@@ -79,7 +79,7 @@ const CardSection = () => {
             </div>
 
             <p className="text-sm text-gray-500 mt-4">
-                Note: Your card will be verified with a small authorization that will be immediately refunded.
+                Note: Your card will be verified with a small authorization which won't get charged.
             </p>
         </div>
     );

@@ -1,7 +1,7 @@
 import Agenda from 'agenda';
 import Auction from '../models/auction.model.js';
 import backendAxios from '../utils/backendAxios.js';
-import { chargeWinningBidder, chargeWinningBidderDirect } from '../controllers/bidPayment.controller.js';
+import { cancelAllBidderAuthorizations, cancelLosingBidderAuthorizations, chargeWinningBidder, chargeWinningBidderDirect } from '../controllers/bidPayment.controller.js';
 import { auctionEndedAdminEmail, auctionEndingSoonEmail, auctionListedEmail, auctionWonAdminEmail, paymentSuccessEmail, sendAuctionEndedSellerEmail, sendAuctionWonEmail } from '../utils/nodemailer.js';
 import User from '../models/user.model.js';
 
@@ -39,6 +39,7 @@ class AgendaService {
         // Job to end an auction at its end time
         this.agenda.define('end auction', async (job) => {
             const { auctionId } = job.attrs.data;
+            // console.log('Entered the auction end.');
 
             try {
                 const auction = await Auction.findById(auctionId)
@@ -57,6 +58,7 @@ class AgendaService {
                     if (auction.winner) {
                         // console.log('Calling chargeWinningBidderDirect for winner:', auction.winner._id);
                         await chargeWinningBidderDirect(auctionId);
+                        await cancelLosingBidderAuthorizations(auctionId, auction.winner._id);
 
                         const populateAuction = await Auction.findById(auctionId)
                             .populate('winner', 'email username firstName')
@@ -69,7 +71,11 @@ class AgendaService {
                         for (const admin of adminUsers) {
                             await auctionWonAdminEmail(admin.email, populateAuction, populateAuction.winner);
                         }
+                        return;
                     }
+                    // console.log('Calling cancel all bidder');
+
+                    await cancelAllBidderAuthorizations(auctionId);
 
                     await sendAuctionEndedSellerEmail(auction);
 
@@ -91,17 +97,50 @@ class AgendaService {
         this.agenda.define('send ending soon notifications', async (job) => {
             try {
                 const now = new Date();
-                const endingSoonTime = new Date(now.getTime() + (60 * 60 * 1000)); // 1 hour from now
 
+                // Define both time thresholds
+                const oneHourFromNow = new Date(now.getTime() + (60 * 60 * 1000)); // 1 hour from now
+                const oneDayFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 1 day from now
+
+                // Find auctions ending in the next hour OR next day
                 const endingSoonAuctions = await Auction.find({
                     status: 'active',
-                    endDate: {
-                        $lte: endingSoonTime,
-                        $gt: now
-                    }
+                    $or: [
+                        {
+                            // Ending in next hour (1-hour notification)
+                            endDate: {
+                                $lte: oneHourFromNow,
+                                $gt: now
+                            }
+                        },
+                        {
+                            // Ending in next day but after next hour (1-day notification)
+                            endDate: {
+                                $lte: oneDayFromNow,
+                                $gt: oneHourFromNow
+                            }
+                        }
+                    ]
                 }).populate('bids.bidder', 'email username preferences');
 
+                // Track which notifications we've sent to avoid duplicates
+                const sentNotifications = new Set();
+
                 for (const auction of endingSoonAuctions) {
+                    // Calculate time remaining for this auction
+                    const timeRemaining = auction.endDate - now;
+                    const hoursRemaining = Math.ceil(timeRemaining / (60 * 60 * 1000));
+
+                    let timeLabel;
+                    if (timeRemaining <= 60 * 60 * 1000) {
+                        timeLabel = 'Less than 1 hour';
+                    } else if (timeRemaining <= 24 * 60 * 60 * 1000) {
+                        timeLabel = hoursRemaining <= 1 ? '1 hour' : `${hoursRemaining} hours`;
+                    } else {
+                        const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000));
+                        timeLabel = daysRemaining === 1 ? '1 day' : `${daysRemaining} days`;
+                    }
+
                     // Get unique bidders who want notifications
                     const bidders = auction.bids
                         .map(bid => bid.bidder)
@@ -114,12 +153,19 @@ class AgendaService {
                     // Send to each bidder
                     for (const bidder of bidders) {
                         try {
-                            await auctionEndingSoonEmail(
-                                bidder.email,
-                                bidder.username,
-                                auction,
-                                'Less than 1 hour'
-                            );
+                            // Create a unique key to prevent duplicate notifications
+                            const notificationKey = `${auction._id}-${bidder._id}-${timeLabel}`;
+
+                            if (!sentNotifications.has(notificationKey)) {
+                                await auctionEndingSoonEmail(
+                                    bidder.email,
+                                    bidder.username,
+                                    auction,
+                                    timeLabel
+                                );
+                                sentNotifications.add(notificationKey);
+                                console.log(`✅ Sent ${timeLabel} notification to ${bidder.email} for auction ${auction.title}`);
+                            }
                         } catch (error) {
                             console.error(`Failed to send ending soon email to ${bidder.email}:`, error);
                         }
@@ -129,24 +175,6 @@ class AgendaService {
                 console.error('Agenda job error (ending soon notifications):', error);
             }
         });
-
-        // Add this job definition
-        // this.agenda.define('charge auction winner', async (job) => {
-        //     const { auctionId } = job.attrs.data;
-
-        //     try {
-        //         const auction = await Auction.findById(auctionId).populate('winner');
-        //         if (auction && auction.status === 'ended' && auction.winner) {
-        //             // Charge the winning bidder
-        //             await backendAxios.post('/api/v1/bid-payments/charge-winner', {
-        //                 auctionId: auctionId
-        //             });
-        //             console.log(`✅ Agenda: Charged winner for auction ${auctionId}`);
-        //         }
-        //     } catch (error) {
-        //         console.error('Agenda job error (charge winner):', error);
-        //     }
-        // });
     }
 
     // Schedule auction activation job
@@ -168,19 +196,6 @@ class AgendaService {
         });
         console.log(`🗑️ Cancelled jobs for auction ${auctionId}`);
     }
-
-    // Schedule winner charging when auction ends
-    // async scheduleWinnerCharging(auctionId) {
-    //     const auction = await Auction.findById(auctionId);
-    //     if (auction) {
-    //         // Schedule charging 1 hour after auction ends (give time for processing)
-    //         const chargeTime = new Date(auction.endDate);
-    //         chargeTime.setHours(chargeTime.getHours() + 0);
-
-    //         await this.agenda.schedule(chargeTime, 'charge auction winner', { auctionId });
-    //         console.log(`📅 Scheduled winner charging for auction ${auctionId} at ${chargeTime}`);
-    //     }
-    // }
 
     // Start Agenda
     async start() {

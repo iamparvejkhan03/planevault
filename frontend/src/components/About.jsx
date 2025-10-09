@@ -1,6 +1,6 @@
 import { ChartColumnIncreasing, Shield, Store } from "lucide-react";
 import { Link } from "react-router-dom";
-import { about } from "../assets";
+import { about, whoWeAre } from "../assets";
 import { useEffect, useRef, useState } from "react";
 
 function About() {
@@ -35,7 +35,7 @@ function About() {
     return (
         <section ref={ref} className="grid grid-cols-1 lg:grid-cols-8 gap-5 items-center">
             <div className="col-span-3 bg-gray-100 py-10 sm:py-14 lg:py-20 rounded">
-                <img loading="lazy" src={about} alt="" className="translate-x-5 sm:translate-x-10 md:translate-x-14 lg:translate-x-1/4 h-96 w-full object-cover [box-shadow:5px_5px_20px_rgba(0,0,0,0.15),-5px_-5px_20px_rgba(0,0,0,0.15)] rounded" />
+                <img loading="lazy" src={whoWeAre} alt="" className="translate-x-5 sm:translate-x-10 md:translate-x-14 lg:translate-x-1/4 h-96 w-full object-cover [box-shadow:5px_5px_20px_rgba(0,0,0,0.15),-5px_-5px_20px_rgba(0,0,0,0.15)] rounded" />
             </div>
             <div className="col-span-1"></div>
 

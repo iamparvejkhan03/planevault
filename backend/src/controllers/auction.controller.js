@@ -6,7 +6,7 @@ import {
     deleteFromCloudinary
 } from '../utils/cloudinary.js';
 import agendaService from '../services/agendaService.js';
-import { bidConfirmationEmail, outbidNotificationEmail, sendOutbidNotifications } from '../utils/nodemailer.js';
+import { auctionSubmittedForApprovalEmail, bidConfirmationEmail, outbidNotificationEmail, sendOutbidNotifications } from '../utils/nodemailer.js';
 
 // Create New Auction
 export const createAuction = async (req, res) => {
@@ -174,6 +174,11 @@ export const createAuction = async (req, res) => {
             }
         });
 
+        const adminUsers = await User.find({ userType: 'admin' });
+
+        for (const admin of adminUsers) {
+            await auctionSubmittedForApprovalEmail(admin.email, auction, auction.seller);
+        }
     } catch (error) {
         console.error('Create auction error:', error);
         res.status(500).json({

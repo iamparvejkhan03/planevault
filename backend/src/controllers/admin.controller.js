@@ -4,7 +4,7 @@ import Comment from '../models/comment.model.js';
 import Watchlist from '../models/watchlist.model.js';
 import agendaService from '../services/agendaService.js';
 import { deleteFromCloudinary, uploadDocumentToCloudinary, uploadImageToCloudinary } from '../utils/cloudinary.js';
-import { auctionListedEmail } from '../utils/nodemailer.js';
+import { auctionApprovedEmail, auctionListedEmail, sendBulkAuctionNotifications } from '../utils/nodemailer.js';
 
 export const getAdminStats = async (req, res) => {
     try {
@@ -438,7 +438,7 @@ export const updateUserStatus = async (req, res) => {
             message: 'Internal server error while updating user status'
         });
     }
-};
+}; 
 
 // Delete user
 export const deleteUser = async (req, res) => {
@@ -727,7 +727,7 @@ export const approveAuction = async (req, res) => {
     try {
         const { auctionId } = req.params;
 
-        const auction = await Auction.findById(auctionId);
+        const auction = await Auction.findById(auctionId).populate('seller');
 
         if (!auction) {
             return res.status(404).json({
@@ -749,6 +749,7 @@ export const approveAuction = async (req, res) => {
             auction.status = 'approved';
             // Schedule activation for start date - keep as draft for now
             await agendaService.scheduleAuctionActivation(auction._id, auction.startDate);
+            await auctionApprovedEmail(auction.seller, auction);
         } else {
             // Activate immediately
             auction.status = 'active';
@@ -770,6 +771,10 @@ export const approveAuction = async (req, res) => {
             message: 'Auction approved successfully',
             data: { auction }
         });
+
+        const bidders = await User.find({ userType: 'bidder' });
+
+        await sendBulkAuctionNotifications(bidders, auction, auction.seller);
 
     } catch (error) {
         console.error('Approve auction error:', error);

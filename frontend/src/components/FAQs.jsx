@@ -17,7 +17,7 @@ const FAQs = ({ faqs }) => {
                 />
                 <div className="md:col-span-4">
                     <p className="text-secondary text-lg font-medium">FAQ's</p>
-                    <h1 className="text-3xl font-bold text-primary">Looking for answer?</h1>
+                    <h1 className="text-3xl font-bold text-primary">Looking For Answers?</h1>
                     <p className="text-sm text-slate-500 mt-2 pb-4">
                         Auction Aircraft with Confidence — Secure, Transparent, and Built for Serious Sellers & Buyers.
                     </p>

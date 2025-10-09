@@ -30,7 +30,7 @@ function Hero() {
     return (
         // <section className={`bg-[url('src/assets/heroImg.webp')] min-h-screen max-w-screen py-24 flex items-center bg-center bg-no-repeat bg-cover relative`}>
         <section 
-            className="min-h-screen max-w-screen py-24 flex items-center bg-center sm:bg-left-bottom bg-no-repeat bg-cover relative"
+            className="min-h-screen max-w-screen py-24 flex items-center bg-center bg-no-repeat bg-cover relative"
             style={{ backgroundImage: `url(${heroImg})` }} // Use inline style with imported image
         >
             <Container>

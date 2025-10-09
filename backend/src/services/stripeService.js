@@ -158,4 +158,48 @@ export class StripeService {
             throw new Error(`Payment intent creation failed: ${error.message}`);
         }
     }
+
+    // Create payment intent with full parameter control
+    static async createPaymentIntent(params) {
+        try {
+            const paymentIntent = await stripe.paymentIntents.create(params);
+            return paymentIntent;
+        } catch (error) {
+            throw new Error(`Payment intent creation failed: ${error.message}`);
+        }
+    }
+
+    // Cancel a payment intent (to release authorization holds)
+    static async cancelPaymentIntent(paymentIntentId) {
+        try {
+            const paymentIntent = await stripe.paymentIntents.cancel(paymentIntentId);
+            return paymentIntent;
+        } catch (error) {
+            throw new Error(`Payment intent cancellation failed: ${error.message}`);
+        }
+    }
+
+    // Create payment intent for bid authorization (manual capture)
+    static async createBidAuthorizationIntent(customerId, paymentMethodId, amount, description) {
+        try {
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount, // Already in cents
+                currency: 'usd',
+                customer: customerId,
+                payment_method: paymentMethodId,
+                description: description,
+                capture_method: 'manual', // KEY: Authorize only, don't capture
+                confirm: true,
+                off_session: true,
+                metadata: {
+                    type: 'bid_authorization',
+                    timestamp: new Date().toISOString()
+                }
+            });
+
+            return paymentIntent;
+        } catch (error) {
+            throw new Error(`Bid authorization intent creation failed: ${error.message}`);
+        }
+    }
 }

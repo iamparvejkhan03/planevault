@@ -127,7 +127,7 @@ function SingleAuction() {
 
                 if (commissionAmount > 0) {
                     const userConfirmed = window.confirm(
-                        `A commission fee of $${commissionAmount} is required to place your first bid on this auction. Continue?`
+                        `A $${commissionAmount} temporary hold will be placed on your card for bidding. This amount will be released after the auction ends. Continue?`
                     );
 
                     if (!userConfirmed) {
@@ -460,7 +460,7 @@ function SingleAuction() {
                                 value={bidAmount}
                                 onChange={(e) => setBidAmount(e.target.value)}
                                 className="py-3 px-5 w-full rounded-lg focus:outline-2 focus:outline-primary"
-                                placeholder={`Bid $${auction.bidCount > 0 ? minBidAmount : auction.startPrice} or up`}
+                                placeholder={`Bid $${auction.bidCount > 0 ? minBidAmount : auction.startPrice} or higher`}
                                 min={minBidAmount}
                             // step={auction.bidIncrement}
                             />

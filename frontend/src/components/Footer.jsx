@@ -12,7 +12,7 @@ function Footer() {
         { name: 'About', href: '/about' },
         { name: 'Contact', href: '/contact' },
         { name: 'Auctions', href: '/auctions' },
-        // { name: 'Testimonials', href: '/testimonials' },
+        { name: 'FAQs', href: '/faqs' },
     ];
 
     const legalPolicies = [

@@ -20,7 +20,8 @@ const userSchema = new Schema({
         required: true,
         unique: true,
         trim: true,
-        index: true
+        index: true,
+        lowercase: true
     },
     email: {
         type: String,
@@ -28,6 +29,13 @@ const userSchema = new Schema({
         unique: true,
         trim: true,
         index: true,
+        lowercase: true,
+        validate: {
+            validator: function (email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            },
+            message: 'Please enter a valid email address'
+        }
     },
     password: {
         type: String,

@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (loginData) => {
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/users/login`, { email: loginData.email, password: loginData.password });
+            const { data } = await axios.post(`${import.meta.env.VITE_DOMAIN_URL}/api/v1/users/login`, { email: loginData.email.toLowerCase(), password: loginData.password });
 
             if (data && data.success) {
                 const userInfo = {

@@ -2046,7 +2046,7 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
                             margin: 10px 5px;
                         }
                         .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
-                        .features { display: flex; justify-content: space-between; margin: 25px 0; text-align: center; }
+                        .features { display: flex; justify-content: space-between; flex-wrap: wrap; margin: 25px 0; text-align: center; }
                         .feature { flex: 1; padding: 15px; }
                         .feature-icon { font-size: 24px; margin-bottom: 10px; }
                         .urgency-banner { background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; border-left: 4px solid #ffc107; }

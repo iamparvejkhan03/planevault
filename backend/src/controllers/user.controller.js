@@ -65,9 +65,16 @@ export const registerUser = async (req, res) => {
             paymentMethodId // Only for bidders
         } = req.body;
 
-        // Check if user already exists
+        // Normalize email to lowercase
+        const normalizedEmail = email.toLowerCase().trim();
+        const normalizedUsername = username.toLowerCase().trim();
+
+        // Check if user already exists with normalized email
         const existingUser = await User.findOne({
-            $or: [{ email }, { username }]
+            $or: [
+                { email: normalizedEmail },
+                { username: normalizedUsername }
+            ]
         });
 
         if (existingUser) {
@@ -122,8 +129,8 @@ export const registerUser = async (req, res) => {
         const userData = {
             firstName,
             lastName,
-            username,
-            email,
+            username: normalizedUsername,
+            email: normalizedEmail,
             password,
             userType,
             countryCode,
@@ -186,7 +193,9 @@ export const loginUser = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ email });
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await User.findOne({ email: normalizedEmail });
 
         if (!user) {
             return res.status(401).json({

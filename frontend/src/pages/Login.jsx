@@ -17,7 +17,7 @@ const Login = () => {
     const { login, user } = useAuth();
 
     useEffect(() => {
-        if(user){
+        if (user) {
             navigate(`/${user.userType}/profile`);
         }
     }, [user])
@@ -33,7 +33,13 @@ const Login = () => {
         try {
             setIsLoading(true);
 
-            const data = await login(loginData);
+            // Convert email to lowercase before sending to API
+            const normalizedLoginData = {
+                ...loginData,
+                email: loginData.email.toLowerCase().trim()
+            };
+
+            const data = await login(normalizedLoginData);
 
             if (data && data.success) {
                 toast.success(data.message);

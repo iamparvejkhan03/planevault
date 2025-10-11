@@ -3,6 +3,7 @@ import { StripeService } from '../services/stripeService.js';
 import jwt from "jsonwebtoken";
 import { newUserRegistrationEmail, resetPasswordEmail, welcomeEmail } from '../utils/nodemailer.js';
 import crypto from "crypto";
+import BidPayment from '../models/bidPayment.model.js';
 
 // Helper function to generate tokens and set cookies
 const generateTokensAndRespond = async (user, req, res, message) => {
@@ -88,7 +89,7 @@ export const registerUser = async (req, res) => {
         let paymentMethodDetails = null;
 
         // Handle bidder-specific payment verification
-        if (userType === 'bidder') {
+        // if (userType === 'bidder') {
             if (!paymentMethodId) {
                 return res.status(400).json({
                     success: false,
@@ -123,7 +124,7 @@ export const registerUser = async (req, res) => {
                     message: `Card verification failed: ${stripeError.message}`
                 });
             }
-        }
+        // }
 
         // Create user in database
         const userData = {
@@ -138,17 +139,18 @@ export const registerUser = async (req, res) => {
             phone,
             image,
             stripeCustomerId,
-            isVerified: userType === 'seller' // Sellers are verified immediately
+            isVerified: false
         };
 
         // Add payment details for bidders
-        if (userType === 'bidder' && paymentMethodDetails) {
+        // if (userType === 'bidder' && paymentMethodDetails) {
+        if (paymentMethodDetails) {
             userData.paymentMethodId = paymentMethodDetails.id;
             userData.cardLast4 = paymentMethodDetails.last4;
             userData.cardBrand = paymentMethodDetails.brand;
             userData.cardExpMonth = paymentMethodDetails.expMonth;
             userData.cardExpYear = paymentMethodDetails.expYear;
-            userData.isVerified = true; // Bidders are verified after payment verification
+            userData.isVerified = true; // Users are verified after payment verification
             userData.isPaymentVerified = true;
         }
 
@@ -382,3 +384,240 @@ export const resetPassword = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Failed to get user' });
     }
 }
+
+// Add these to your user controller
+
+export const getBillingInfo = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select(
+            'stripeCustomerId paymentMethodId cardLast4 cardBrand cardExpMonth cardExpYear isPaymentVerified userType'
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const billingInfo = {
+            stripeCustomerId: user.stripeCustomerId,
+            isPaymentVerified: user.isPaymentVerified,
+            userType: user.userType
+        };
+
+        // Add card details if available
+        if (user.cardLast4) {
+            billingInfo.card = {
+                last4: user.cardLast4,
+                brand: user.cardBrand,
+                expMonth: user.cardExpMonth,
+                expYear: user.cardExpYear
+            };
+        }
+
+        res.status(200).json({
+            success: true,
+            data: billingInfo
+        });
+
+    } catch (error) {
+        console.error('Get billing info error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while fetching billing information'
+        });
+    }
+};
+
+// export const updatePaymentMethod = async (req, res) => {
+//     try {
+//         const { paymentMethodId } = req.body;
+//         const userId = req.user._id;
+
+//         if (!paymentMethodId) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Payment method ID is required'
+//             });
+//         }
+
+//         const user = await User.findById(userId);
+        
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'User not found'
+//             });
+//         }
+
+//         if (!user.stripeCustomerId) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'No Stripe customer found'
+//             });
+//         }
+
+//         // Verify and update card with Stripe (using the same function from registration)
+//         const verificationResult = await StripeService.verifyAndSaveCard(
+//             user.stripeCustomerId,
+//             paymentMethodId
+//         );
+
+//         if (!verificationResult.success) {
+//             throw new Error('Card verification failed');
+//         }
+
+//         const paymentMethodDetails = verificationResult.paymentMethod;
+
+//         // Update user in database
+//         user.paymentMethodId = paymentMethodDetails.id;
+//         user.cardLast4 = paymentMethodDetails.last4;
+//         user.cardBrand = paymentMethodDetails.brand;
+//         user.cardExpMonth = paymentMethodDetails.expMonth;
+//         user.cardExpYear = paymentMethodDetails.expYear;
+//         user.isPaymentVerified = true;
+
+//         await user.save();
+
+//         const updatedCardInfo = {
+//             last4: user.cardLast4,
+//             brand: user.cardBrand,
+//             expMonth: user.cardExpMonth,
+//             expYear: user.cardExpYear
+//         };
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Payment method updated successfully',
+//             data: {
+//                 card: updatedCardInfo,
+//                 isPaymentVerified: true,
+//                 userType: user.userType,
+//                 stripeCustomerId: user.stripeCustomerId
+//             }
+//         });
+
+//     } catch (error) {
+//         console.error('Update payment method error:', error);
+//         res.status(400).json({
+//             success: false,
+//             message: error.message || 'Failed to update payment method'
+//         });
+//     }
+// };
+
+export const updatePaymentMethod = async (req, res) => {
+    try {
+        const { paymentMethodId } = req.body;
+        const userId = req.user._id;
+
+        if (!paymentMethodId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Payment method ID is required'
+            });
+        }
+
+        const user = await User.findById(userId);
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        if (!user.stripeCustomerId) {
+            return res.status(400).json({
+                success: false,
+                message: 'No Stripe customer found'
+            });
+        }
+
+        // ✅ STEP 1: Cancel ONLY pending authorizations (requires_capture) on old card
+        // DO NOT cancel succeeded payments (already charged commissions)
+        const pendingAuthorizations = await BidPayment.find({
+            bidder: userId,
+            type: 'bid_authorization',
+            status: 'requires_capture' // ONLY this status!
+        });
+
+        console.log(`🔄 Cancelling ${pendingAuthorizations.length} PENDING authorizations for user ${userId}`);
+
+        let cancelledCount = 0;
+        for (const payment of pendingAuthorizations) {
+            try {
+                await StripeService.cancelPaymentIntent(payment.paymentIntentId);
+                payment.status = 'canceled';
+                await payment.save();
+                cancelledCount++;
+                console.log(`✅ Cancelled PENDING authorization for auction: ${payment.auction}`);
+            } catch (error) {
+                console.error(`❌ Failed to cancel authorization ${payment.paymentIntentId}:`, error.message);
+            }
+        }
+
+        // ✅ STEP 2: Also mark any 'succeeded' bid_authorizations as 'replaced'
+        // These are the old $2500 authorizations that were replaced by final commissions
+        const succeededAuthorizations = await BidPayment.find({
+            bidder: userId,
+            type: 'bid_authorization', 
+            status: 'succeeded'
+        });
+
+        for (const payment of succeededAuthorizations) {
+            payment.status = 'replaced'; // Mark as replaced for clarity
+            await payment.save();
+            console.log(`📝 Marked succeeded authorization as replaced for auction: ${payment.auction}`);
+        }
+
+        // ✅ STEP 3: Verify and update card with Stripe
+        const verificationResult = await StripeService.verifyAndSaveCard(
+            user.stripeCustomerId,
+            paymentMethodId
+        );
+
+        if (!verificationResult.success) {
+            throw new Error('Card verification failed');
+        }
+
+        const paymentMethodDetails = verificationResult.paymentMethod;
+
+        // ✅ STEP 4: Update user in database
+        user.paymentMethodId = paymentMethodDetails.id;
+        user.cardLast4 = paymentMethodDetails.last4;
+        user.cardBrand = paymentMethodDetails.brand;
+        user.cardExpMonth = paymentMethodDetails.expMonth;
+        user.cardExpYear = paymentMethodDetails.expYear;
+        user.isPaymentVerified = true;
+
+        await user.save();
+
+        const updatedCardInfo = {
+            last4: user.cardLast4,
+            brand: user.cardBrand,
+            expMonth: user.cardExpMonth,
+            expYear: user.cardExpYear
+        };
+
+        res.status(200).json({
+            success: true,
+            message: `Payment method updated successfully. ${cancelledCount} pending authorizations cancelled.`,
+            data: {
+                card: updatedCardInfo,
+                isPaymentVerified: true,
+                userType: user.userType,
+                stripeCustomerId: user.stripeCustomerId,
+                cancelledAuthorizations: cancelledCount
+            }
+        });
+
+    } catch (error) {
+        console.error('Update payment method error:', error);
+        res.status(400).json({
+            success: false,
+            message: error.message || 'Failed to update payment method'
+        });
+    }
+};

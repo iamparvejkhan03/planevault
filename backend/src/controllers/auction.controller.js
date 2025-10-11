@@ -14,12 +14,12 @@ export const createAuction = async (req, res) => {
         const seller = req.user;
 
         // Check if user is a seller
-        if (seller.userType !== 'seller') {
-            return res.status(403).json({
-                success: false,
-                message: 'Only sellers can create auctions'
-            });
-        }
+        // if (seller.userType !== 'seller') {
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: 'Only sellers can create auctions'
+        //     });
+        // }
 
         const {
             title,
@@ -936,12 +936,12 @@ export const placeBid = async (req, res) => {
         const bidder = req.user;
 
         // Check if user is a bidder
-        if (bidder.userType !== 'bidder') {
-            return res.status(403).json({
-                success: false,
-                message: 'Only bidders can place bids'
-            });
-        }
+        // if (bidder.userType !== 'bidder') {
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: 'Only bidders can place bids'
+        //     });
+        // }
 
         const auction = await Auction.findById(id);
 

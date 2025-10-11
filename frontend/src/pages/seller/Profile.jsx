@@ -54,7 +54,7 @@ function Profile() {
 
     const fetchUserStats = async () => {
         try {
-            const { data } = await axiosInstance.get('/api/v1/users/stats');
+            const { data } = await axiosInstance.get('/api/v1/users/stats/seller');
             if (data.success) {
                 setStats(data.data.statistics);
             }

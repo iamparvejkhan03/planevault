@@ -268,7 +268,7 @@ function MyBids() {
                         <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-purple-100 text-sm">Total Bid Amount</p>
+                                    <p className="text-purple-100 text-sm">Total Spent</p>
                                     <p className="text-2xl font-bold mt-1">{formatCurrency(statistics.totalWonAmount)}</p>
                                     <p className="text-purple-200 text-xs mt-1">Across all auctions</p>
                                 </div>

@@ -53,7 +53,7 @@ function Profile() {
 
     const fetchUserStats = async () => {
         try {
-            const { data } = await axiosInstance.get('/api/v1/users/stats');
+            const { data } = await axiosInstance.get('/api/v1/users/stats/bidder');
             if (data.success) {
                 setStats(data.data.statistics);
             }
@@ -609,14 +609,14 @@ function Profile() {
 
                             {/* Bidder Stats Cards */}
                             {stats && (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-5">
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
                                         <div className="p-3 rounded-lg mr-4 bg-blue-100">
                                             <Gavel size={20} className="text-blue-600" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Total Bids</p>
-                                            <p className="font-semibold text-lg">{stats.totalBids}</p>
+                                            <p className="font-semibold text-lg">{stats.totalBids || 0}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
@@ -625,7 +625,7 @@ function Profile() {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Auctions Won</p>
-                                            <p className="font-semibold text-lg">{stats.wonAuctions}</p>
+                                            <p className="font-semibold text-lg">{stats.wonAuctions || 0}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
@@ -634,7 +634,7 @@ function Profile() {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Success Rate</p>
-                                            <p className="font-semibold text-lg">{stats.successRate}%</p>
+                                            <p className="font-semibold text-lg">{stats.successRate || 0}%</p>
                                         </div>
                                     </div>
                                     {/* Additional bidder stats */}
@@ -644,7 +644,7 @@ function Profile() {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Active Bids</p>
-                                            <p className="font-semibold text-lg">{stats.activeBids}</p>
+                                            <p className="font-semibold text-lg">{stats.activeBids || 0}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
@@ -653,7 +653,7 @@ function Profile() {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Watchlist Items</p>
-                                            <p className="font-semibold text-lg">{stats.watchlistCount}</p>
+                                            <p className="font-semibold text-lg">{stats.watchlistCount || 0}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center">
@@ -667,7 +667,7 @@ function Profile() {
                                                     style: 'currency',
                                                     currency: 'USD',
                                                     minimumFractionDigits: 0
-                                                }).format(stats.totalSpent)}
+                                                }).format(stats.totalSpent) || 0}
                                             </p>
                                         </div>
                                     </div>

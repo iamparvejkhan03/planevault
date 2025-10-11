@@ -9,7 +9,7 @@ function Dashboard() {
 
     const fetchUserStats = async () => {
         try {
-            const { data } = await axiosInstance.get('/api/v1/users/stats');
+            const { data } = await axiosInstance.get('/api/v1/users/stats/seller');
             if (data.success) {
                 setStats(data.data.statistics);
             }
@@ -93,8 +93,8 @@ function Dashboard() {
 
                 <SellerContainer>
                     <div className="max-w-full pt-16 pb-7 md:pt-0">
-                        <h2 className="text-3xl md:text-4xl font-bold my-5">Dashboard</h2>
-                        <p className="text-secondary">Easily track your consultations and documents in one place.</p>
+                        <h2 className="text-3xl md:text-4xl font-bold my-5">Seller Dashboard</h2>
+                        <p className="text-secondary">Easily track your auctions in one place.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

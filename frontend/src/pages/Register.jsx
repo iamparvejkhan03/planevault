@@ -135,7 +135,7 @@ const Register = () => {
             let paymentMethodId = null;
 
             // Handle bidder card verification
-            if (registrationData.userType === 'bidder') {
+            // if (registrationData.userType === 'bidder') {
                 if (!stripe || !elements) {
                     toast.error('Stripe not initialized properly');
                     setIsLoading(false);
@@ -171,7 +171,7 @@ const Register = () => {
                 }
 
                 paymentMethodId = paymentMethod.id;
-            }
+            // }
 
             // Prepare registration data - store both name and code
             const registrationPayload = {
@@ -184,7 +184,8 @@ const Register = () => {
                 countryCode: registrationData.country, // This will be the code like 'IN', 'US'
                 countryName: countries.find(c => c.code === registrationData.country)?.name || registrationData.country,
                 userType: registrationData.userType,
-                ...(registrationData.userType === 'bidder' && { paymentMethodId })
+                // ...(registrationData.userType === 'bidder' && { paymentMethodId })
+                paymentMethodId: paymentMethodId
             };
 
             // Send registration request
@@ -507,7 +508,22 @@ const Register = () => {
                         </div>
 
                         {/* Stripe Card Section for Bidders */}
-                        {userType === 'bidder' && <CardSection />}
+                        {/* {userType === 'bidder' && <CardSection />} */}
+                        <CardSection />
+
+                        <div>
+                            <label className='flex items-center gap-2'>
+                                <input
+                                    type="checkbox"
+                                    {...register('termsConditions', { required: 'Accepting terms of use is required for registration.' })}
+                                />
+
+                                <p className="text-sm text-gray-600">By registering, I agree to PlaneVault's <Link className='text-blue-600 underline' to={`/terms-of-use`}>Terms of Use</Link>. My information will be used as described in the <Link to={`/privacy-policy`} className='text-blue-600 underline'>Privacy Policy</Link>.</p>
+                            </label>
+                            {errors.termsConditions && (
+                                <p className="text-red-500 text-sm mt-1">{errors.termsConditions.message}</p>
+                            )}
+                        </div>
 
                         {/* Submit Button */}
                         <button

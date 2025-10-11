@@ -8,7 +8,8 @@ import {
     X,
     Menu,
     Bell,
-    Plus
+    Plus,
+    CreditCard
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { logo } from "../../assets";
@@ -21,6 +22,7 @@ const navigation = [
     { name: 'Create Auction', path: '/seller/auctions/create', icon: <Plus size={20} /> },
     { name: 'Sold Auctions', path: '/seller/auctions/sold', icon: <Award size={20} /> },
     { name: 'Bid History', path: '/seller/bids/history', icon: <TrendingUp size={20} /> },
+    { name: 'Billing', path: '/seller/billing', icon: <CreditCard size={20} /> },
     // { name: 'Notifications', path: '/seller/notifications', icon: <Bell size={20} /> },
     { name: 'Profile', path: '/seller/profile', icon: <User size={20} /> },
 ];

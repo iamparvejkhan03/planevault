@@ -43,8 +43,8 @@ class AgendaService {
 
             try {
                 const auction = await Auction.findById(auctionId)
-                    .populate('winner', 'email username firstName')
-                    .populate('seller', 'email username firstName');
+                    .populate('winner', 'email phone username firstName')
+                    .populate('seller', 'email phone username firstName');
                 // Add safety check - only end if current time is actually past end date
                 if (auction && (auction.status === 'active' || auction.status === 'reserve_not_met') && new Date() >= auction.endDate) {
                     // if (auction && auction.status === 'active' && new Date() >= auction.endDate) {
@@ -61,11 +61,12 @@ class AgendaService {
                         await cancelLosingBidderAuthorizations(auctionId, auction.winner._id);
 
                         const populateAuction = await Auction.findById(auctionId)
-                            .populate('winner', 'email username firstName')
-                            .populate('seller', 'email username firstName');
+                            .populate('winner', 'email phone username firstName')
+                            .populate('seller', 'email phone username firstName');
 
                         await sendAuctionWonEmail(populateAuction);
                         await paymentSuccessEmail(populateAuction.winner, populateAuction, populateAuction?.commissionAmount);
+                        await sendAuctionEndedSellerEmail(populateAuction);
 
                         const adminUsers = await User.find({ userType: 'admin' });
                         for (const admin of adminUsers) {
@@ -98,26 +99,34 @@ class AgendaService {
             try {
                 const now = new Date();
 
-                // Define both time thresholds
-                const oneHourFromNow = new Date(now.getTime() + (60 * 60 * 1000)); // 1 hour from now
-                const oneDayFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 1 day from now
+                // Define multiple time thresholds
+                const thirtyMinutesFromNow = new Date(now.getTime() + (30 * 60 * 1000)); // 30 minutes from now
+                const twoHoursFromNow = new Date(now.getTime() + (2 * 60 * 60 * 1000)); // 2 hours from now
+                const twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 24 hours from now
 
-                // Find auctions ending in the next hour OR next day
+                // Find auctions ending within our thresholds
                 const endingSoonAuctions = await Auction.find({
                     status: 'active',
                     $or: [
                         {
-                            // Ending in next hour (1-hour notification)
+                            // Ending in next 30 minutes (30-minute notification)
                             endDate: {
-                                $lte: oneHourFromNow,
+                                $lte: thirtyMinutesFromNow,
                                 $gt: now
                             }
                         },
                         {
-                            // Ending in next day but after next hour (1-day notification)
+                            // Ending in next 2 hours but after 30 minutes (2-hour notification)
                             endDate: {
-                                $lte: oneDayFromNow,
-                                $gt: oneHourFromNow
+                                $lte: twoHoursFromNow,
+                                $gt: thirtyMinutesFromNow
+                            }
+                        },
+                        {
+                            // Ending in next 24 hours but after 2 hours (24-hour notification)
+                            endDate: {
+                                $lte: twentyFourHoursFromNow,
+                                $gt: twoHoursFromNow
                             }
                         }
                     ]
@@ -127,18 +136,25 @@ class AgendaService {
                 const sentNotifications = new Set();
 
                 for (const auction of endingSoonAuctions) {
-                    // Calculate time remaining for this auction
+                    // Calculate exact time remaining for this auction
                     const timeRemaining = auction.endDate - now;
+                    const minutesRemaining = Math.ceil(timeRemaining / (60 * 1000));
                     const hoursRemaining = Math.ceil(timeRemaining / (60 * 60 * 1000));
 
+                    // Determine which notification threshold this auction falls into
                     let timeLabel;
-                    if (timeRemaining <= 60 * 60 * 1000) {
-                        timeLabel = 'Less than 1 hour';
-                    } else if (timeRemaining <= 24 * 60 * 60 * 1000) {
-                        timeLabel = hoursRemaining <= 1 ? '1 hour' : `${hoursRemaining} hours`;
+                    if (timeRemaining <= 30 * 60 * 1000) {
+                        // 30 minutes or less
+                        timeLabel = minutesRemaining <= 1 ? 'Less than 1 minute' :
+                            minutesRemaining <= 5 ? 'Less than 5 minutes' :
+                                minutesRemaining <= 30 ? `${minutesRemaining} minutes` : '30 minutes';
+                    } else if (timeRemaining <= 2 * 60 * 60 * 1000) {
+                        // 2 hours or less (but more than 30 minutes)
+                        timeLabel = hoursRemaining <= 1 ? '1 hour' : '2 hours';
                     } else {
+                        // 24 hours or less (but more than 2 hours)
                         const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000));
-                        timeLabel = daysRemaining === 1 ? '1 day' : `${daysRemaining} days`;
+                        timeLabel = daysRemaining === 1 ? '24 hours' : `${daysRemaining} days`;
                     }
 
                     // Get unique bidders who want notifications
@@ -153,7 +169,7 @@ class AgendaService {
                     // Send to each bidder
                     for (const bidder of bidders) {
                         try {
-                            // Create a unique key to prevent duplicate notifications
+                            // Create a unique key to prevent duplicate notifications for the same time threshold
                             const notificationKey = `${auction._id}-${bidder._id}-${timeLabel}`;
 
                             if (!sentNotifications.has(notificationKey)) {
@@ -171,6 +187,8 @@ class AgendaService {
                         }
                     }
                 }
+
+                console.log(`📧 Sent ending soon notifications for ${endingSoonAuctions.length} auctions`);
             } catch (error) {
                 console.error('Agenda job error (ending soon notifications):', error);
             }

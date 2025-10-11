@@ -43,6 +43,7 @@ import WatchlistButton from "./WatchlistButton";
 import SpecificationsSection from "./SpecificationsSection";
 import SearchFormPopUp from "./SearchFormPopUp";
 import CategoryImagesSection from "./CategoryImagesSection";
+import BidConfirmationModal from "./BidConfirmationModal";
 
 export {
     Container,
@@ -90,4 +91,5 @@ export {
     SpecificationsSection,
     SearchFormPopUp,
     CategoryImagesSection,
+    BidConfirmationModal,
 }

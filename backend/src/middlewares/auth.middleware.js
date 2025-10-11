@@ -95,8 +95,10 @@ export const requireAdmin = (req, res, next) => {
 };
 
 // Combined middleware for specific user types
-export const authSeller = [auth, requireSeller];
-export const authBidder = [auth, requireBidder];
+// export const authSeller = [auth, requireSeller];
+// export const authBidder = [auth, requireBidder];
+export const authSeller = [auth];
+export const authBidder = [auth];
 export const authAdmin = [auth, requireAdmin];
 
 // Optional: Soft auth middleware (attaches user if available, but doesn't require auth)

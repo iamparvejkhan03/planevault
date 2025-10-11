@@ -1,5 +1,5 @@
 import { CalendarDays, CheckSquare, Clock, Download, File, Fuel, Gauge, Gavel, Heart, Loader, MapPin, MessageCircle, PaintBucket, Plane, ShieldCheck, Tag, User, Users, Weight } from "lucide-react";
-import { Container, LoadingSpinner, MobileBidStickyBar, SpecificationsSection, TabSection, TimerDisplay, WatchlistButton } from "../components";
+import { BidConfirmationModal, Container, LoadingSpinner, MobileBidStickyBar, SpecificationsSection, TabSection, TimerDisplay, WatchlistButton } from "../components";
 import { Link, useParams } from "react-router-dom";
 import { lazy, Suspense, useRef, useState, useEffect } from "react";
 import useAuctionCountdown from "../hooks/useAuctionCountDown";
@@ -25,6 +25,21 @@ function SingleAuction() {
     const { pagination } = useComments(id);
     const { isWatchlisted, toggleWatchlist, watchlistCount } = useWatchlist(id);
     const hasFetchedRef = useRef(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const formRef = useRef();
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmBid = (e) => {
+        handleBid(e)
+        setIsModalOpen(false);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     // useEffect(() => {
     //     const fetchAuction = async () => {
@@ -117,7 +132,12 @@ function SingleAuction() {
 
             // Check if user needs to make payment intent (first bid by this user)
             const { data: userBidPayments } = await axiosInstance.get(`/api/v1/bid-payments/auction/${id}`);
-            const hasExistingPayment = userBidPayments.data.bidPayments.length > 0;
+            // const hasExistingPayment = userBidPayments.data.bidPayments.length > 0;
+            const activePayments = userBidPayments.data.bidPayments.filter(
+                payment => payment.status !== 'canceled' && payment.type === 'bid_authorization'
+            );
+
+            const hasExistingPayment = activePayments.length > 0;
 
             if (!hasExistingPayment) {
                 // Get commission amount from backend
@@ -127,7 +147,7 @@ function SingleAuction() {
 
                 if (commissionAmount > 0) {
                     const userConfirmed = window.confirm(
-                        `A $${commissionAmount} temporary hold will be placed on your card for bidding. This amount will be released after the auction ends. Continue?`
+                        `A $${commissionAmount} temporary hold will be placed on your credit card for bidding. This amount will be released after the auction ends if you are not the winning bidder. Continue?`
                     );
 
                     if (!userConfirmed) {
@@ -454,7 +474,7 @@ function SingleAuction() {
 
                     {/* Conditional Bid Form based on auction status */}
                     {countdown.status === 'counting-down' ? (
-                        <form onSubmit={handleBid} className="flex flex-col gap-4">
+                        <form ref={formRef} onSubmit={handleBid} className="flex flex-col gap-4">
                             <input
                                 type="number"
                                 value={bidAmount}
@@ -465,8 +485,9 @@ function SingleAuction() {
                             // step={auction.bidIncrement}
                             />
                             <button
-                                type="submit"
+                                type="button"
                                 disabled={bidding}
+                                onClick={() => handleOpenModal(bidAmount)}
                                 className="flex items-center justify-center gap-2 w-full bg-primary text-white py-3 px-6 cursor-pointer rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
                             >
                                 {bidding ? (
@@ -478,6 +499,15 @@ function SingleAuction() {
                                     </>
                                 )}
                             </button>
+
+                            <BidConfirmationModal
+                                isOpen={isModalOpen}
+                                onClose={handleCloseModal}
+                                onConfirm={handleConfirmBid}
+                                bidAmount={bidAmount}
+                                auction={auction}
+                                ref={formRef}
+                            />
                         </form>
                     ) : countdown.status === 'approved' ? (
                         <div className="text-center py-4 bg-blue-100 rounded-lg border border-blue-200">

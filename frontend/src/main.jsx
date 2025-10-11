@@ -32,6 +32,7 @@ const SoldAuctions = lazy(() => import('./pages/seller/SoldAuctions'));
 const BidHistory = lazy(() => import('./pages/seller/BidHistory'));
 const SellerProfile = lazy(() => import('./pages/seller/Profile'));
 const SellerNotifications = lazy(() => import('./pages/seller/Notifications'));
+const SellerBilling = lazy(() => import('./pages/seller/Billing'));
 
 {/* Bidder Pages */ }
 const BidderLayout = lazy(() => import('./pages/bidder/Layout'));
@@ -42,6 +43,7 @@ const MyBids = lazy(() => import('./pages/bidder/MyBids'));
 const WonAuctions = lazy(() => import('./pages/bidder/WonAuctions'));
 const BidderProfile = lazy(() => import('./pages/bidder/Profile'));
 const BidderNotifications = lazy(() => import('./pages/bidder/Notifications'));
+const BidderBilling = lazy(() => import('./pages/bidder/Billing'));
 
 {/* Admin Pages */ }
 const AdminLayout = lazy(() => import('./pages/admin/Layout'));
@@ -160,11 +162,21 @@ createRoot(document.getElementById('root')).render(
                                 }
                             />
                             {/* Seller Notifications */}
-                            <Route
+                            {/* <Route
                                 path='/seller/notifications'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <SellerNotifications />
+                                    </Suspense>
+                                }
+                            /> */}
+
+                            {/* Seller Billing */}
+                            <Route
+                                path='/seller/billing'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <SellerBilling />
                                     </Suspense>
                                 }
                             />
@@ -233,11 +245,21 @@ createRoot(document.getElementById('root')).render(
                             />
 
                             {/* Bidder Notifications */}
-                            <Route
+                            {/* <Route
                                 path='/bidder/notifications'
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <BidderNotifications />
+                                    </Suspense>
+                                }
+                            /> */}
+
+                            {/* Bidder Billing */}
+                            <Route
+                                path='/bidder/billing'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <BidderBilling />
                                     </Suspense>
                                 }
                             />

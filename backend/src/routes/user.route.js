@@ -2,10 +2,12 @@ import { Router } from "express";
 import upload from "../middlewares/multer.middleware.js";
 import { 
     forgotPassword,
+    getBillingInfo,
     loginUser, 
     refreshAccessToken, 
     registerUser,
     resetPassword,
+    updatePaymentMethod,
 } from "../controllers/user.controller.js";
 
 import {
@@ -32,6 +34,8 @@ userRouter.get('/profile', auth, getProfile);
 userRouter.put('/profile', auth, upload.single('image'), updateProfile);
 userRouter.put('/change-password', auth, changePassword);
 userRouter.put('/preferences', auth, updatePreferences);
-userRouter.get('/stats', auth, getUserStats);
+userRouter.get('/stats/:userType', auth, getUserStats);
+userRouter.get('/billing', auth, getBillingInfo);
+userRouter.put('/billing/update-card', auth, updatePaymentMethod);
 
 export default userRouter;

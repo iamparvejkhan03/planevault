@@ -11,10 +11,11 @@ function Protected({ authetication, children, userType }) {
     useEffect(() => {
         if (!loading && authetication && !user) {
             navigate('/login');
-        }else if(!loading && authetication && userType !== user.userType){
-            navigate(`/${user.userType}/dashboard`);
-            toast.error(`You are not allowed to access ${userType}'s path`);
         }
+        // else if(!loading && authetication && userType !== user.userType){
+        //     navigate(`/${user.userType}/dashboard`);
+        //     toast.error(`You are not allowed to access ${userType}'s path`);
+        // }
     }, [pathname, user, loading, authetication, navigate]);
 
     if (loading) {

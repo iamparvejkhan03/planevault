@@ -68,7 +68,7 @@ function Header() {
                             ))
                         }
                         <li>
-                            <NavLink className={({ isActive }) => `${isActive && isScrolled ? 'text-secondary' : isActive && !isScrolled ? 'text-secondary' : isScrolled ? 'text-black' : 'text-white'} hover:underline`} to={user && user.userType == 'seller' ? '/seller/auctions/create' : '/register'}>Sell with Us</NavLink>
+                            <NavLink className={({ isActive }) => `${isActive && isScrolled ? 'text-secondary' : isActive && !isScrolled ? 'text-secondary' : isScrolled ? 'text-black' : 'text-white'} hover:underline`} to={user ? '/seller/auctions/create' : '/register'}>Sell with Us</NavLink>
                         </li>
                         <li className={`${isScrolled ? 'text-black' : 'text-white'}`}>
                             <button onClick={() => openPopup('category')} className="flex gap-1 items-end cursor-pointer hover:underline"><span>Categories</span> <ChevronRight /></button>
@@ -96,7 +96,7 @@ function Header() {
                             ))
                         }
                         <li onClick={() => setIsMenuOpen(false)} className="mx-5 py-2">
-                            <Link to={user && user.userType == 'seller' ? '/seller/auctions/create' : '/register'}>Sell with Us</Link>
+                            <Link to={user ? '/seller/auctions/create' : '/register'}>Sell with Us</Link>
                         </li>
                         <li>
                             {

@@ -32,6 +32,7 @@ const contactEmail = async (name, email, phone, userType, message) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
                         .content { background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-top: 20px; }
                         .field { margin-bottom: 15px; }
@@ -43,6 +44,7 @@ const contactEmail = async (name, email, phone, userType, message) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>New Contact Form Submission</h2>
                             <p>You have received a new query from your website</p>
                         </div>
@@ -96,6 +98,7 @@ const contactConfirmationEmail = async (name, email) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
                         .content { background: #fff; padding: 20px; border-radius: 5px; margin-top: 20px; }
                         .footer { margin-top: 20px; text-align: center; color: #666; font-size: 12px; }
@@ -104,6 +107,7 @@ const contactConfirmationEmail = async (name, email) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>Thank You for Contacting PlaneVault</h2>
                         </div>
                         <div class="content">
@@ -141,6 +145,7 @@ const bidConfirmationEmail = async (userEmail, userName, itemName, amount, curre
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
                         .bid-info { background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0; }
                         .amount { font-size: 24px; font-weight: bold; color: #2e7d32; }
@@ -150,6 +155,7 @@ const bidConfirmationEmail = async (userEmail, userName, itemName, amount, curre
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>Bid Confirmation</h2>
                         </div>
                         <p>Dear <strong>${userName}</strong>,</p>
@@ -193,6 +199,7 @@ const outbidNotificationEmail = async (userEmail, userName, itemName, newBid, au
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .alert { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
                         .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
                         .bid-amount { font-size: 20px; font-weight: bold; color: #dc3545; margin: 10px 0; }
@@ -202,6 +209,7 @@ const outbidNotificationEmail = async (userEmail, userName, itemName, newBid, au
                 <body>
                     <div class="container">
                         <div class="alert">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>🚨 You've Been Outbid!</h2>
                             <p>Another bidder has placed a higher bid on an item you were bidding on.</p>
                         </div>
@@ -341,6 +349,7 @@ const sendAuctionWonEmail = async (auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .congrats { background: #d4edda; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; border-left: 4px solid #28a745; }
                         .winning-bid { font-size: 28px; font-weight: bold; color: #155724; margin: 10px 0; }
                         .next-steps { background: #e2e3e5; padding: 20px; border-radius: 5px; margin: 20px 0; }
@@ -352,6 +361,7 @@ const sendAuctionWonEmail = async (auction) => {
                 <body>
                     <div class="container">
                         <div class="congrats">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>🎉 Congratulations! You Won! 🎉</h2>
                             <p>You are the winning bidder for:</p>
                             <h3>${auction.title}</h3>
@@ -367,6 +377,18 @@ const sendAuctionWonEmail = async (auction) => {
                             <p><strong>Auction Ended:</strong> ${new Date(auction.endDate).toLocaleDateString()}</p>
                             ${auction.location ? `<p><strong>Location:</strong> ${auction.location}</p>` : ''}
                         </div>
+
+                        ${auction.status === 'sold' ? `
+                            <p>Congratulations on being the highest bidder and winning this auction! Now, you can reach out to ${auction.seller.firstName || auction.seller.username} on the following details and follow up to arrange payment and transfer details.</p>
+
+                            ${auction.seller ? `<p><strong>Seller:</strong> ${auction.seller.firstName || auction.seller.username}</p>` : ''}
+
+                            ${auction.seller ? `<p><strong>E-mail:</strong> ${auction.seller?.email}</p>` : ''}
+
+                            ${auction.seller ? `<p><strong>Phone:</strong> ${auction.seller?.phone}</p>` : ''}
+                        ` : `
+                            <p></p>
+                        `}
                         
                         <div class="next-steps">
                             <h4>Next Steps:</h4>
@@ -374,10 +396,8 @@ const sendAuctionWonEmail = async (auction) => {
                         </div>
                         
                         <p style="text-align: center; margin: 25px 0;">
-                            <a href="${process.env.FRONTEND_URL}/dashboard/purchases" class="cta-button">View Your Purchase</a>
+                            <a href="${process.env.FRONTEND_URL}/bidder/auctions/won" class="cta-button">View Your Winnings</a>
                         </p>
-                        
-                        <p>Our team will contact you shortly to arrange the final details.</p>
                         
                         <p>Thank you for bidding with <strong>PlaneVault</strong>!</p>
                         
@@ -419,6 +439,7 @@ const sendAuctionEndedSellerEmail = async (auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #${auction.status === 'sold' ? 'd4edda' : 'fff3cd'}; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .status { font-size: 24px; font-weight: bold; color: #${auction.status === 'sold' ? '155724' : '856404'}; }
                         .footer { margin-top: 20px; text-align: center; color: #666; font-size: 12px; }
@@ -427,6 +448,7 @@ const sendAuctionEndedSellerEmail = async (auction) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>Your Auction Has Ended</h2>
                             <div class="status">${statusMessage}</div>
                         </div>
@@ -434,17 +456,23 @@ const sendAuctionEndedSellerEmail = async (auction) => {
                         <p>Dear <strong>${auction.seller.firstName || auction.seller.username}</strong>,</p>
                         
                         <p>Your auction for <strong>"${auction.title}"</strong> has ended.</p>
+
+                        ${auction.status === 'sold' ? `
+                            <p>Congratulations on your successful sale! Now, you can reach out to ${auction.winner.firstName || auction.winner.username} on the following details and follow up to arrange payment and transfer details.</p>
+
+                            ${auction.winner ? `<p><strong>Winner:</strong> ${auction.winner.firstName || auction.winner.username}</p>` : ''}
+
+                            ${auction.winner ? `<p><strong>E-mail:</strong> ${auction.winner?.email}</p>` : ''}
+
+                            ${auction.winner ? `<p><strong>Phone:</strong> ${auction.winner?.phone}</p>` : ''}
+                        ` : `
+                            <p>Your item did not sell this time. You can relist the item from your dashboard.</p>
+                        `}
                         
                         <p><strong>Final Status:</strong> ${auction.status}</p>
                         ${auction.finalPrice ? `<p><strong>Final Price:</strong> $${auction.finalPrice.toLocaleString()}</p>` : ''}
                         ${auction.winner ? `<p><strong>Winner:</strong> ${auction.winner.username}</p>` : ''}
                         <p><strong>Total Bids:</strong> ${auction.bidCount.toLocaleString()}</p>
-                        
-                        ${auction.status === 'sold' ? `
-                            <p>Congratulations on your successful sale! Our team will contact you to arrange the next steps.</p>
-                        ` : `
-                            <p>Your item did not sell this time. You can relist the item from your dashboard.</p>
-                        `}
                         
                         <div class="footer">
                             <p>Thank you for using PlaneVault for your auction needs.</p>
@@ -505,6 +533,7 @@ const auctionListedEmail = async (auction, seller) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .auction-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -514,6 +543,7 @@ const auctionListedEmail = async (auction, seller) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>🎉 Your Auction is Live!</h2>
                             <p>Your item is now available for bidding</p>
                         </div>
@@ -540,7 +570,7 @@ const auctionListedEmail = async (auction, seller) => {
                         </div>
                         
                         <p style="text-align: center; margin: 25px 0;">
-                            <a href="${process.env.FRONTEND_URL}/auctions/${auction._id}" class="cta-button">View Your Live Auction</a>
+                            <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" class="cta-button">View Your Live Auction</a>
                         </p>
                         
                         <p>We'll notify you when you receive bids and when the auction ends.</p>
@@ -573,6 +603,7 @@ const auctionEndingSoonEmail = async (userEmail, userName, auction, timeRemainin
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .alert { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
                         .auction-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #dc3545; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -582,6 +613,7 @@ const auctionEndingSoonEmail = async (userEmail, userName, auction, timeRemainin
                 <body>
                     <div class="container">
                         <div class="alert">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>⏰ Auction Ending Soon!</h2>
                             <p>Don't miss your chance to bid on this item</p>
                         </div>
@@ -601,7 +633,7 @@ const auctionEndingSoonEmail = async (userEmail, userName, auction, timeRemainin
                         <p>This is your last chance to place a bid and secure this item!</p>
                         
                         <p style="text-align: center; margin: 25px 0;">
-                            <a href="${process.env.FRONTEND_URL}/auctions/${auction._id}" class="cta-button">Place Your Bid Now</a>
+                            <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" class="cta-button">Place Your Bid Now</a>
                         </p>
                         
                         <p><em>Act fast - this auction is about to end!</em></p>
@@ -631,6 +663,7 @@ const paymentSuccessEmail = async (user, auction, paymentAmount) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .confirmation { background: #d4edda; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .payment-details { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .amount { font-size: 24px; font-weight: bold; color: #155724; }
@@ -639,6 +672,7 @@ const paymentSuccessEmail = async (user, auction, paymentAmount) => {
                 <body>
                     <div class="container">
                         <div class="confirmation">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>✅ Payment Successful</h2>
                             <p>Your payment has been processed successfully</p>
                         </div>
@@ -651,8 +685,20 @@ const paymentSuccessEmail = async (user, auction, paymentAmount) => {
                             <p class="amount">$${auction?.commissionAmount?.toLocaleString()}</p>
                             <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
                         </div>
+
+                        ${auction.status === 'sold' ? `
+                            <p>Congratulations on being the highest bidder and winning this auction! Now, you can reach out to ${auction.seller.firstName || auction.seller.username} on the following details and follow up to arrange payment and transfer details.</p>
+
+                            ${auction.seller ? `<p><strong>Seller:</strong> ${auction.seller.firstName || auction.seller.username}</p>` : ''}
+
+                            ${auction.seller ? `<p><strong>E-mail:</strong> ${auction.seller?.email}</p>` : ''}
+
+                            ${auction.seller ? `<p><strong>Phone:</strong> ${auction.seller?.phone}</p>` : ''}
+                        ` : `
+                            <p></p>
+                        `}
                         
-                        <p>The hold we created on your card on the first bid has been successfully charged and captured. Now, you can proceed to contacat the seller.</p>
+                        <p>The hold we created on your card on the first bid has been successfully released and the commission/fee has been charged. Now, you can proceed to contacat the seller.</p>
                         
                         <p>You can check your order and contact the seller from your dashboard.</p>
                         
@@ -684,6 +730,7 @@ const welcomeEmail = async (user) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .welcome { background: #e3f2fd; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .features { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #000; color: #fff !important !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -692,6 +739,7 @@ const welcomeEmail = async (user) => {
                 <body>
                     <div class="container">
                         <div class="welcome">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>✈️ Welcome to PlaneVault!</h2>
                             <p>Your premier destination for aircraft auctions</p>
                         </div>
@@ -806,6 +854,7 @@ const resetPasswordEmail = async (email, url) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .cta-button { background: #000; color: #fff !important; padding: 14px 28px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px; }
@@ -818,6 +867,7 @@ const resetPasswordEmail = async (email, url) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>🔒 Reset Your Password</h2>
                             <p>PlaneVault Account Security</p>
                         </div>
@@ -878,6 +928,7 @@ const newUserRegistrationEmail = async (adminEmail, user) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .user-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff; }
@@ -901,6 +952,7 @@ const newUserRegistrationEmail = async (adminEmail, user) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>👤 New User Registration</h2>
                             <p>A new user has joined PlaneVault</p>
                         </div>
@@ -979,6 +1031,7 @@ const auctionWonAdminEmail = async (adminEmail, auction, winner) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #d4edda; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
@@ -1004,6 +1057,7 @@ const auctionWonAdminEmail = async (adminEmail, auction, winner) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>🏆 Auction Successfully Completed</h2>
                             <p>An auction has ended with a winning bidder</p>
                         </div>
@@ -1157,6 +1211,7 @@ const auctionEndedAdminEmail = async (adminEmail, auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: ${statusDetails.headerColor}; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${statusDetails.badgeColor}; }
@@ -1184,6 +1239,7 @@ const auctionEndedAdminEmail = async (adminEmail, auction) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>${statusDetails.headerText}</h2>
                             <p>${statusDetails.summary}</p>
                             <div class="status-badge">${statusDetails.statusBadge}</div>
@@ -1343,6 +1399,7 @@ const flaggedCommentAdminEmail = async (adminEmail, reason, comment, auction, re
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; border-left: 4px solid #ffc107; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .comment-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #dc3545; }
@@ -1371,6 +1428,7 @@ const flaggedCommentAdminEmail = async (adminEmail, reason, comment, auction, re
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>🚩 Comment Flagged for Review</h2>
                             <p>A user has reported inappropriate content in an auction comment</p>
                             <div class="flag-badge">FLAGGED CONTENT</div>
@@ -1479,7 +1537,7 @@ const flaggedCommentAdminEmail = async (adminEmail, reason, comment, auction, re
                             </div>
 
                             <div style="text-align: center; margin: 25px 0;">
-                                <a href="${process.env.FRONTEND_URL}/comments" class="cta-button">Review Comment</a>
+                                <a href="${process.env.FRONTEND_URL}/admin/comments" class="cta-button">Review Comment</a>
                             </div>
                             
                             <div class="footer">
@@ -1516,6 +1574,7 @@ const newCommentSellerEmail = async (seller, auction, comment, commentAuthor) =>
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
@@ -1532,6 +1591,7 @@ const newCommentSellerEmail = async (seller, auction, comment, commentAuthor) =>
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>💬 New Comment on Your Auction</h2>
                             <p>Someone has commented on your auction listing</p>
                         </div>
@@ -1621,6 +1681,7 @@ const newCommentBidderEmail = async (bidder, auction, comment, commentAuthor) =>
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
@@ -1638,6 +1699,7 @@ const newCommentBidderEmail = async (bidder, auction, comment, commentAuthor) =>
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>💬 New Auction Activity</h2>
                             <p>There's new discussion on an auction you're interested in</p>
                         </div>
@@ -1738,6 +1800,7 @@ const auctionSubmittedForApprovalEmail = async (adminEmail, auction, seller) => 
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; border-left: 4px solid #ffc107; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #17a2b8; }
@@ -1793,6 +1856,7 @@ const auctionSubmittedForApprovalEmail = async (adminEmail, auction, seller) => 
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>📝 New Auction Awaiting Approval</h2>
                             <p>A seller has submitted a new auction for review</p>
                             <div class="status-badge">AWAITING APPROVAL</div>
@@ -1924,6 +1988,7 @@ const auctionApprovedEmail = async (seller, auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: #d4edda; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
@@ -1934,6 +1999,7 @@ const auctionApprovedEmail = async (seller, auction) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h2>✅ Auction Approved!</h2>
                             <p>Your auction is now live and accepting bids</p>
                         </div>
@@ -1948,7 +2014,7 @@ const auctionApprovedEmail = async (seller, auction) => {
                                 <p><strong>Title:</strong> ${auction.title}</p>
                                 <p><strong>Starting Price:</strong> $${auction.startPrice?.toLocaleString()}</p>
                                 <p><strong>Auction Ends:</strong> ${new Date(auction.endDate).toLocaleString()}</p>
-                                <p><strong>Auction URL:</strong> <a href="${process.env.FRONTEND_URL}/auctions/${auction._id}">View Your Live Auction</a></p>
+                                <p><strong>Auction URL:</strong> <a href="${process.env.FRONTEND_URL}/auction/${auction._id}">View Your Live Auction</a></p>
                             </div>
 
                             <p><strong>Next Steps:</strong></p>
@@ -1959,7 +2025,7 @@ const auctionApprovedEmail = async (seller, auction) => {
                             </ul>
 
                             <div style="text-align: center; margin: 25px 0;">
-                                <a href="${process.env.FRONTEND_URL}/auctions/${auction._id}" class="cta-button">View Your Live Auction</a>
+                                <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" class="cta-button">View Your Live Auction</a>
                             </div>
 
                             <p>Good luck with your sale! If you have any questions, our support team is here to help.</p>
@@ -1991,8 +2057,8 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
         const statusColor = isLive ? '#28a745' : '#17a2b8';
         const actionText = isLive ? 'Place Your Bid Now' : 'Add to Watch Later';
         const urgencyText = isLive ? 'Bidding is now open!' : 'Get ready to bid when it goes live!';
-        const timeInfo = isLive ? 
-            `Ends: ${new Date(auction.endDate).toLocaleString()}` : 
+        const timeInfo = isLive ?
+            `Ends: ${new Date(auction.endDate).toLocaleString()}` :
             `Starts: ${new Date(auction.startDate).toLocaleString()}`;
 
         const info = await transporter.sendMail({
@@ -2006,6 +2072,7 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; color: white; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 25px; border-radius: 10px; margin: 20px 0; border-left: 5px solid ${statusColor}; }
@@ -2058,6 +2125,7 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/darkLogo.webp" alt="PlaneVault Logo" class="logo">
                             <h1>✈️ New Auction Available</h1>
                             <p>Something matching your interests has been listed</p>
                             <div class="status-badge">${auctionStatus}</div>
@@ -2142,24 +2210,6 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
                                 </div>
                             </div>
 
-                            <div class="features">
-                                <div class="feature">
-                                    <div class="feature-icon">📸</div>
-                                    <strong>Multiple Photos</strong>
-                                    <p>Detailed images available</p>
-                                </div>
-                                <div class="feature">
-                                    <div class="feature-icon">📋</div>
-                                    <strong>Full Documentation</strong>
-                                    <p>Complete auction records</p>
-                                </div>
-                                <div class="feature">
-                                    <div class="feature-icon">🛡️</div>
-                                    <strong>Secure Transaction</strong>
-                                    <p>PlaneVault protected</p>
-                                </div>
-                            </div>
-
                             <div style="text-align: center; margin: 30px 0;">
                                 <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" 
                                    class="${isLive ? 'live-button' : 'cta-button'}">
@@ -2176,11 +2226,6 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
 
                             <div class="footer">
                                 <p>You're receiving this email because you're a registered bidder on PlaneVault.</p>
-                                <p>
-                                    <a href="${process.env.FRONTEND_URL}/preferences/notifications" style="color: #666; text-decoration: underline;">
-                                        Manage your notification preferences
-                                    </a>
-                                </p>
                                 <p>&copy; ${new Date().getFullYear()} PlaneVault. The premier platform for aircraft auctions.</p>
                             </div>
                         </div>
@@ -2216,12 +2261,12 @@ const sendBulkAuctionNotifications = async (bidders, auction, seller) => {
         });
 
         const results = await Promise.allSettled(notificationPromises);
-        
+
         // Log summary
-        const successful = results.filter(result => 
+        const successful = results.filter(result =>
             result.status === 'fulfilled' && result.value.success
         ).length;
-        const failed = results.filter(result => 
+        const failed = results.filter(result =>
             result.status === 'fulfilled' && !result.value.success
         ).length;
         const errors = results.filter(result => result.status === 'rejected').length;

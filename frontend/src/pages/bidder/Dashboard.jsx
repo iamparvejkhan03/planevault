@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { LoadingSpinner, StatCard, BidderContainer, BidderHeader, BidderSidebar } from "../../components";
-// import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { TrendingUp, Gavel, Award, DollarSign, Bookmark, Hand } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -13,14 +12,14 @@ function Dashboard() {
 
     const fetchUserStats = async () => {
         try {
-            const { data } = await axiosInstance.get('/api/v1/users/stats');
+            const { data } = await axiosInstance.get('/api/v1/users/stats/bidder');
             if (data.success) {
                 setLoading(true);
                 setStats(data.data.statistics);
             }
         } catch (err) {
             console.error('Fetch stats error:', err);
-        } finally{
+        } finally {
             setLoading(false);
         }
     };
@@ -31,6 +30,13 @@ function Dashboard() {
 
     const statsData = [
         {
+            title: "Currently Winning Auctions",
+            value: stats?.currentlyWinning?.toLocaleString(),
+            change: "Leading In Auctions",
+            icon: <Hand size={24} />,
+            trend: "up"
+        },
+        {
             title: "Active Bids",
             value: stats?.activeBids?.toLocaleString(),
             change: "On Live Auctions",
@@ -38,19 +44,11 @@ function Dashboard() {
             trend: "up"
         },
         {
-            title: "Watchlist Items",
-            value: stats?.watchlistCount?.toLocaleString(),
-            change: "Saved For Later",
-            icon: <Bookmark size={24} />,
+            title: "Total Participated Auctions",
+            value: stats?.totalParticipatedAuctions?.toLocaleString(),
+            change: "All Time",
+            icon: <Hand size={24} />,
             trend: "up"
-        },
-        {
-            title: "Total Spent",
-            value: stats?.totalSpent?.toLocaleString(),
-            change: "Used To Purchase",
-            icon: <DollarSign size={24} />,
-            trend: "up",
-            currency: "$"
         },
         {
             title: "Auctions Won",
@@ -68,6 +66,14 @@ function Dashboard() {
             suffix: "%"
         },
         {
+            title: "Total Spent",
+            value: stats?.totalSpent?.toLocaleString(),
+            change: "Used To Purchase",
+            icon: <DollarSign size={24} />,
+            trend: "up",
+            currency: "$"
+        },
+        {
             title: "Average Bid Amount",
             value: stats?.avgBidAmount?.toLocaleString(),
             change: "Bid Amount / No. of Bids",
@@ -76,19 +82,12 @@ function Dashboard() {
             currency: "$"
         },
         {
-            title: "Total Participated Auctions",
-            value: stats?.totalParticipatedAuctions?.toLocaleString(),
-            change: "All Time",
-            icon: <Hand size={24} />,
+            title: "Watchlist Items",
+            value: stats?.watchlistCount?.toLocaleString(),
+            change: "Saved For Later",
+            icon: <Bookmark size={24} />,
             trend: "up"
         },
-        {
-            title: "Currenly Winning Auctions",
-            value: stats?.currentlyWinning?.toLocaleString(),
-            change: "Leading In Auctions",
-            icon: <Hand size={24} />,
-            trend: "up"
-        }
     ];
 
     return (

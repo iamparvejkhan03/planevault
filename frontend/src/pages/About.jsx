@@ -1,4 +1,4 @@
-import { Verified, Upload, Tag, Gavel, BadgeCheck } from "lucide-react";
+import { Verified, Upload, Tag, Gavel, BadgeCheck, UserCog2, UserPlus, Clock } from "lucide-react";
 import { aboutUs } from "../assets";
 import { Container, HowItWorksCard, Testimonial } from "../components";
 import { useState, useEffect } from "react";
@@ -23,26 +23,49 @@ const stats = [
     }
 ];
 
-const HowItWorks = [
+const HowItWorksSelling = [
     {
         icon: <Upload />,
-        title: 'Create Your Listing',
-        description: 'Upload details, photos, and documents for your aircraft, parts, or memorabilia.'
+        title: 'Submit Your Listing',
+        description: 'Begin by submitting your aircraft, aviation parts, or memorabilia through our secure online form. Upload clear photos, accurate details, and any supporting documents to showcase your aircraft or aviation related item.'
     },
     {
-        icon: <Tag />,
-        title: 'Set Terms & Reserve',
-        description: 'Choose your reserve price and auction settings with full control.'
+        icon: <UserCog2 />,
+        title: 'Expert Curation',
+        description: `Our aviation specialists carefully review and refine each submission to ensure it's presented in the most compelling way possible. Every listing is tailored for maximum visibility, credebility, and results - giving both you and the buyer confidence in every transaction.`
     },
     {
         icon: <Gavel />,
-        title: 'Engage Bidders',
-        description: 'Buyers compete in real time, driving the best possible outcome.'
+        title: 'Go Live and Engage',
+        description: `Once approved, your listing is published on PlaneVault for our global audience of qualified buyers. You'll have the opportunity to answer questions, share insights, and help your auction reach its highest potential.`
     },
     {
         icon: <BadgeCheck />,
-        title: 'Finalize the Sale',
-        description: 'Complete secure transfer with verified documents and support every step.'
+        title: 'Complete the Sale',
+        description: 'When the auction closes, PlaneVault connects the winning bidder and seller directly. From there, both parties finalize the transaction on their own terms. For security and convenience, we recommend completing payment through wire transfer or a trusted escrow service'
+    }
+];
+
+const HowItWorksBuying = [
+    {
+        icon: <UserPlus />,
+        title: 'Register to Bid',
+        description: 'Create your Plane Vault account and register with a valid credit card. A temporary authorization hold verifies bidder commitment and ensures a trustworthy marketplace for all participants.'
+    },
+    {
+        icon: <Clock />,
+        title: 'Explore Auctions',
+        description: 'Explore the live and timed auctions in a secure online environment. Follow active listings, place competitive bids, and monitor results in real time. Our platform ensures fairness and transparency.'
+    },
+    {
+        icon: <Gavel />,
+        title: 'Place Your Bid',
+        description: `Once verified, you can place bids on any active listing. A hold is placed for the buyer's fee amount - this is only captured if you win. When the auction ends, all holds for non-winning bidders are automatically released.`
+    },
+    {
+        icon: <BadgeCheck />,
+        title: 'Finalize the Purchase',
+        description: `Once approved, your listing is published on PlaneVault for our global audience of qualified buyers. You'll have the opportunity to answer questions, share insights, and help your auction reach its highest potential.`
     }
 ];
 
@@ -111,11 +134,26 @@ function About() {
                     <br />
 
                     <ul>
-                        <li className="flex items-center gap-1"><Verified size={18} className="text-primary" /> Transparent, secure auction process</li>
-                        <li className="flex items-center gap-1"><Verified size={18} className="text-primary" />Dedicated support for sellers and bidders</li>
-                        <li className="flex items-center gap-1"><Verified size={18} className="text-primary" />Verified documentation and FAA guidance</li>
-                        <li className="flex items-center gap-1"><Verified size={18} className="text-primary" />Streamlined listings with global reach</li>
-                        <li className="flex items-center gap-1"><Verified size={18} className="text-primary" />Built by aviation enthusiasts, for aviation enthusiasts</li>
+                        <li className="flex items-start gap-2">
+                            <Verified size={18} className="text-primary flex-shrink-0 mt-1" />
+                            <span>Transparent, secure auction process</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <Verified size={18} className="text-primary flex-shrink-0 mt-1" />
+                            <span>Dedicated support for sellers and bidders</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <Verified size={18} className="text-primary flex-shrink-0 mt-1" />
+                            <span>Verified documentation and FAA guidance</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <Verified size={18} className="text-primary flex-shrink-0 mt-1" />
+                            <span>Streamlined listings with global reach</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <Verified size={18} className="text-primary flex-shrink-0 mt-1" />
+                            <span>Built by aviation enthusiasts, for aviation enthusiasts</span>
+                        </li>
                     </ul>
                 </div>
 
@@ -136,15 +174,16 @@ function About() {
                 </div>
             </Container>
 
-            <Container>
-                {/* How it works Section */}
-                <section className="bg-white p-8 md:p-12 lg:p-14 rounded-2xl mb-14">
-                    <h5 className="font-semibold text-secondary">How It Works</h5>
-                    <h2 className="text-2xl md:text-3xl font-semibold my-5 text-primary">Quick, Clear, and Focused on Results</h2>
+            <Container className="my-14">
+                <section className="">
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works - Selling on PlaneVault</h2>
+                    <p className="text-sm md:text-base text-gray-500 mt-3 mb-8">
+                        Simple steps, seamless auctions — see how Plane Vault makes listing and selling aviation assets effortless.
+                    </p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 xl:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 xl:gap-8">
                         {
-                            HowItWorks && HowItWorks.map((howItWork, i) => {
+                            HowItWorksSelling && HowItWorksSelling.map((howItWork, i) => {
                                 return (
                                     <HowItWorksCard key={howItWork.title} index={i} icon={howItWork.icon} title={howItWork.title} description={howItWork.description} />
                                 )
@@ -152,31 +191,26 @@ function About() {
                         }
                     </div>
                 </section>
+            </Container>
 
-                {/* Our vision and mission */}
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white px-5 py-8 sm:p-8 md:p-12 lg:p-14 rounded-2xl">
-                    <div>
-                        <h5 className="font-semibold text-secondary">Our Vision</h5>
-                        <h2 className="text-2xl md:text-3xl font-semibold my-3 text-primary">A Trusted Marketplace for Aviation</h2>
+            <Container className="my-14">
+                <section className="">
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works - Buying on PlaneVault</h2>
+                    <p className="text-sm md:text-base text-gray-500 mt-3 mb-8">
+                        Simple steps, seamless auctions — see how Plane Vault makes bidding and buying aviation assets effortless.
+                    </p>
 
-                        <p className="text-gray-600">
-                            We believe that buying and selling aircraft, parts, and memorabilia should be simple, secure, and transparent.
-                            Our vision is to create a platform where sellers and buyers connect with confidence, backed by trust and integrity.
-                        </p>
-                    </div>
-
-                    <div>
-                        <h5 className="font-semibold text-secondary">Our Mission</h5>
-                        <h2 className="text-2xl md:text-3xl font-semibold my-3 text-primary">Secure Auctions. Real Connections.</h2>
-
-                        <p className="text-gray-600">
-                            From streamlined listings to verified documentation and dedicated support, our mission is to make every auction
-                            reliable and rewarding. We’re here to empower aviation enthusiasts and professionals
-                            with a platform built for real results.
-                        </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 xl:gap-8">
+                        {
+                            HowItWorksBuying && HowItWorksBuying.map((howItWork, i) => {
+                                return (
+                                    <HowItWorksCard key={howItWork.title} index={i} icon={howItWork.icon} title={howItWork.title} description={howItWork.description} />
+                                )
+                            })
+                        }
                     </div>
                 </section>
-            </Container >
+            </Container>
 
             {/* Testimonials section */}
             <section className="my-14">

@@ -137,9 +137,19 @@ export const createBidPaymentIntent = async (req, res) => {
             });
         }
 
-        // Calculate authorization amount - $2500
-        const authorizationAmount = 250000; // $2500 in cents
+        // ✅ ONLY CHANGE: Get commission amount from category (from first function)
+        const commission = await Commission.findOne({ category: auction.category });
+        if (!commission) {
+            return res.status(400).json({
+                success: false,
+                message: 'Commission not set for this category'
+            });
+        }
 
+        const commissionAmount = commission.commissionAmount;
+        const authorizationAmount = Math.round(commissionAmount * 100); // Convert to cents
+
+        // ✅ EVERYTHING ELSE REMAINS EXACTLY LIKE SECOND FUNCTION:
         // Check if user already has an authorization for this auction
         const existingPayment = await BidPayment.findOne({
             auction: auctionId,
@@ -168,13 +178,13 @@ export const createBidPaymentIntent = async (req, res) => {
             `Bid authorization for: ${auction.title}`
         );
 
-        // Create bid payment record for authorization
+        // Create bid payment record for authorization (EXACTLY like second function)
         const bidPayment = await BidPayment.create({
             auction: auctionId,
             bidder: userId,
             bidAmount: bidAmount,
-            commissionAmount: 0, // Will calculate later
-            totalAmount: authorizationAmount / 100, // Store in dollars
+            commissionAmount: 0, // Will calculate later - KEEP AS 0 like second function
+            totalAmount: authorizationAmount / 100, // Store in dollars - KEEP authorization amount
             paymentIntentId: paymentIntent.id,
             clientSecret: paymentIntent.client_secret,
             status: paymentIntent.status,
@@ -623,10 +633,10 @@ export async function chargeWinningBidderDirect(auctionId) {
         } else {
             // ❌ ACTUAL COMMISSION FAILED - Capture the $2500 authorization instead
             console.log('⚠️ Actual commission failed - capturing $2500 authorization instead');
-            
+
             try {
                 const capturedIntent = await StripeService.capturePaymentIntent(authorizationPayment.paymentIntentId);
-                
+
                 if (capturedIntent.status === 'succeeded') {
                     // Update authorization payment to show it was captured
                     authorizationPayment.status = 'succeeded';

@@ -30,6 +30,10 @@ const faqs = [
         answer: "No, listing fees and commissions do not apply currently, so the platform is free for sellers to list. Optional upgrades, such as featured placement, will also be available soon.",
     },
     {
+        question: "Are there any fees for buying?",
+        answer: "Yes, 5% will get charged to the card on file at the close of the auction to the winning bidder, with a maximum commission of $10,000 for all sales under $500,000 and 3% for all sales over $500,000.",
+    },
+    {
         question: "What happens after my item sells?",
         answer: "You are required to complete the transfer of ownership, provide necessary FAA documentation such as the Bill of Sale and registration, and coordinate pickup or delivery with the buyer.",
     },
@@ -113,7 +117,7 @@ const HowItWorksBuying = [
     {
         icon: <UserPlus />,
         title: 'Register to Bid',
-        description: 'Create your PlaneVault account and register witha valid credit card. A temporaty authorization hold verifies bidder commitment and ensures a trustworthy marketplace for all participants.'
+        description: 'Create your Plane Vault account and register with a valid credit card. A temporary authorization hold verifies bidder commitment and ensures a trustworthy marketplace for all participants.'
     },
     {
         icon: <Clock />,

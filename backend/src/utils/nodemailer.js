@@ -44,7 +44,7 @@ const contactEmail = async (name, email, phone, userType, message) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>New Contact Form Submission</h2>
                             <p>You have received a new query from your website</p>
                         </div>
@@ -107,7 +107,7 @@ const contactConfirmationEmail = async (name, email) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>Thank You for Contacting PlaneVault</h2>
                         </div>
                         <div class="content">
@@ -155,7 +155,7 @@ const bidConfirmationEmail = async (userEmail, userName, itemName, amount, curre
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>Bid Confirmation</h2>
                         </div>
                         <p>Dear <strong>${userName}</strong>,</p>
@@ -209,7 +209,7 @@ const outbidNotificationEmail = async (userEmail, userName, itemName, newBid, au
                 <body>
                     <div class="container">
                         <div class="alert">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>🚨 You've Been Outbid!</h2>
                             <p>Another bidder has placed a higher bid on an item you were bidding on.</p>
                         </div>
@@ -361,7 +361,7 @@ const sendAuctionWonEmail = async (auction) => {
                 <body>
                     <div class="container">
                         <div class="congrats">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>🎉 Congratulations! You Won! 🎉</h2>
                             <p>You are the winning bidder for:</p>
                             <h3>${auction.title}</h3>
@@ -448,7 +448,7 @@ const sendAuctionEndedSellerEmail = async (auction) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>Your Auction Has Ended</h2>
                             <div class="status">${statusMessage}</div>
                         </div>
@@ -543,7 +543,7 @@ const auctionListedEmail = async (auction, seller) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>🎉 Your Auction is Live!</h2>
                             <p>Your item is now available for bidding</p>
                         </div>
@@ -613,7 +613,7 @@ const auctionEndingSoonEmail = async (userEmail, userName, auction, timeRemainin
                 <body>
                     <div class="container">
                         <div class="alert">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>⏰ Auction Ending Soon!</h2>
                             <p>Don't miss your chance to bid on this item</p>
                         </div>
@@ -672,7 +672,7 @@ const paymentSuccessEmail = async (user, auction, paymentAmount) => {
                 <body>
                     <div class="container">
                         <div class="confirmation">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>✅ Payment Successful</h2>
                             <p>Your payment has been processed successfully</p>
                         </div>
@@ -739,7 +739,7 @@ const welcomeEmail = async (user) => {
                 <body>
                     <div class="container">
                         <div class="welcome">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>✈️ Welcome to PlaneVault!</h2>
                             <p>Your premier destination for aircraft auctions</p>
                         </div>
@@ -867,7 +867,7 @@ const resetPasswordEmail = async (email, url) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>🔒 Reset Your Password</h2>
                             <p>PlaneVault Account Security</p>
                         </div>
@@ -952,7 +952,7 @@ const newUserRegistrationEmail = async (adminEmail, user) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>👤 New User Registration</h2>
                             <p>A new user has joined PlaneVault</p>
                         </div>
@@ -1057,7 +1057,7 @@ const auctionWonAdminEmail = async (adminEmail, auction, winner) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>🏆 Auction Successfully Completed</h2>
                             <p>An auction has ended with a winning bidder</p>
                         </div>
@@ -1239,7 +1239,7 @@ const auctionEndedAdminEmail = async (adminEmail, auction) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>${statusDetails.headerText}</h2>
                             <p>${statusDetails.summary}</p>
                             <div class="status-badge">${statusDetails.statusBadge}</div>
@@ -1428,7 +1428,7 @@ const flaggedCommentAdminEmail = async (adminEmail, reason, comment, auction, re
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>🚩 Comment Flagged for Review</h2>
                             <p>A user has reported inappropriate content in an auction comment</p>
                             <div class="flag-badge">FLAGGED CONTENT</div>
@@ -1591,7 +1591,7 @@ const newCommentSellerEmail = async (seller, auction, comment, commentAuthor) =>
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>💬 New Comment on Your Auction</h2>
                             <p>Someone has commented on your auction listing</p>
                         </div>
@@ -1699,7 +1699,7 @@ const newCommentBidderEmail = async (bidder, auction, comment, commentAuthor) =>
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>💬 New Auction Activity</h2>
                             <p>There's new discussion on an auction you're interested in</p>
                         </div>
@@ -1856,7 +1856,7 @@ const auctionSubmittedForApprovalEmail = async (adminEmail, auction, seller) => 
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>📝 New Auction Awaiting Approval</h2>
                             <p>A seller has submitted a new auction for review</p>
                             <div class="status-badge">AWAITING APPROVAL</div>
@@ -1999,7 +1999,7 @@ const auctionApprovedEmail = async (seller, auction) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>✅ Auction Approved!</h2>
                             <p>Your auction is now live and accepting bids</p>
                         </div>
@@ -2125,7 +2125,7 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${process.env.FRONTEND_URL}/logo.webp" alt="PlaneVault Logo" class="logo">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h1>✈️ New Auction Available</h1>
                             <p>Something matching your interests has been listed</p>
                             <div class="status-badge">${auctionStatus}</div>

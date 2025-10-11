@@ -32,7 +32,7 @@ const contactEmail = async (name, email, phone, userType, message) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
                         .content { background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-top: 20px; }
                         .field { margin-bottom: 15px; }
@@ -98,7 +98,7 @@ const contactConfirmationEmail = async (name, email) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
                         .content { background: #fff; padding: 20px; border-radius: 5px; margin-top: 20px; }
                         .footer { margin-top: 20px; text-align: center; color: #666; font-size: 12px; }
@@ -145,7 +145,7 @@ const bidConfirmationEmail = async (userEmail, userName, itemName, amount, curre
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 5px; }
                         .bid-info { background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0; }
                         .amount { font-size: 24px; font-weight: bold; color: #2e7d32; }
@@ -199,7 +199,7 @@ const outbidNotificationEmail = async (userEmail, userName, itemName, newBid, au
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .alert { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
                         .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
                         .bid-amount { font-size: 20px; font-weight: bold; color: #dc3545; margin: 10px 0; }
@@ -349,7 +349,7 @@ const sendAuctionWonEmail = async (auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .congrats { background: #d4edda; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; border-left: 4px solid #28a745; }
                         .winning-bid { font-size: 28px; font-weight: bold; color: #155724; margin: 10px 0; }
                         .next-steps { background: #e2e3e5; padding: 20px; border-radius: 5px; margin: 20px 0; }
@@ -439,7 +439,7 @@ const sendAuctionEndedSellerEmail = async (auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #${auction.status === 'sold' ? 'd4edda' : 'fff3cd'}; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .status { font-size: 24px; font-weight: bold; color: #${auction.status === 'sold' ? '155724' : '856404'}; }
                         .footer { margin-top: 20px; text-align: center; color: #666; font-size: 12px; }
@@ -533,7 +533,7 @@ const auctionListedEmail = async (auction, seller) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .auction-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -603,7 +603,7 @@ const auctionEndingSoonEmail = async (userEmail, userName, auction, timeRemainin
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .alert { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
                         .auction-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #dc3545; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -663,7 +663,7 @@ const paymentSuccessEmail = async (user, auction, paymentAmount) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .confirmation { background: #d4edda; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .payment-details { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .amount { font-size: 24px; font-weight: bold; color: #155724; }
@@ -730,7 +730,7 @@ const welcomeEmail = async (user) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .welcome { background: #e3f2fd; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .features { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #000; color: #fff !important !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -854,7 +854,7 @@ const resetPasswordEmail = async (email, url) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .cta-button { background: #000; color: #fff !important; padding: 14px 28px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px; }
@@ -928,7 +928,7 @@ const newUserRegistrationEmail = async (adminEmail, user) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .user-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff; }
@@ -1031,7 +1031,7 @@ const auctionWonAdminEmail = async (adminEmail, auction, winner) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #d4edda; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
@@ -1211,7 +1211,7 @@ const auctionEndedAdminEmail = async (adminEmail, auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: ${statusDetails.headerColor}; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${statusDetails.badgeColor}; }
@@ -1399,7 +1399,7 @@ const flaggedCommentAdminEmail = async (adminEmail, reason, comment, auction, re
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; border-left: 4px solid #ffc107; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .comment-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #dc3545; }
@@ -1574,7 +1574,7 @@ const newCommentSellerEmail = async (seller, auction, comment, commentAuthor) =>
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #e3f2fd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
@@ -1681,7 +1681,7 @@ const newCommentBidderEmail = async (bidder, auction, comment, commentAuthor) =>
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
@@ -1800,7 +1800,7 @@ const auctionSubmittedForApprovalEmail = async (adminEmail, auction, seller) => 
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #fff3cd; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; border-left: 4px solid #ffc107; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #17a2b8; }
@@ -1988,7 +1988,7 @@ const auctionApprovedEmail = async (seller, auction) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: #d4edda; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
@@ -2072,7 +2072,7 @@ const newAuctionNotificationEmail = async (bidder, auction, seller) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
                         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; color: white; }
                         .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
                         .auction-card { background: #f8f9fa; padding: 25px; border-radius: 10px; margin: 20px 0; border-left: 5px solid ${statusColor}; }

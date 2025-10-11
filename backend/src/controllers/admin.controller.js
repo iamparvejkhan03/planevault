@@ -1121,9 +1121,9 @@ export const updateAuction = async (req, res) => {
         // Handle status changes based on new dates
         if (start > now && end > now) {
             // Dates are in future - activate if not already active
-            if (auction.status == 'active') {
+            // if (auction.status == 'active') {
                 updateData.status = 'approved';
-            }
+            // }
         } else if (end <= now) {
             // Auction has ended
             if (auction.status === 'active') {

@@ -6,7 +6,8 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
     const [currentIndex, setCurrentIndex] = useState(0);
     
     // Reverse the images array to show newest first
-    const reversedImages = [...images].reverse();
+    // const reversedImages = [...images].reverse();
+    const reversedImages = images;
     const [mainImage, setMainImage] = useState(reversedImages[0]?.url || '');
 
     const openLightbox = (index = 0) => {

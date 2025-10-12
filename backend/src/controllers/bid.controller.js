@@ -541,11 +541,11 @@ export const getAdminBidHistory = async (req, res) => {
                 return {
                     id: bid._id.toString(),
                     bidder: {
-                        id: bid.bidder._id.toString(),
-                        name: `${bid.bidder.firstName} ${bid.bidder.lastName}`.trim() || bid.bidder.username,
-                        username: bid.bidder.username,
-                        email: bid.bidder.email,
-                        company: bid.bidder.company || 'N/A'
+                        id: bid.bidder?._id.toString(),
+                        name: `${bid.bidder?.firstName} ${bid.bidder?.lastName}`.trim() || bid.bidder?.username,
+                        username: bid.bidder?.username,
+                        email: bid.bidder?.email,
+                        company: bid.bidder?.company || 'N/A'
                     },
                     amount: bid.amount,
                     time: bid.timestamp,
@@ -581,7 +581,7 @@ export const getAdminBidHistory = async (req, res) => {
                     name: `${auction.winner.firstName} ${auction.winner.lastName}`.trim() || auction.winner.username
                 } : null,
                 totalBids: auction.bidCount,
-                uniqueBidders: new Set(auction.bids.map(bid => bid.bidder._id.toString())).size,
+                uniqueBidders: new Set(auction.bids.map(bid => bid.bidder?._id.toString())).size,
                 bids: bidsWithStatus,
                 commissionAmount: auction.commissionAmount || 0,
                 finalPrice: auction.finalPrice || 0,

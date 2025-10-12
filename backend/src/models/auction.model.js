@@ -155,7 +155,15 @@ const auctionSchema = new Schema({
         type: Boolean,
         default: true
     },
-    lastBidTime: Date
+    lastBidTime: Date,
+    notifications: {
+        ending30min: { type: Boolean, default: false },
+        ending2hour: { type: Boolean, default: false },
+        ending24hour: { type: Boolean, default: false },
+        ending30minSentAt: Date,
+        ending2hourSentAt: Date,
+        ending24hourSentAt: Date
+    }
 
 }, {
     timestamps: true

@@ -7,6 +7,7 @@ import axiosInstance from "../utils/axiosInstance";
 import { toast } from "react-hot-toast";
 import { useComments } from "../hooks/useComments";
 import { useWatchlist } from "../hooks/useWatchlist";
+import { useAuth } from "../contexts/AuthContext";
 
 const YouTubeEmbed = lazy(() => import('../components/YouTubeEmbed'));
 const ImageLightBox = lazy(() => import('../components/ImageLightBox'));
@@ -27,6 +28,7 @@ function SingleAuction() {
     const hasFetchedRef = useRef(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const formRef = useRef();
+    const { user } = useAuth();
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -121,6 +123,11 @@ function SingleAuction() {
 
     const handleBid = async (e) => {
         e.preventDefault();
+
+        if(user._id?.toString() === auction?.seller?._id?.toString()){
+            toast.error(`You can't bid on your own auction.`);
+            return;
+        }
 
         if (!bidAmount || (parseFloat(bidAmount) <= auction.currentPrice && auction.bidCount > 0)) {
             toast.error(`Bid must be higher than current price: $${auction.currentPrice}`);

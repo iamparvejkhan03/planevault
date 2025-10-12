@@ -18,6 +18,8 @@
     "html-react-parser": "^5.2.6",
     "lucide-react": "^0.543.0",
     "react": "^19.1.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.1.1",
     "react-fast-marquee": "^1.6.5",
     "react-hook-form": "^7.62.0",

@@ -132,7 +132,7 @@ const HowItWorksBuying = [
     {
         icon: <BadgeCheck />,
         title: 'Finalize the Purchase',
-        description: `Once approved, your listing is published on PlaneVault for our global audience of qualified buyers. You'll have the opportunity to answer questions, share insights, and help your auction reach its highest potential.`
+        description: `After the auction closes, Plane Vault provides both parties with direct contact information. The buyer and seller then arrange payment and delivery through their preferred method. We recommend using wire transfer or escrow for secure transactions.`
     }
 ];
 

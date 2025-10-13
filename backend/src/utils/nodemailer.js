@@ -738,7 +738,7 @@ const welcomeEmail = async (user) => {
                 <body>
                     <div class="container">
                         <div class="welcome">
-                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
+                            <img style="max-width: 150px !important; height: auto !important; width: 150px;" src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
                             <h2>✈️ Welcome to PlaneVault!</h2>
                             <p>Your premier destination for aircraft auctions</p>
                         </div>
@@ -917,7 +917,7 @@ const resetPasswordEmail = async (email, url) => {
 const newUserRegistrationEmail = async (adminEmail, user) => {
     try {
         const info = await transporter.sendMail({
-            from: `"PlaneVault System" <${process.env.EMAIL_USER}>`,
+            from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
             to: adminEmail,
             subject: `📋 New User Registration - ${user.userType}`,
             html: `

@@ -729,7 +729,7 @@ const welcomeEmail = async (user) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { max-width: auto; height: auto; margin-bottom: 15px; }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 15px; }
                         .welcome { background: #e3f2fd; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .features { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #000; color: #fff !important !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }

@@ -1,6 +1,6 @@
 import { CalendarDays, CheckSquare, Clock, Download, File, Fuel, Gauge, Gavel, Heart, Loader, MapPin, MessageCircle, PaintBucket, Plane, ShieldCheck, Tag, User, Users, Weight } from "lucide-react";
 import { BidConfirmationModal, Container, LoadingSpinner, MobileBidStickyBar, SpecificationsSection, TabSection, TimerDisplay, WatchlistButton } from "../components";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { lazy, Suspense, useRef, useState, useEffect } from "react";
 import useAuctionCountdown from "../hooks/useAuctionCountDown";
 import axiosInstance from "../utils/axiosInstance";
@@ -29,6 +29,7 @@ function SingleAuction() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const formRef = useRef();
     const { user } = useAuth();
+    const navigate = useNavigate();
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -123,6 +124,11 @@ function SingleAuction() {
 
     const handleBid = async (e) => {
         e.preventDefault();
+
+        if(!user){
+            toast.error('You must login to bid.')
+            navigate('/login');
+        }
 
         if(user._id?.toString() === auction?.seller?._id?.toString()){
             toast.error(`You can't bid on your own auction.`);

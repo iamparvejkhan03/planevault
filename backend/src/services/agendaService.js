@@ -2,7 +2,7 @@ import Agenda from 'agenda';
 import Auction from '../models/auction.model.js';
 import backendAxios from '../utils/backendAxios.js';
 import { cancelAllBidderAuthorizations, cancelLosingBidderAuthorizations, chargeWinningBidder, chargeWinningBidderDirect } from '../controllers/bidPayment.controller.js';
-import { auctionEndedAdminEmail, auctionEndingSoonEmail, auctionListedEmail, auctionWonAdminEmail, paymentSuccessEmail, sendAuctionEndedSellerEmail, sendAuctionWonEmail } from '../utils/nodemailer.js';
+import { auctionEndedAdminEmail, auctionEndingSoonEmail, auctionListedEmail, auctionWonAdminEmail, paymentSuccessEmail, sendAuctionEndedSellerEmail, sendAuctionWonEmail, sendBulkAuctionNotifications } from '../utils/nodemailer.js';
 import User from '../models/user.model.js';
 
 class AgendaService {
@@ -17,6 +17,26 @@ class AgendaService {
 
     defineJobs() {
         // Job to activate an auction at its start time
+        // this.agenda.define('activate auction', async (job) => {
+        //     const { auctionId } = job.attrs.data;
+
+        //     try {
+        //         const auction = await Auction.findById(auctionId);
+        //         if (auction && (auction.status === 'approved')) {
+        //             auction.status = 'active';
+        //             await auction.save();
+        //             await auction.populate('seller', 'email username firstName');
+
+        //             await auctionListedEmail(auction, auction.seller);
+        //             // console.log(`✅ Agenda: Activated auction ${auctionId}`);
+        //         }
+        //     } catch (error) {
+        //         console.error('Agenda job error (activate auction):', error);
+        //         // Job will retry based on Agenda's retry logic
+        //     }
+        // });
+
+        // Job to activate an auction at its start time
         this.agenda.define('activate auction', async (job) => {
             const { auctionId } = job.attrs.data;
 
@@ -27,7 +47,19 @@ class AgendaService {
                     await auction.save();
                     await auction.populate('seller', 'email username firstName');
 
+                    // Send email to seller
                     await auctionListedEmail(auction, auction.seller);
+
+                    // Send bulk notifications to all users (except admin and auction seller)
+                    const allUsers = await User.find({
+                        _id: { $ne: auction.seller._id }, // Exclude auction owner
+                        userType: { $ne: 'admin' }, // Exclude admin users
+                        isActive: true // Only active users
+                    }).select('email username firstName preferences userType');
+
+                    // Send bulk notifications
+                    await sendBulkAuctionNotifications(allUsers, auction, auction.seller);
+
                     // console.log(`✅ Agenda: Activated auction ${auctionId}`);
                 }
             } catch (error) {

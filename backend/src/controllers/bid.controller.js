@@ -531,7 +531,7 @@ export const getAdminBidHistory = async (req, res) => {
                         status = "Winning";
                     }
                 } else if (auction.status === 'sold' || auction.status === 'ended') {
-                    if (auction.winner && auction.winner._id.toString() === bid.bidder._id.toString() && index === 0) {
+                    if (auction.winner && auction.winner?._id.toString() === bid.bidder?._id.toString() && index === 0) {
                         status = "Winner";
                     }
                 } else if (auction.status === 'reserve_not_met') {
@@ -539,7 +539,7 @@ export const getAdminBidHistory = async (req, res) => {
                 }
 
                 return {
-                    id: bid._id.toString(),
+                    id: bid?._id.toString(),
                     bidder: {
                         id: bid.bidder?._id.toString(),
                         name: `${bid.bidder?.firstName} ${bid.bidder?.lastName}`.trim() || bid.bidder?.username,
@@ -555,8 +555,8 @@ export const getAdminBidHistory = async (req, res) => {
             });
 
             return {
-                id: auction._id.toString(),
-                auctionId: `AU${auction._id.toString().slice(-6).toUpperCase()}`,
+                id: auction?._id.toString(),
+                auctionId: `AU${auction?._id.toString().slice(-6).toUpperCase()}`,
                 title: auction.title,
                 description: auction.description,
                 category: auction.category,
@@ -569,15 +569,15 @@ export const getAdminBidHistory = async (req, res) => {
                 winningBid: sortedBids[0]?.amount || auction.currentPrice,
                 status: auction.status,
                 seller: {
-                    id: auction.seller._id.toString(),
-                    name: `${auction.seller.firstName} ${auction.seller.lastName}`.trim() || auction.seller.username,
-                    username: auction.seller.username,
-                    email: auction.seller.email,
-                    company: auction.seller.company || 'N/A',
-                    rating: auction.seller.rating || 0
+                    id: auction.seller?._id.toString(),
+                    name: `${auction.seller?.firstName} ${auction.seller?.lastName}`.trim() || auction.seller?.username,
+                    username: auction.seller?.username,
+                    email: auction.seller?.email,
+                    company: auction.seller?.company || 'N/A',
+                    rating: auction.seller?.rating || 0
                 },
                 winner: auction.winner ? {
-                    id: auction.winner._id.toString(),
+                    id: auction.winner?._id.toString(),
                     name: `${auction.winner.firstName} ${auction.winner.lastName}`.trim() || auction.winner.username
                 } : null,
                 totalBids: auction.bidCount,
@@ -601,7 +601,7 @@ export const getAdminBidHistory = async (req, res) => {
                 case 'highest_bid':
                     return b.winningBid - a.winningBid;
                 case 'seller_name':
-                    return a.seller.name.localeCompare(b.seller.name);
+                    return a.seller?.name.localeCompare(b.seller?.name);
                 default:
                     return new Date(b.createdAt) - new Date(a.createdAt);
             }
@@ -650,8 +650,8 @@ export const getAdminBidHistory = async (req, res) => {
         const filterOptions = {
             categories: ['all', ...categories],
             sellers: ['all', ...sellersPopulated.map(s => ({
-                id: s._id.toString(),
-                name: `${s.seller?.firstName} ${s.seller?.lastName}`.trim() || s.seller.username
+                id: s?._id.toString(),
+                name: `${s.seller?.firstName} ${s.seller?.lastName}`.trim() || s.seller?.username
             }))],
             statuses: [
                 'all', 'active', 'sold', 'ended', 'reserve_not_met', 'cancelled'

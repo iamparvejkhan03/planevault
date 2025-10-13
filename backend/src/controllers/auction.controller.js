@@ -6,7 +6,7 @@ import {
     deleteFromCloudinary
 } from '../utils/cloudinary.js';
 import agendaService from '../services/agendaService.js';
-import { auctionSubmittedForApprovalEmail, bidConfirmationEmail, outbidNotificationEmail, sendOutbidNotifications } from '../utils/nodemailer.js';
+import { auctionSubmittedForApprovalEmail, bidConfirmationEmail, newBidNotificationEmail, outbidNotificationEmail, sendOutbidNotifications } from '../utils/nodemailer.js';
 
 // Create New Auction
 export const createAuction = async (req, res) => {
@@ -1318,6 +1318,7 @@ export const placeBid = async (req, res) => {
 
         // Populate the updated auction
         await auction.populate('currentBidder', 'username firstName email');
+        await auction.populate('seller', 'username firstName email');
 
         res.status(200).json({
             success: true,
@@ -1334,6 +1335,8 @@ export const placeBid = async (req, res) => {
             auction.currentPrice,
             auction.endDate
         );
+
+        await newBidNotificationEmail(auction.seller, auction, parseFloat(amount), bidder);
 
         // Send outbid notifications to previous bidders (except current bidder)
         if (previousHighestBidder && previousHighestBidder.toString() !== bidder._id.toString()) {

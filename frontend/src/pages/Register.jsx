@@ -13,30 +13,6 @@ import useCountryStates from '../hooks/useCountryStates';
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-// const countries = [
-//     { name: 'United States', code: 'US' },
-//     { name: 'India', code: 'IN' },
-//     { name: 'United Kingdom', code: 'GB' },
-//     { name: 'Canada', code: 'CA' },
-//     { name: 'Australia', code: 'AU' },
-//     { name: 'Germany', code: 'DE' },
-//     { name: 'France', code: 'FR' },
-//     { name: 'Japan', code: 'JP' },
-//     { name: 'China', code: 'CN' },
-//     { name: 'Brazil', code: 'BR' },
-//     { name: 'Mexico', code: 'MX' },
-//     { name: 'Italy', code: 'IT' },
-//     { name: 'Spain', code: 'ES' },
-//     { name: 'South Korea', code: 'KR' },
-//     { name: 'Russia', code: 'RU' },
-//     { name: 'Netherlands', code: 'NL' },
-//     { name: 'Switzerland', code: 'CH' },
-//     { name: 'Sweden', code: 'SE' },
-//     { name: 'Norway', code: 'NO' },
-//     { name: 'Denmark', code: 'DK' },
-// ];
-
-
 // CardSection component that uses Stripe hooks
 const CardSection = () => {
     const stripe = useStripe();
@@ -92,7 +68,7 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [userType, setUserType] = useState('');
     const navigate = useNavigate();
-    const { setUser, setLoading } = useAuth();
+    const { setUser, setLoading, user } = useAuth();
     const countriesAPI = useCountryStates();
     const [countries, setCountries] = useState([]);
 
@@ -102,6 +78,12 @@ const Register = () => {
         }
         fetchCountries()
     }, [])
+
+    useEffect(() => {
+        if (user) {
+            navigate(`/${user.userType}/profile`);
+        }
+    }, [user])
 
     // Stripe hooks - these must be used at the top level of the component
     const stripe = useStripe();
@@ -236,8 +218,8 @@ const Register = () => {
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-800">Account Information</h3>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
+                            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
+                                <div className={`${errors.email && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Email
                                     </label>
@@ -258,12 +240,12 @@ const Register = () => {
                                             placeholder="Enter your email"
                                         />
                                         {errors.email && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                                            <p className="text-red-500 text-sm mt-1 absolute">{errors.email.message}</p>
                                         )}
                                     </div>
                                 </div>
 
-                                <div>
+                                <div className={`${errors.phone && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Phone
                                     </label>
@@ -284,14 +266,14 @@ const Register = () => {
                                             placeholder="Enter your contact no."
                                         />
                                         {errors.phone && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+                                            <p className="text-red-500 text-sm mt-1 absolute">{errors.phone.message}</p>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
+                                <div className={`${errors.password && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Password
                                     </label>
@@ -320,12 +302,12 @@ const Register = () => {
                                             )}
                                         </button>
                                         {errors.password && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                                            <p className="text-red-500 text-sm mt-1 absolute">{errors.password.message}</p>
                                         )}
                                     </div>
                                 </div>
 
-                                <div>
+                                <div className={`${errors.confirmPassword && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Confirm Password
                                     </label>
@@ -354,7 +336,7 @@ const Register = () => {
                                             )}
                                         </button>
                                         {errors.confirmPassword && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
+                                            <p className="text-red-500 text-sm mt-1 absolute">{errors.confirmPassword.message}</p>
                                         )}
                                     </div>
                                 </div>
@@ -366,7 +348,7 @@ const Register = () => {
                             <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
+                                <div className={`${errors.firstName && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         First name
                                     </label>
@@ -380,11 +362,11 @@ const Register = () => {
                                         placeholder="First name"
                                     />
                                     {errors.firstName && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>
+                                        <p className="text-red-500 text-sm mt-1 absolute">{errors.firstName.message}</p>
                                     )}
                                 </div>
 
-                                <div>
+                                <div className={`${errors.lastName && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Last name
                                     </label>
@@ -398,13 +380,13 @@ const Register = () => {
                                         placeholder="Last name"
                                     />
                                     {errors.lastName && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>
+                                        <p className="text-red-500 text-sm mt-1 absolute">{errors.lastName.message}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                <div>
+                                <div className={`${errors.username && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Username
                                     </label>
@@ -426,12 +408,12 @@ const Register = () => {
                                             placeholder="What others see when you bid"
                                         />
                                         {errors.username && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+                                            <p className="text-red-500 text-sm mt-1 absolute">{errors.username.message}</p>
                                         )}
                                     </div>
                                 </div>
 
-                                <div>
+                                <div className={`${errors.country && 'mb-3'}`}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Country of residence
                                     </label>
@@ -449,7 +431,7 @@ const Register = () => {
                                         </select>
                                         <ChevronDown size={20} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
                                         {errors.country && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
+                                            <p className="text-red-500 text-sm mt-1 absolute">{errors.country.message}</p>
                                         )}
                                     </div>
                                 </div>
@@ -457,7 +439,7 @@ const Register = () => {
                         </div>
 
                         {/* User Type Selection */}
-                        <div className="border-t pt-6">
+                        <div className={`border-t pt-6 ${errors.email && 'mb-3'}`}>
                             <label className="text-sm font-medium leading-none text-gray-700 flex items-center gap-2 mb-4">
                                 <User size={20} />
                                 <span>User Type</span>
@@ -503,7 +485,7 @@ const Register = () => {
                                 </label>
                             </div>
                             {errors.userType && (
-                                <p className="text-red-500 text-sm mt-1">{errors.userType.message}</p>
+                                <p className="text-red-500 text-sm mt-1 absolute">{errors.userType.message}</p>
                             )}
                         </div>
 
@@ -511,7 +493,7 @@ const Register = () => {
                         {/* {userType === 'bidder' && <CardSection />} */}
                         <CardSection />
 
-                        <div>
+                        <div className={`${errors.termsConditions && 'mb-3'}`}>
                             <label className='flex items-center gap-2'>
                                 <input
                                     type="checkbox"

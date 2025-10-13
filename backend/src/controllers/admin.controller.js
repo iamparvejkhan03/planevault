@@ -772,7 +772,12 @@ export const approveAuction = async (req, res) => {
             data: { auction }
         });
 
-        const bidders = await User.find({ userType: 'bidder' });
+        // const bidders = await User.find({ userType: 'bidder' });
+        const bidders = await User.find({
+            _id: { $ne: auction?.seller?._id }, // Exclude auction owner
+            userType: { $ne: 'admin' }, // Exclude admin users
+            isActive: true // Only active users
+        }).select('email username firstName preferences userType');
 
         await sendBulkAuctionNotifications(bidders, auction, auction.seller);
 
@@ -1513,9 +1518,13 @@ export const updateAuction = async (req, res) => {
         // Handle status changes based on new dates
         if (start > now && end > now) {
             // Dates are in future - activate if not already active
-            // if (auction.status == 'active') {
-            updateData.status = 'approved';
-            // }
+            if (auction.status == 'active') {
+                updateData.status = 'approved';
+            } else if (auction.status == 'ended') {
+                updateData.status = 'approved';
+            } else if (auction.status == 'reserve_not_met') {
+                updateData.status = 'approved';
+            }
         } else if (end <= now) {
             // Auction has ended
             if (auction.status === 'active') {

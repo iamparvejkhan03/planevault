@@ -627,7 +627,6 @@ const auctionEndingSoonEmail = async (userEmail, userName, auction, timeRemainin
                             <p><strong>Item:</strong> ${auction.title}</p>
                             <p><strong>Current Price:</strong> $${auction.currentPrice}</p>
                             <p><strong>Bid Count:</strong> ${auction.bidCount}</p>
-                            <p><strong>Ends:</strong> ${new Date(auction.endDate).toLocaleString()}</p>
                         </div>
                         
                         <p>This is your last chance to place a bid and secure this item!</p>
@@ -730,7 +729,7 @@ const welcomeEmail = async (user) => {
                     <style>
                         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
+                        .logo { max-width: auto; height: auto; margin-bottom: 15px; }
                         .welcome { background: #e3f2fd; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0; }
                         .features { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
                         .cta-button { background: #000; color: #fff !important !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
@@ -2285,6 +2284,108 @@ const sendBulkAuctionNotifications = async (bidders, auction, seller) => {
     }
 };
 
+const newBidNotificationEmail = async (seller, auction, bidAmount, bidder) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
+            to: seller.email,
+            subject: `💰 New Bid Received - ${auction.title}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background: #f8f9fa; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
+                        .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
+                        .bid-card { background: #e8f5e8; padding: 25px; border-radius: 8px; margin: 20px 0; text-align: center; border-left: 4px solid #28a745; }
+                        .bid-amount { font-size: 32px; font-weight: bold; color: #2e7d32; margin: 10px 0; }
+                        .auction-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                        .detail { margin: 10px 0; display: flex; }
+                        .label { font-weight: bold; color: #555; min-width: 120px; }
+                        .cta-button { background: #000; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
+                        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                        <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo">
+                            <h2>🎉 New Bid Received!</h2>
+                            <p>Your auction is gaining interest</p>
+                        </div>
+                        
+                        <div class="content">
+                            <p>Dear <strong>${seller.firstName || seller.username}</strong>,</p>
+                            
+                            <p>Great news! Your auction has received a new bid.</p>
+
+                            <div class="bid-card">
+                                <h3 style="margin: 0 0 10px 0; color: #2e7d32;">New Bid Amount</h3>
+                                <div class="bid-amount">$${bidAmount.toLocaleString()}</div>
+                                <p style="margin: 5px 0; color: #555;">on <strong>${auction.title}</strong></p>
+                            </div>
+
+                            <div class="auction-info">
+                                <h4 style="margin-top: 0;">Auction Details</h4>
+                                <div class="detail">
+                                    <span class="label">Current Price:</span>
+                                    <span>$${auction.currentPrice?.toLocaleString()}</span>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Total Bids:</span>
+                                    <span>${(auction.bidCount || 0).toLocaleString()}</span>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Time Remaining:</span>
+                                    <span>${auction.timeRemainingFormatted || 'Ending soon'}</span>
+                                </div>
+                                ${bidder ? `
+                                <div class="detail">
+                                    <span class="label">Bidder:</span>
+                                    <span>${bidder.username}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            <p style="text-align: center; margin: 25px 0;">
+                                <a href="${process.env.FRONTEND_URL}/seller/auctions/all" class="cta-button">
+                                    View Auction Details
+                                </a>
+                            </p>
+
+                            <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                <h4 style="margin-top: 0; color: #1565c0;">💡 Tips for Success</h4>
+                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                    <li>Respond promptly to bidder questions</li>
+                                    <li>Share your auction on social media</li>
+                                    <li>Monitor your auction's progress regularly</li>
+                                </ul>
+                            </div>
+
+                            <p>Your auction is moving in the right direction! Keep up the momentum.</p>
+                            
+                            <div class="footer">
+                                <p>You're receiving this email because you're the seller of this auction.</p>
+                                <p>&copy; ${new Date().getFullYear()} PlaneVault. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `,
+        });
+
+        console.log(`✅ New bid notification sent to seller ${seller.email}`);
+        return !!info;
+    } catch (error) {
+        console.error(`❌ Failed to send new bid notification:`, error);
+        return false;
+    }
+};
+
 export {
     contactEmail,
     contactConfirmationEmail,
@@ -2308,4 +2409,5 @@ export {
     auctionSubmittedForApprovalEmail,
     auctionApprovedEmail,
     sendBulkAuctionNotifications,
+    newBidNotificationEmail,
 };

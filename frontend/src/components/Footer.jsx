@@ -61,12 +61,12 @@ function Footer() {
                         </p>
                         <div className='flex items-center gap-3 mt-4'>
                             {/* Instagram */}
-                            <Link to="https://www.instagram.com/" target="_blank">
+                            <Link to="https://www.instagram.com/plane_vault/" target="_blank">
                                 <Instagram strokeWidth={1.25} />
                             </Link>
 
                             {/* Facebook */}
-                            <Link to="https://www.facebook.com/" target="_blank">
+                            <Link to="https://www.facebook.com/people/Plane-Vault/61581993906127/" target="_blank">
                                 <Facebook strokeWidth={1.25} />
                             </Link>
 

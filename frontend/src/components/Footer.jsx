@@ -71,14 +71,14 @@ function Footer() {
                             </Link>
 
                             {/* LinkedIn */}
-                            <Link to="https://www.linkedin.com/" target="_blank">
+                            {/* <Link to="https://www.linkedin.com/" target="_blank">
                                 <Linkedin strokeWidth={1.25} />
-                            </Link>
+                            </Link> */}
 
                             {/* YouTube */}
-                            <Link to="https://www.youtube.com/" target="_blank">
+                            {/* <Link to="https://www.youtube.com/" target="_blank">
                                 <Youtube strokeWidth={1.25} />
-                            </Link>
+                            </Link> */}
                         </div>
                     </div>
 

@@ -123,7 +123,7 @@ export const getMyBids = async (req, res) => {
 
         // Get paginated auctions for display
         const auctions = await Auction.find(baseQuery)
-            .populate('seller', 'username firstName lastName rating reviews')
+            .populate('seller', 'username firstName lastName')
             .populate('currentBidder', 'username firstName')
             .populate('winner', 'username firstName lastName')
             .sort({ 'bids.timestamp': -1 })
@@ -226,13 +226,13 @@ export const getMyBids = async (req, res) => {
             let status = 'outbid';
             
             if (auction.status === 'sold' || auction.status === 'ended') {
-                if (auction.winner && auction.winner._id.toString() === userId.toString()) {
+                if (auction.winner && auction.winner?._id.toString() === userId.toString()) {
                     status = 'won';
                 } else {
                     status = 'lost';
                 }
             } else if (auction.status === 'active') {
-                if (auction.currentBidder && auction.currentBidder._id.toString() === userId.toString()) {
+                if (auction.currentBidder && auction.currentBidder?._id.toString() === userId.toString()) {
                     status = 'winning';
                 } else {
                     status = 'outbid';
@@ -245,8 +245,8 @@ export const getMyBids = async (req, res) => {
                 auction.currentPrice + auction.bidIncrement : null;
 
             return {
-                id: auction._id.toString(),
-                auctionId: `AU${auction._id.toString().slice(-6).toUpperCase()}`,
+                id: auction?._id.toString(),
+                auctionId: `AU${auction?._id.toString().slice(-6).toUpperCase()}`,
                 title: auction.title,
                 description: auction.description,
                 category: auction.category,
@@ -260,13 +260,13 @@ export const getMyBids = async (req, res) => {
                 watchers: auction.watchlistCount,
                 image: auction.photos.length > 0 ? auction.photos[0].url : '/api/placeholder/400/300',
                 location: auction.location,
-                sellerRating: auction.seller.rating || 4.5,
+                sellerRating: 4.5,
                 timeLeft: calculateTimeLeft(auction.endDate),
                 bidIncrement: auction.bidIncrement,
                 nextMinBid: nextMinBid,
                 auctionStatus: auction.status,
                 winnerInfo: auction.winner ? {
-                    id: auction.winner._id.toString(),
+                    id: auction.winner?._id.toString(),
                     name: auction.winner.firstName + ' ' + auction.winner.lastName
                 } : null,
                 currentBidderInfo: auction.currentBidder ? {
@@ -505,7 +505,7 @@ export const getAdminBidHistory = async (req, res) => {
             ...filter,
             'bids.0': { $exists: true } // Only auctions with at least one bid
         })
-        .populate('seller', 'username firstName lastName email company rating')
+        .populate('seller', 'username firstName lastName email company')
         .populate('currentBidder', 'username firstName lastName email')
         .populate('winner', 'username firstName lastName email')
         .populate('bids.bidder', 'username firstName lastName email company')
@@ -574,7 +574,7 @@ export const getAdminBidHistory = async (req, res) => {
                     username: auction.seller?.username,
                     email: auction.seller?.email,
                     company: auction.seller?.company || 'N/A',
-                    rating: auction.seller?.rating || 0
+                    rating: 0
                 },
                 winner: auction.winner ? {
                     id: auction.winner?._id.toString(),

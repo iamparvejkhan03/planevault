@@ -582,7 +582,7 @@ function SingleAuction() {
                     </p>
 
                     {/* Additional auction info */}
-                    {auction.bids && auction.bids.length > 0 && (
+                    {/* {auction.bids && auction.bids.length > 0 && (
                         <div className="bg-white p-3 rounded-lg border border-gray-200">
                             <p className="text-sm font-medium text-secondary mb-2">Recent Bids</p>
                             <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -594,7 +594,7 @@ function SingleAuction() {
                                 ))}
                             </div>
                         </div>
-                    )}
+                    )} */}
                 </div>
             </section>
         </Container>

@@ -441,6 +441,44 @@ export const updateUserStatus = async (req, res) => {
 };
 
 // Delete user
+// export const deleteUser = async (req, res) => {
+//     try {
+//         const { userId } = req.params;
+
+//         // Check if user exists
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'User not found'
+//             });
+//         }
+
+//         // Prevent admin from deleting themselves
+//         if (user._id.toString() === req.user._id.toString()) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Cannot delete your own account'
+//             });
+//         }
+
+//         // Delete user (you might want to soft delete instead)
+//         await User.findByIdAndDelete(userId);
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'User deleted successfully'
+//         });
+
+//     } catch (error) {
+//         console.error('Delete user error:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Internal server error while deleting user'
+//         });
+//     }
+// };
+
 export const deleteUser = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -462,12 +500,75 @@ export const deleteUser = async (req, res) => {
             });
         }
 
-        // Delete user (you might want to soft delete instead)
+        // 1. Cancel all auctions created by this user
+        const userAuctions = await Auction.find({ seller: userId });
+
+        for (const auction of userAuctions) {
+            // Cancel the auction
+            auction.status = 'cancelled';
+
+            // Cancel agenda jobs for this auction
+            await agendaService.cancelAuctionJobs(auction._id);
+
+            await auction.save();
+        }
+
+        // 2. Remove user's bids from all auctions and update current highest bidder
+        const auctionsWithUserBids = await Auction.find({
+            'bids.bidder': userId,
+            status: 'active' // Only update active auctions
+        });
+
+        for (const auction of auctionsWithUserBids) {
+            // Remove all bids by this user
+            auction.bids = auction.bids.filter(bid =>
+                bid.bidder.toString() !== userId.toString()
+            );
+
+            // Update bid count
+            auction.bidCount = auction.bids.length;
+
+            // Find the new highest bidder
+            if (auction.bids.length > 0) {
+                // Sort bids by amount descending and get the highest
+                const sortedBids = auction.bids.sort((a, b) => b.amount - a.amount);
+                const highestBid = sortedBids[0];
+
+                auction.currentBidder = highestBid.bidder;
+                auction.currentPrice = highestBid.amount;
+            } else {
+                // No bids left, reset to start price
+                auction.currentBidder = null;
+                auction.currentPrice = auction.startPrice;
+            }
+
+            await auction.save();
+        }
+
+        // 3. Delete user's comments (soft delete by marking as deleted)
+        await Comment.updateMany(
+            { user: userId },
+            {
+                status: 'deleted',
+                deletedAt: new Date(),
+                deletedBy: req.user._id,
+                adminDeleteReason: 'User account deleted by admin'
+            }
+        );
+
+        // 4. Remove user's watchlist items
+        await Watchlist.deleteMany({ user: userId });
+
+        // 5. Finally delete the user
         await User.findByIdAndDelete(userId);
 
         res.status(200).json({
             success: true,
-            message: 'User deleted successfully'
+            message: 'User deleted successfully. All related data has been cleaned up.',
+            data: {
+                cancelledAuctions: userAuctions.length,
+                updatedAuctions: auctionsWithUserBids.length
+            }
         });
 
     } catch (error) {

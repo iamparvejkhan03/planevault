@@ -90,6 +90,18 @@ const auctionSchema = new Schema({
         filename: String,
         originalName: String
     }],
+    logbooks: [{  // Add this array
+        url: String,
+        publicId: String,
+        filename: String,
+        originalName: String
+    }],
+
+    // Add avionics field in Basic Auction Info section
+    avionics: {
+        type: String,
+        default: ''
+    },
 
     // Bidding
     bids: [{

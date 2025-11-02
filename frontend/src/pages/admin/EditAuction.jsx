@@ -246,6 +246,10 @@ const EditAuction = () => {
     const [initialSpecifications, setInitialSpecifications] = useState({});
     const [removedPhotos, setRemovedPhotos] = useState([]);
     const [removedDocuments, setRemovedDocuments] = useState([]);
+    const [existingLogbooks, setExistingLogbooks] = useState([]);
+    const [uploadedLogbooks, setUploadedLogbooks] = useState([]);
+    const [removedLogbooks, setRemovedLogbooks] = useState([]);
+    const [allLogbooks, setAllLogbooks] = useState([]); // Unified logbook array
 
     // Calculate if there are new files to upload
     const newPhotos = allPhotos.filter(photo => !photo.isExisting);
@@ -302,6 +306,15 @@ const EditAuction = () => {
         });
     }, []);
 
+    const moveLogbook = useCallback((dragIndex, hoverIndex) => {
+        setAllLogbooks(prevLogbooks => {
+            const updatedLogbooks = [...prevLogbooks];
+            const [movedLogbook] = updatedLogbooks.splice(dragIndex, 1);
+            updatedLogbooks.splice(hoverIndex, 0, movedLogbook);
+            return updatedLogbooks;
+        });
+    }, []);
+
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -337,6 +350,7 @@ const EditAuction = () => {
                     const formData = {
                         title: auction.title,
                         category: auction.category,
+                        avionics: auction.avionics || '',
                         description: auction.description,
                         location: auction.location,
                         video: auction.videoLink,
@@ -369,6 +383,15 @@ const EditAuction = () => {
                     setAllPhotos(existingPhotosWithFlag);
 
                     setExistingDocuments(auction.documents || []);
+
+                    // setExistingLogbooks(auction.logbooks || []);
+                    // Replace existing logbook initialization with:
+                    const existingLogbooksWithFlag = (auction.logbooks || []).map(logbook => ({
+                        ...logbook,
+                        isExisting: true,
+                        id: logbook.publicId || logbook._id
+                    }));
+                    setAllLogbooks(existingLogbooksWithFlag);
 
                     toast.success('Auction data loaded successfully');
                 }
@@ -589,6 +612,63 @@ const EditAuction = () => {
         e.target.value = '';
     };
 
+    const handleLogbookUpload = (e) => {
+        const files = Array.from(e.target.files);
+
+        if (files.length === 0) return;
+
+        const newLogbooks = files.map(file => {
+            const fileId = `${file.name}-${file.size}-${file.lastModified}`;
+            const uniqueId = `new-logbook-${Date.now()}-${fileId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+
+            return {
+                file,
+                isExisting: false,
+                id: uniqueId,
+                _fileSignature: `${file.name}-${file.size}-${file.lastModified}`
+            };
+        });
+
+        const existingSignatures = new Set(
+            allLogbooks
+                .filter(logbook => !logbook.isExisting)
+                .map(logbook => logbook._fileSignature)
+        );
+
+        const uniqueNewLogbooks = newLogbooks.filter(logbook =>
+            !existingSignatures.has(logbook._fileSignature)
+        );
+
+        if (uniqueNewLogbooks.length === 0) {
+            toast.error('Some logbook images are already added');
+            return;
+        }
+
+        setAllLogbooks(prev => {
+            const existingSignatures = new Set(
+                prev.filter(l => !l.isExisting).map(l => l._fileSignature)
+            );
+
+            const filteredNewLogbooks = uniqueNewLogbooks.filter(logbook =>
+                !existingSignatures.has(logbook._fileSignature)
+            );
+
+            return [...filteredNewLogbooks, ...prev];
+        });
+
+        e.target.value = '';
+    };
+
+    const removeLogbook = (index) => {
+        const logbookToRemove = allLogbooks[index];
+
+        if (logbookToRemove.isExisting) {
+            setRemovedLogbooks(prev => [...prev, logbookToRemove.id]);
+        }
+
+        setAllLogbooks(prev => prev.filter((_, i) => i !== index));
+    };
+
     const removePhoto = (index) => {
         const photoToRemove = allPhotos[index];
 
@@ -633,6 +713,7 @@ const EditAuction = () => {
             // Append all text fields
             formDataToSend.append('title', formData.title);
             formDataToSend.append('category', formData.category);
+            formDataToSend.append('avionics', formData.avionics || '');
             formDataToSend.append('description', formData.description);
             formDataToSend.append('location', formData.location || '');
             formDataToSend.append('videoLink', formData.video || '');
@@ -651,6 +732,29 @@ const EditAuction = () => {
             // Add removed photos and documents
             if (removedPhotos.length > 0) {
                 formDataToSend.append('removedPhotos', JSON.stringify(removedPhotos));
+            }
+
+            // Send the complete logbook order
+            const logbookOrder = allLogbooks.map(logbook => ({
+                id: logbook.id,
+                isExisting: logbook.isExisting
+            }));
+            formDataToSend.append('logbookOrder', JSON.stringify(logbookOrder));
+
+            // Append new logbooks
+            const newLogbooksToUpload = allLogbooks.filter(logbook =>
+                !logbook.isExisting && logbook.file && !logbook._uploaded
+            );
+
+            newLogbooksToUpload.forEach((logbook) => {
+                if (logbook.file) {
+                    formDataToSend.append('logbooks', logbook.file);
+                }
+            });
+
+            // Append removed logbooks
+            if (removedLogbooks.length > 0) {
+                formDataToSend.append('removedLogbooks', JSON.stringify(removedLogbooks));
             }
 
             // Append reserve price if applicable
@@ -830,6 +934,24 @@ const EditAuction = () => {
                                         {/* Category-specific fields */}
                                         {selectedCategory && renderCategoryFields()}
 
+                                        {/* Avionics Section - Only for Aircraft */}
+                                        {selectedCategory === 'Aircraft' && (
+                                            <div className="mb-6">
+                                                <label className="block text-sm font-medium text-secondary mb-1">
+                                                    Avionics & Equipment
+                                                </label>
+                                                <RTE
+                                                    name="avionics"
+                                                    control={control}
+                                                    label="Avionics:"
+                                                    defaultValue={getValues('avionics') || ''}
+                                                    onBlur={(value) => {
+                                                        setValue('avionics', value, { shouldValidate: true });
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
                                         <div className="mb-6">
                                             <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1">Description *</label>
                                             <RTE
@@ -1002,6 +1124,51 @@ const EditAuction = () => {
                                                                     <X size={16} />
                                                                 </button>
                                                             </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Logbook Images Section */}
+                                        <div className="mb-6">
+                                            <label htmlFor="logbook-upload" className="block text-sm font-medium text-secondary mb-1">
+                                                Logbook Images {selectedCategory === 'Aircraft' && '*'}
+                                            </label>
+                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    accept="image/*"
+                                                    onChange={handleLogbookUpload}
+                                                    className="hidden"
+                                                    id="logbook-upload"
+                                                />
+                                                <label htmlFor="logbook-upload" className="cursor-pointer">
+                                                    <FileText size={40} className="mx-auto text-gray-400 mb-2" />
+                                                    <p className="text-gray-600">Browse logbook image(s) to upload</p>
+                                                    <p className="text-sm text-secondary">Maintenance records, logbook pages, etc.</p>
+                                                </label>
+                                            </div>
+
+                                            {/* Unified Logbook Gallery with Drag & Drop */}
+                                            {allLogbooks.length > 0 && (
+                                                <div className="mt-4">
+                                                    <p className="text-sm text-secondary mb-3">
+                                                        Drag and drop to reorder logbook images.
+                                                        <span className="block text-xs text-gray-500 mt-1">
+                                                            Blue badge indicates existing logbook images
+                                                        </span>
+                                                    </p>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                                        {allLogbooks.map((logbook, index) => (
+                                                            <DraggablePhoto
+                                                                key={logbook.id}
+                                                                photo={logbook}
+                                                                index={index}
+                                                                movePhoto={moveLogbook}
+                                                                removePhoto={removeLogbook}
+                                                            />
                                                         ))}
                                                     </div>
                                                 </div>
@@ -1237,6 +1404,12 @@ const EditAuction = () => {
                                                                     {existingDocuments.length + uploadedDocuments.length} total
                                                                 </span>
                                                             </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <p className="text-xs text-secondary">Logbook Images</p>
+                                                                <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                                    {allLogbooks.length} total ({allLogbooks.filter(l => l.isExisting).length} existing, {allLogbooks.filter(l => !l.isExisting).length} new)
+                                                                </span>
+                                                            </div>
                                                             {watch('video') && (
                                                                 <div className="flex justify-between items-center">
                                                                     <p className="text-xs text-secondary">Video</p>
@@ -1249,6 +1422,16 @@ const EditAuction = () => {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {/* Add avionics preview if exists */}
+                                            {watch('avionics') && (
+                                                <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
+                                                    <h4 className="font-medium text-black mb-3">Avionics & Equipment</h4>
+                                                    <div className="prose prose-lg max-w-none border rounded-lg p-4 bg-gray-50">
+                                                        {parse(watch('avionics'))}
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Description Preview */}
                                             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">

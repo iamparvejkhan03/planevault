@@ -35,7 +35,8 @@ AdminRouter.patch('/auctions/:auctionId/end', authAdmin, endAuction);
 AdminRouter.delete('/auctions/:auctionId', authAdmin, deleteAuction);
 AdminRouter.put('/auctions/:id', authAdmin, upload.fields([
     { name: 'photos' },
-    { name: 'documents' }
+    { name: 'documents' },
+    { name: 'logbooks' },
 ]), updateAuction);
 AdminRouter.get('/transactions', authAdmin, getAdminTransactions);
 AdminRouter.get('/transactions/stats', authAdmin, getTransactionStats);

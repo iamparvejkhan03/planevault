@@ -3,18 +3,18 @@ import multer from 'multer';
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-    // Check file types - ADD THIS SECTION FOR 'image' FIELD
+    // Check file types - ADD 'logbooks' FIELD
     if (file.fieldname === 'image') {
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
             cb(new Error('Only image files are allowed for profile images'), false);
         }
-    } else if (file.fieldname === 'photos') {
+    } else if (file.fieldname === 'photos' || file.fieldname === 'logbooks') { // ADD 'logbooks' HERE
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
-            cb(new Error('Only image files are allowed for photos'), false);
+            cb(new Error('Only image files are allowed for photos and logbooks'), false);
         }
     } else if (file.fieldname === 'documents') {
         // Allow almost all file types for documents, but exclude executables and scripts

@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, LayoutGrid, Shield, Clock } from 'lucide-react';
 
-const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => {
+const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '', type = 'photos' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     
-    // Reverse the images array to show newest first
-    // const reversedImages = [...images].reverse();
     const reversedImages = images;
     const [mainImage, setMainImage] = useState(reversedImages[0]?.url || '');
 
@@ -35,7 +33,7 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
     if (reversedImages.length === 0) {
         return (
             <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">No images available</p>
+                <p className="text-gray-500">No {type} available</p>
             </div>
         );
     }
@@ -102,42 +100,47 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
 
     const statusBadges = getStatusBadges();
 
+    // Only show the main image section and badges for photos (not for logbooks)
+    const isPhotos = type === 'photos';
+
     return (
         <div className="flex flex-col gap-3 md:gap-5">
-            {/* Main Image Section */}
-            <div className="relative">
-                <img
-                    src={mainImage}
-                    alt={`Auction image ${currentIndex + 1}`}
-                    className="block object-cover w-full h-48 md:h-80 lg:h-[450px] rounded-2xl shadow-lg cursor-pointer"
-                    onClick={() => openLightbox(0)}
-                />
-                <button
-                    onClick={() => openLightbox(0)}
-                    className="flex items-center gap-2 absolute bottom-3 right-3 md:bottom-5 md:right-5 bg-white py-2 px-3 md:py-3 md:px-5 rounded-md cursor-pointer text-sm md:text-base shadow-lg hover:bg-gray-50 transition-colors"
-                >
-                    <LayoutGrid strokeWidth={1.5} className="w-4 h-4 md:w-5 md:h-5" />
-                    <span>See all photos ({reversedImages.length})</span>
-                </button>
-                {/* Status Badges */}
-                <div className="absolute top-3 right-3 flex flex-wrap gap-2">
-                    {statusBadges.map((badge, index) => {
-                        const IconComponent = badge.icon;
-                        return (
-                            <span
-                                key={index}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badge.color}`}
-                            >
-                                <IconComponent size={12} />
-                                {badge.label}
-                            </span>
-                        );
-                    })}
+            {/* Main Image Section - Only for photos */}
+            {isPhotos && (
+                <div className="relative">
+                    <img
+                        src={mainImage}
+                        alt={`Auction image ${currentIndex + 1}`}
+                        className="block object-cover w-full h-48 md:h-80 lg:h-[450px] rounded-2xl shadow-lg cursor-pointer"
+                        onClick={() => openLightbox(0)}
+                    />
+                    <button
+                        onClick={() => openLightbox(0)}
+                        className="flex items-center gap-2 absolute bottom-3 right-3 md:bottom-5 md:right-5 bg-white py-2 px-3 md:py-3 md:px-5 rounded-md cursor-pointer text-sm md:text-base shadow-lg hover:bg-gray-50 transition-colors"
+                    >
+                        <LayoutGrid strokeWidth={1.5} className="w-4 h-4 md:w-5 md:h-5" />
+                        <span>See all photos ({reversedImages.length})</span>
+                    </button>
+                    {/* Status Badges - Only for photos */}
+                    <div className="absolute top-3 right-3 flex flex-wrap gap-2">
+                        {statusBadges.map((badge, index) => {
+                            const IconComponent = badge.icon;
+                            return (
+                                <span
+                                    key={index}
+                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badge.color}`}
+                                >
+                                    <IconComponent size={12} />
+                                    {badge.label}
+                                </span>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Thumbnail Grid */}
-            {reversedImages.length > 1 && (
+            {/* Thumbnail Grid - Only for photos */}
+            {isPhotos && reversedImages.length > 1 && (
                 <div className="hidden md:grid w-full grid-cols-3 gap-3">
                     {reversedImages.slice(0, 2).map((image, index) => (
                         <img
@@ -170,6 +173,22 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Image Grid for Logbooks */}
+            {!isPhotos && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {reversedImages.map((image, index) => (
+                        <div key={index} className="relative group">
+                            <img
+                                src={image.url}
+                                alt={`${type.slice(0, -1)} ${index + 1}`}
+                                className="w-full h-28 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => openLightbox(index)}
+                            />
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -206,7 +225,7 @@ const ImageLightBox = ({ images = [], auctionType = '', isReserveMet = '' }) => 
                     <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
                         <img
                             src={mainImage}
-                            alt={`Auction image ${currentIndex + 1}`}
+                            alt={`${type.slice(0, -1)} image ${currentIndex + 1}`}
                             className="max-w-full max-h-full object-contain rounded-lg"
                         />
                     </div>

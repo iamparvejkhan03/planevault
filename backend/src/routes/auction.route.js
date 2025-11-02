@@ -20,12 +20,14 @@ const auctionRouter = Router();
 // Protected routes
 auctionRouter.post('/create', authSeller, upload.fields([
     { name: 'photos' },
-    { name: 'documents' }
+    { name: 'documents' },
+    { name: 'logbooks' },
 ]), createAuction);
 
 auctionRouter.put('/update/:id', authSeller, upload.fields([
     { name: 'photos' },
-    { name: 'documents' }
+    { name: 'documents' },
+    { name: 'logbooks' },
 ]), updateAuction);
 auctionRouter.delete('/delete/:id', authSeller, deleteAuction);
 auctionRouter.post('/bid/:id', authBidder, placeBid);

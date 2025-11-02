@@ -8,7 +8,7 @@ const Description = lazy(() => import("./Description"));
 
 const TabSection = forwardRef(({ description, bids, auction, activatedTab }, ref) => {
   // Internal state that syncs with the activatedTab prop
-  const [activeTab, setActiveTab] = useState(activatedTab || "comments");
+  const [activeTab, setActiveTab] = useState(activatedTab || "description");
 
   // Sync internal state when activatedTab prop changes
   useEffect(() => {

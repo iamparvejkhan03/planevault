@@ -22,7 +22,7 @@ function SingleAuction() {
     const commentSectionRef = useRef(null);
     const auctionTime = useAuctionCountdown(auction);
     const countdown = useAuctionCountdown(auction);
-    const [activeTab, setActiveTab] = useState('comments');
+    const [activeTab, setActiveTab] = useState('description');
     const { pagination } = useComments(id);
     const { isWatchlisted, toggleWatchlist, watchlistCount } = useWatchlist(id);
     const hasFetchedRef = useRef(false);
@@ -125,12 +125,12 @@ function SingleAuction() {
     const handleBid = async (e) => {
         e.preventDefault();
 
-        if(!user){
+        if (!user) {
             toast.error('You must login to bid.')
             navigate('/login');
         }
 
-        if(user._id?.toString() === auction?.seller?._id?.toString()){
+        if (user._id?.toString() === auction?.seller?._id?.toString()) {
             toast.error(`You can't bid on your own auction.`);
             return;
         }
@@ -396,6 +396,37 @@ function SingleAuction() {
                 </div>
 
                 <hr className="my-8" />
+
+                {/* Avionics Section */}
+                {auction.avionics && (
+                    <>
+                        <div>
+                            <h3 className="my-5 text-primary text-xl font-semibold">Avionics & Equipment</h3>
+                            <div className="prose prose-lg max-w-none border rounded-lg px-6 py-3 bg-white text-md">
+                                {/* {parse(auction.avionics)} */}
+                                {auction.avionics ? (
+                                    <div dangerouslySetInnerHTML={{ __html: auction.avionics }} />
+                                ) : (
+                                    <p className="text-gray-500">No description provided.</p>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* Logbook Images Section */}
+                {auction.logbooks && auction.logbooks.length > 0 && (
+                    <>
+                        <hr className="my-8" />
+                        <div>
+                            <h3 className="my-5 text-primary text-xl font-semibold">Logbook Images</h3>
+                            <ImageLightBox
+                                images={auction.logbooks}
+                                type="logbooks"
+                            />
+                        </div>
+                    </>
+                )}
 
                 {/* Document section */}
                 {auction.documents && auction.documents.length > 0 && (

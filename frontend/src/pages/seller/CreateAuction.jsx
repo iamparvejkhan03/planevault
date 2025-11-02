@@ -95,6 +95,29 @@ const PhotoGallery = ({ photos, movePhoto, removePhoto }) => {
     );
 };
 
+// Logbook Gallery Component
+const LogbookGallery = ({ logbooks, moveLogbook, removeLogbook, onImageClick }) => {
+    return (
+        <div className="mt-4">
+            <p className="text-sm text-secondary mb-3">
+                Drag and drop to reorder logbook images.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {logbooks.map((logbook, index) => (
+                    <DraggablePhoto
+                        key={`logbook-${index}`}
+                        photo={logbook}
+                        index={index}
+                        movePhoto={moveLogbook}
+                        removePhoto={removeLogbook}
+                        onImageClick={onImageClick}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
 // components/UploadProgressModal.jsx
 const UploadProgressModal = ({ isOpen, fileCount }) => {
     if (!isOpen) return null;
@@ -174,6 +197,7 @@ const CreateAuction = () => {
     const [uploadedDocuments, setUploadedDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [uploadedLogbooks, setUploadedLogbooks] = useState([]);
     const {
         register,
         handleSubmit,
@@ -199,6 +223,14 @@ const CreateAuction = () => {
         const [movedPhoto] = updatedPhotos.splice(fromIndex, 1);
         updatedPhotos.splice(toIndex, 0, movedPhoto);
         setUploadedPhotos(updatedPhotos);
+    };
+
+    // Move logbook function for drag and drop
+    const moveLogbook = (fromIndex, toIndex) => {
+        const updatedLogbooks = [...uploadedLogbooks];
+        const [movedLogbook] = updatedLogbooks.splice(fromIndex, 1);
+        updatedLogbooks.splice(toIndex, 0, movedLogbook);
+        setUploadedLogbooks(updatedLogbooks);
     };
 
     // Get category-specific fields
@@ -385,6 +417,15 @@ const CreateAuction = () => {
         setUploadedDocuments([...uploadedDocuments, ...files]);
     };
 
+    const handleLogbookUpload = (e) => {
+        const files = Array.from(e.target.files);
+        setUploadedLogbooks([...uploadedLogbooks, ...files]);
+    };
+
+    const removeLogbook = (index) => {
+        setUploadedLogbooks(uploadedLogbooks.filter((_, i) => i !== index));
+    };
+
     const removePhoto = (index) => {
         const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
         setUploadedPhotos(newPhotos);
@@ -420,6 +461,7 @@ const CreateAuction = () => {
             formData.append('startPrice', auctionData.startPrice);
             formData.append('bidIncrement', auctionData.bidIncrement);
             formData.append('auctionType', auctionData.auctionType);
+            formData.append('avionics', auctionData.avionics || '');
 
             // Append specifications as JSON
             if (auctionData.specifications) {
@@ -439,6 +481,11 @@ const CreateAuction = () => {
             // Append documents as files
             uploadedDocuments.forEach((doc, index) => {
                 formData.append('documents', doc); // This should be the actual File object
+            });
+
+            // Append logbook images as files
+            uploadedLogbooks.forEach((logbook, index) => {
+                formData.append('logbooks', logbook);
             });
 
             const { data } = await axiosInstance.post(
@@ -548,6 +595,22 @@ const CreateAuction = () => {
                                         {/* Category-specific fields */}
                                         {selectedCategory && renderCategoryFields()}
 
+                                        {/* Avionics details */}
+                                        {/* Avionics Section - Only for Aircraft */}
+                                        {selectedCategory === 'Aircraft' && (
+                                            <div className="mb-6">
+                                                <label className="block text-sm font-medium text-secondary mb-1">
+                                                    Avionics & Equipment
+                                                </label>
+                                                <RTE
+                                                    name="avionics"
+                                                    control={control}
+                                                    label="Avionics:"
+                                                    defaultValue={getValues('avionics') || ''}
+                                                />
+                                            </div>
+                                        )}
+
                                         <div className="mb-6">
                                             <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1">Description *</label>
                                             <RTE
@@ -655,6 +718,61 @@ const CreateAuction = () => {
                                                         </div>
                                                     ))}
                                                 </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mb-6">
+                                            <label htmlFor="logbook-upload" className="block text-sm font-medium text-secondary mb-1">
+                                                Logbook Images {selectedCategory === 'Aircraft' && '*'}
+                                            </label>
+                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    accept="image/*"
+                                                    onChange={handleLogbookUpload}
+                                                    className="hidden"
+                                                    id="logbook-upload"
+                                                />
+                                                <label htmlFor="logbook-upload" className="cursor-pointer">
+                                                    <FileText size={40} className="mx-auto text-gray-400 mb-2" />
+                                                    <p className="text-gray-600">Browse logbook image(s) to upload</p>
+                                                    <p className="text-sm text-secondary">Maintenance records, logbook pages, etc.</p>
+                                                </label>
+                                            </div>
+
+                                            {/* {uploadedLogbooks.length > 0 && (
+                                                <div className="mt-4">
+                                                    <p className="text-sm text-secondary mb-3">Logbook Images ({uploadedLogbooks.length})</p>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                                        {uploadedLogbooks.map((logbook, index) => (
+                                                            <div key={index} className="relative group">
+                                                                <img
+                                                                    src={URL.createObjectURL(logbook)}
+                                                                    alt={`Logbook ${index + 1}`}
+                                                                    className="w-full h-32 object-cover rounded-lg cursor-pointer"
+                                                                    onClick={() => openLightbox(index, 'logbooks')}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeLogbook(index)}
+                                                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )} */}
+
+                                            {uploadedLogbooks.length > 0 && (
+                                                <LogbookGallery
+                                                    logbooks={uploadedLogbooks}
+                                                    moveLogbook={moveLogbook}
+                                                    removeLogbook={removeLogbook}
+                                                    onImageClick={(index) => openLightbox(index, 'logbooks')}
+                                                />
                                             )}
                                         </div>
                                     </div>
@@ -863,6 +981,12 @@ const CreateAuction = () => {
                                                                     {uploadedDocuments.length} uploaded
                                                                 </span>
                                                             </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <p className="text-xs text-secondary">Logbook Images</p>
+                                                                <span className="font-medium bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                                    {uploadedLogbooks.length} uploaded
+                                                                </span>
+                                                            </div>
                                                             {watch('video') && (
                                                                 <div className="flex justify-between items-center">
                                                                     <p className="text-xs text-secondary">Video</p>
@@ -875,6 +999,15 @@ const CreateAuction = () => {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {watch('avionics') && (
+                                                <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
+                                                    <h4 className="font-medium text-black mb-3">Avionics & Equipment</h4>
+                                                    <div className="prose prose-lg max-w-none border rounded-lg p-4 bg-gray-50">
+                                                        {parse(watch('avionics'))}
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Description Preview */}
                                             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">

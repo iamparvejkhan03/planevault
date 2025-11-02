@@ -1309,6 +1309,7 @@ export const updateAuction = async (req, res) => {
         const {
             title,
             category,
+            avionics,
             description,
             specifications,
             location,
@@ -1321,7 +1322,9 @@ export const updateAuction = async (req, res) => {
             endDate,
             removedPhotos,
             removedDocuments,
-            photoOrder // NEW: Photo order from frontend
+            removedLogbooks,
+            photoOrder,
+            logbookOrder
         } = req.body;
 
         // Basic validation - check if fields exist in req.body
@@ -1564,6 +1567,128 @@ export const updateAuction = async (req, res) => {
             }
         }
 
+        // Handle removed logbooks
+        let finalLogbooks = [...auction.logbooks || []];
+        if (removedLogbooks) {
+            try {
+                const removedLogbookIds = typeof removedLogbooks === 'string'
+                    ? JSON.parse(removedLogbooks)
+                    : removedLogbooks;
+
+                if (Array.isArray(removedLogbookIds)) {
+                    for (const logbookId of removedLogbookIds) {
+                        const logbookIndex = finalLogbooks.findIndex(logbook =>
+                            logbook.publicId === logbookId || logbook._id?.toString() === logbookId
+                        );
+
+                        if (logbookIndex > -1) {
+                            const removedLogbook = finalLogbooks[logbookIndex];
+                            // Delete from Cloudinary
+                            if (removedLogbook.publicId) {
+                                await deleteFromCloudinary(removedLogbook.publicId);
+                            }
+                            finalLogbooks.splice(logbookIndex, 1);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing removed logbooks:', error);
+            }
+        }
+
+        // Handle new logbook uploads
+        const newLogbooks = [];
+        if (req.files && req.files.logbooks) {
+            const logbooks = Array.isArray(req.files.logbooks) ? req.files.logbooks : [req.files.logbooks];
+            for (const logbook of logbooks) {
+                try {
+                    const result = await uploadImageToCloudinary(logbook.buffer, 'auction-logbooks');
+                    newLogbooks.push({
+                        url: result.secure_url,
+                        publicId: result.public_id,
+                        filename: logbook.originalname,
+                        originalName: logbook.originalname,
+                        resourceType: 'image'
+                    });
+                } catch (uploadError) {
+                    console.error('Logbook upload error:', uploadError);
+                    return res.status(400).json({
+                        success: false,
+                        message: `Failed to upload logbook: ${logbook.originalname}`
+                    });
+                }
+            }
+        }
+
+        // Handle logbook ordering
+        if (logbookOrder) {
+            try {
+                const parsedLogbookOrder = typeof logbookOrder === 'string'
+                    ? JSON.parse(logbookOrder)
+                    : logbookOrder;
+
+                if (Array.isArray(parsedLogbookOrder)) {
+                    // Create a map of existing logbooks by their ID for quick lookup
+                    const existingLogbooksMap = new Map();
+                    finalLogbooks.forEach(logbook => {
+                        const logbookId = logbook.publicId || logbook._id?.toString();
+                        if (logbookId) {
+                            existingLogbooksMap.set(logbookId, logbook);
+                        }
+                    });
+
+                    // Track used new logbooks to prevent duplicates
+                    const usedNewLogbooks = new Set();
+                    const reorderedLogbooks = [];
+
+                    for (const orderItem of parsedLogbookOrder) {
+                        if (orderItem.isExisting) {
+                            // Find existing logbook by ID
+                            const existingLogbook = existingLogbooksMap.get(orderItem.id);
+                            if (existingLogbook) {
+                                reorderedLogbooks.push(existingLogbook);
+                                // Remove from map to avoid duplicates
+                                existingLogbooksMap.delete(orderItem.id);
+                            }
+                        } else {
+                            // For new logbooks, find by the temporary ID from frontend
+                            let foundNewLogbook = null;
+                            for (let i = 0; i < newLogbooks.length; i++) {
+                                if (!usedNewLogbooks.has(i)) {
+                                    foundNewLogbook = newLogbooks[i];
+                                    usedNewLogbooks.add(i);
+                                    break;
+                                }
+                            }
+
+                            if (foundNewLogbook) {
+                                reorderedLogbooks.push(foundNewLogbook);
+                            }
+                        }
+                    }
+
+                    // Add any remaining existing logbooks that weren't in the logbookOrder
+                    existingLogbooksMap.forEach(logbook => reorderedLogbooks.push(logbook));
+
+                    // Add any remaining new logbooks that weren't used
+                    newLogbooks.forEach((logbook, index) => {
+                        if (!usedNewLogbooks.has(index)) {
+                            reorderedLogbooks.push(logbook);
+                        }
+                    });
+
+                    finalLogbooks = reorderedLogbooks;
+                }
+            } catch (error) {
+                console.error('Error processing logbook order:', error);
+                // Fallback: append new logbooks at the end
+                finalLogbooks = [...finalLogbooks, ...newLogbooks];
+            }
+        } else {
+            // If no logbookOrder is provided, just append new logbooks at the end
+            finalLogbooks = [...finalLogbooks, ...newLogbooks];
+        }
+
         // For admin, allow updating past start dates if needed
         // Remove this check for admin or modify as needed
         // if (start <= new Date() && new Date(auction.startDate).getTime() !== start.getTime()) {
@@ -1596,6 +1721,7 @@ export const updateAuction = async (req, res) => {
         const updateData = {
             title,
             category,
+            avionics: avionics || '',
             description,
             specifications: finalSpecifications,
             location: location || '',
@@ -1607,6 +1733,7 @@ export const updateAuction = async (req, res) => {
             endDate: end,
             photos: finalPhotos, // This now contains the properly ordered photos
             documents: finalDocuments,
+            logbooks: finalLogbooks,
         };
 
         // Add reserve price if applicable

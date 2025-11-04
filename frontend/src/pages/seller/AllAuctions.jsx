@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { LoadingSpinner, SellerContainer, SellerHeader, SellerSidebar } from "../../components";
+import { LoadingSpinner, LowerReserveModal, SellerContainer, SellerHeader, SellerSidebar } from "../../components";
 import { Gavel, Eye, Award, BarChart3, TrendingUp, DollarSign, Clock, Search, Filter, SortAsc, Users, MoreVertical, Loader } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 
 function AllAuctions() {
     const [auctions, setAuctions] = useState([]);
@@ -20,6 +21,35 @@ function AllAuctions() {
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
     const [sortBy, setSortBy] = useState("newest");
+
+    const [isLowerReserveModalOpen, setIsLowerReserveModalOpen] = useState(false);
+    const [lowerReserveCurrentAuction, setLowerReserveCurrentAuction] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
+
+    const handleReserveLowered = (updatedAuction) => {
+        // Update your local state with the new auction data
+        return;
+    };
+
+    const dropdownRef = useRef();
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setActiveDropdown(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleShowReserveModal = (auction) => {
+        setLowerReserveCurrentAuction(auction);
+        setIsLowerReserveModalOpen(true);
+    }
 
     // Fetch user stats (keep as is since it's working)
     // const fetchUserStats = async () => {
@@ -76,39 +106,6 @@ function AllAuctions() {
         // fetchUserStats();
         fetchAuctions();
     }, []);
-
-    // Stats configuration
-    // const auctionStats = [
-    //     {
-    //         title: "Active Auctions",
-    //         value: stats?.activeAuctions?.toString() || "0",
-    //         change: "Active Right Now",
-    //         icon: <Gavel size={24} />,
-    //         trend: "up"
-    //     },
-    //     {
-    //         title: "Total Bids",
-    //         value: stats?.totalBidsReceived?.toString() || "0",
-    //         change: "All Time",
-    //         icon: <TrendingUp size={24} />,
-    //         trend: "up"
-    //     },
-    //     {
-    //         title: "Highest Sale",
-    //         value: stats?.highestSale?.amount?.toLocaleString() || "0",
-    //         change: "Across All Auctions",
-    //         icon: <DollarSign size={24} />,
-    //         trend: "up",
-    //         currency: "$ "
-    //     },
-    //     {
-    //         title: "Items Ending Soon",
-    //         value: stats?.endingSoonAuctions?.toString() || "0",
-    //         change: "In Next 24hr",
-    //         icon: <Clock size={24} />,
-    //         trend: "up"
-    //     }
-    // ];
 
 
     // Get unique categories from auctions
@@ -213,8 +210,20 @@ function AllAuctions() {
         <section className="flex min-h-[70vh]">
             <SellerSidebar />
 
+            {/* Modal */}
+            {
+                isLowerReserveModalOpen &&
+                <LowerReserveModal
+                    isOpen={isLowerReserveModalOpen}
+                    onClose={() => setIsLowerReserveModalOpen(false)}
+                    auction={lowerReserveCurrentAuction}
+                    onReserveLowered={handleReserveLowered}
+                />
+            }
+
             <div className="w-full relative">
                 <SellerHeader />
+                <LowerReserveModal />
 
                 <SellerContainer>
                     <div className="max-w-full pt-16 pb-7 md:pt-0">
@@ -331,13 +340,13 @@ function AllAuctions() {
                     </div>
 
                     {/* Auctions Table */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-16">
+                    <div ref={dropdownRef} className="bg-white rounded-xl shadow-sm border border-gray-100 mb-16 min-h-[300px]">
                         {loading ? (
-                            <div className="flex justify-center items-center py-12">
+                            <div className="flex justify-center items-center py-12 min-h-[300px]">
                                 <LoadingSpinner />
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto min-h-[300px]">
                                 <table className="w-full">
                                     <thead className="bg-gray-50">
                                         <tr>
@@ -398,18 +407,48 @@ function AllAuctions() {
                                                             {statusConfig.text}
                                                         </span>
                                                     </td> */}
-                                                    <td className="py-4 px-6 text-sm font-medium relative group">
-                                                        <MoreVertical className="cursor-pointer" />
-                                                        <div className="hidden space-x-2 group-hover:flex group-hover:gap-3 group-hover:flex-col absolute left-0 top-0 bg-white border py-3 px-5 z-20 rounded-md text-base">
-                                                            <Link to={`/auction/${auction._id}`} target="_blank" className="text-primary hover:text-primary-dark">
-                                                                View
-                                                            </Link>
-                                                            <Link to={`/seller/auctions/edit/${auction._id}`} className="text-blue-600 hover:text-blue-800">
-                                                                Edit
-                                                            </Link>
-                                                            <button className="text-red-600 hover:text-red-800">
-                                                                End
-                                                            </button>
+                                                    <td className="py-4 px-6 text-sm font-medium text-center">
+                                                        <div className="relative inline-block">
+                                                            <MoreVertical
+                                                                className="cursor-pointer mx-auto"
+                                                                onClick={() => setActiveDropdown(activeDropdown === auction._id ? null : auction._id)}
+                                                            />
+                                                            {activeDropdown === auction._id && (
+                                                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg py-2 z-50 rounded-md min-w-[180px]">
+                                                                    <div className="flex flex-col">
+                                                                        <Link
+                                                                            to={`/auction/${auction._id}`}
+                                                                            target="_blank"
+                                                                            className="px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                                                                            onClick={() => setActiveDropdown(null)}
+                                                                        >
+                                                                            View
+                                                                        </Link>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                handleShowReserveModal(auction);
+                                                                                setActiveDropdown(null);
+                                                                            }}
+                                                                            className="px-4 py-2 text-orange-600 hover:bg-orange-50 transition-colors text-left"
+                                                                        >
+                                                                            Lower Reserve Price
+                                                                        </button>
+                                                                        <Link
+                                                                            to={`/seller/auctions/edit/${auction._id}`}
+                                                                            className="px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                                                                            onClick={() => setActiveDropdown(null)}
+                                                                        >
+                                                                            Edit
+                                                                        </Link>
+                                                                        <button
+                                                                            className="px-4 py-2 text-red-600 hover:bg-red-50 transition-colors text-left"
+                                                                            onClick={() => setActiveDropdown(null)}
+                                                                        >
+                                                                            End
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -419,7 +458,7 @@ function AllAuctions() {
                                 </table>
 
                                 {filteredAuctions.length === 0 && !loading && (
-                                    <div className="text-center py-12">
+                                    <div className="text-center py-12 min-h-[200px]">
                                         <BarChart3 size={48} className="mx-auto text-gray-300 mb-3" />
                                         <p className="text-gray-500">
                                             {auctions.length === 0 ? "No auctions found" : "No auctions match your filters"}

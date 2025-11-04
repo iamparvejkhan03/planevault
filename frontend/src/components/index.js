@@ -44,6 +44,7 @@ import SpecificationsSection from "./SpecificationsSection";
 import SearchFormPopUp from "./SearchFormPopUp";
 import CategoryImagesSection from "./CategoryImagesSection";
 import BidConfirmationModal from "./BidConfirmationModal";
+import LowerReserveModal from "./LowerReserveModal";
 
 export {
     Container,
@@ -92,4 +93,5 @@ export {
     SearchFormPopUp,
     CategoryImagesSection,
     BidConfirmationModal,
+    LowerReserveModal,
 }

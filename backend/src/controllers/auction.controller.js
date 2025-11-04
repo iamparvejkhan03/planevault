@@ -1960,3 +1960,102 @@ export const getSoldAuctions = async (req, res) => {
         });
     }
 };
+
+export const lowerReservePrice = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const seller = req.user;
+        const { newReservePrice } = req.body;
+
+        // Validate input
+        if (!newReservePrice || isNaN(parseFloat(newReservePrice))) {
+            return res.status(400).json({
+                success: false,
+                message: 'Valid new reserve price is required'
+            });
+        }
+
+        const auction = await Auction.findById(id);
+
+        if (!auction) {
+            return res.status(404).json({
+                success: false,
+                message: 'Auction not found'
+            });
+        }
+
+        // Check if user owns the auction
+        if (auction.seller.toString() !== seller._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'You can only modify your own auctions'
+            });
+        }
+
+        // Check if auction is active
+        if (auction.status !== 'active') {
+            return res.status(400).json({
+                success: false,
+                message: 'Can only lower reserve price for active auctions'
+            });
+        }
+
+        // Check if auction has reserve price
+        if (auction.auctionType !== 'reserve') {
+            return res.status(400).json({
+                success: false,
+                message: 'Only reserve auctions can have reserve prices'
+            });
+        }
+
+        const newPrice = parseFloat(newReservePrice);
+        const currentReserve = parseFloat(auction.reservePrice);
+        const currentBid = parseFloat(auction.currentPrice);
+
+        // Validate new reserve price is lower
+        if (newPrice >= currentReserve) {
+            return res.status(400).json({
+                success: false,
+                message: 'New reserve price must be lower than current reserve price'
+            });
+        }
+
+        // Validate new reserve price is higher than current bid
+        // if (newPrice <= currentBid) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: `New reserve price must be higher than current bid ($${currentBid.toLocaleString()})`
+        //     });
+        // }
+
+        // Validate positive price
+        if (newPrice <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Reserve price must be greater than 0'
+            });
+        }
+
+        // Update reserve price
+        auction.reservePrice = newPrice;
+
+        // Save the auction
+        const updatedAuction = await auction.save();
+
+        // Populate seller info for response
+        await updatedAuction.populate('seller', 'username firstName lastName');
+
+        res.status(200).json({
+            success: true,
+            message: 'Reserve price lowered successfully',
+            data: { auction: updatedAuction }
+        });
+
+    } catch (error) {
+        console.error('Lower reserve price error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while lowering reserve price'
+        });
+    }
+};

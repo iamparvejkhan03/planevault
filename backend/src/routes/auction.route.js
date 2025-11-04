@@ -10,7 +10,8 @@ import {
     getBiddingStats,
     getWonAuctions,
     getSoldAuctions,
-    getTopLiveAuctions
+    getTopLiveAuctions,
+    lowerReservePrice
 } from '../controllers/auction.controller.js';
 import upload from '../middlewares/multer.middleware.js';
 import { auth, authBidder, authSeller } from '../middlewares/auth.middleware.js';
@@ -36,6 +37,7 @@ auctionRouter.get('/stats', auth, getBiddingStats);
 auctionRouter.get('/won-auctions', auth, getWonAuctions);
 auctionRouter.get('/sold-auctions', authSeller, getSoldAuctions);
 auctionRouter.get('/top', getTopLiveAuctions);
+auctionRouter.patch('/:id/lower-reserve', authSeller, lowerReservePrice);
 
 // Public routes
 auctionRouter.get('/', getAuctions);

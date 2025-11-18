@@ -1718,10 +1718,6 @@ const newCommentBidderEmail = async (bidder, auction, comment, commentAuthor) =>
                                     $${auction.currentPrice?.toLocaleString()}
                                 </div>
                                 <div class="detail">
-                                    <span class="label">Your Last Bid:</span>
-                                    $[User's last bid amount would go here]
-                                </div>
-                                <div class="detail">
                                     <span class="label">Time Remaining:</span>
                                     ${auction.timeRemainingFormatted || 'Ending soon'}
                                 </div>

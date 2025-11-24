@@ -481,7 +481,8 @@ export const getTopLiveAuctions = async (req, res) => {
                 $lt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Ending in next 24 hours
             };
         } else if (status === 'sold') {
-            filter.status = 'sold';
+            // Filter for sold, ended, and reserve_not_met statuses
+            filter.status = { $in: ['sold', 'ended', 'reserve_not_met'] };
         } else if (status === 'upcoming') {
             filter.status = 'active';
             filter.startDate = { $gt: new Date() }; // Haven't started yet

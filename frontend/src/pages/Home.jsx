@@ -407,7 +407,7 @@ function Home() {
                                     onChange={() => handleTabChange('sold')}
                                 />
                                 <label htmlFor="sold" className="cursor-pointer rounded py-2 px-4 sm:px-8 text-gray-500 transition-colors duration-200 peer-checked:bg-black peer-checked:text-white">
-                                    Sold
+                                    Closed
                                 </label>
                             </div>
                             <div className="flex items-center">

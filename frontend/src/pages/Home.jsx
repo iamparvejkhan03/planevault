@@ -282,13 +282,13 @@ function Home() {
 
     const tabTitles = {
         'active': 'Live Auctions',
-        'sold': 'Sold Auctions',
+        'sold': 'Closed Auctions',
         'approved': 'Upcoming Auctions'
     };
 
     const tabDescriptions = {
         'active': 'Browse through our selection of premium aircraft auctions — find your perfect plane with transparent bidding and expert verification.',
-        'sold': 'Explore completed aircraft sales and final bid prices — gain valuable market insights and pricing trends for your next aviation purchase.',
+        'sold': 'Review completed aircraft auction outcomes — including sold, ended, and reserve-not-met listings — to inform your aviation market analysis and purchase decisions.',
         'approved': 'Get ready for exciting new aircraft listings — preview upcoming auctions and prepare your bids for these premium aviation assets.'
     };
 

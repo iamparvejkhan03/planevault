@@ -30,14 +30,51 @@ function SingleAuction() {
     const formRef = useRef();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [commissionAmount, setCommissionAmount] = useState(0);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
     };
 
-    const handleConfirmBid = (e) => {
-        handleBid(e)
-        setIsModalOpen(false);
+    const handleConfirmBid = async (e) => {
+        e?.preventDefault?.();
+
+        try {
+            setBidding(true);
+            setIsModalOpen(false);
+
+            // Check if user needs to make payment intent
+            const { data: userBidPayments } = await axiosInstance.get(`/api/v1/bid-payments/auction/${id}`);
+            const activePayments = userBidPayments.data.bidPayments.filter(
+                payment => payment.status !== 'canceled' && payment.type === 'bid_authorization'
+            );
+
+            const hasExistingPayment = activePayments.length > 0;
+
+            if (!hasExistingPayment && commissionAmount > 0) {
+                // Create payment intent (checkbox already validated in modal)
+                const { data: paymentData } = await axiosInstance.post('/api/v1/bid-payments/create-intent', {
+                    auctionId: id,
+                    bidAmount: parseFloat(bidAmount)
+                });
+            }
+
+            // Place the bid
+            const { data } = await axiosInstance.post(`/api/v1/auctions/bid/${id}`, {
+                amount: parseFloat(bidAmount)
+            });
+
+            if (data.success) {
+                setAuction(data.data.auction);
+                setBidAmount('');
+                toast.success('Bid placed successfully!');
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message || 'Failed to place bid');
+            console.error('Bid error:', error);
+        } finally {
+            setBidding(false);
+        }
     };
 
     const handleCloseModal = () => {
@@ -80,6 +117,20 @@ function SingleAuction() {
                 const { data } = await axiosInstance.get(`/api/v1/auctions/${id}`);
                 if (data.success) {
                     setAuction(data.data.auction);
+
+                    // Fetch commission amount for this category
+                    if (data.data.auction?.category) {
+                        try {
+                            const { data: commissionData } = await axiosInstance.get(`/api/v1/admin/commissions`);
+                            const commission = commissionData.data.commissions.find(
+                                c => c.category === data.data.auction.category
+                            );
+                            setCommissionAmount(commission ? commission.commissionAmount : 0);
+                        } catch (error) {
+                            console.log('Could not fetch commission amount:', error);
+                            setCommissionAmount(0);
+                        }
+                    }
                 }
             } catch (error) {
                 toast.error(error?.response?.data?.message || 'Failed to fetch auction');
@@ -128,6 +179,7 @@ function SingleAuction() {
         if (!user) {
             toast.error('You must login to bid.')
             navigate('/login');
+            return;
         }
 
         if (user._id?.toString() === auction?.seller?._id?.toString()) {
@@ -140,59 +192,8 @@ function SingleAuction() {
             return;
         }
 
-        try {
-            setBidding(true);
-
-            // Check if user needs to make payment intent (first bid by this user)
-            const { data: userBidPayments } = await axiosInstance.get(`/api/v1/bid-payments/auction/${id}`);
-            // const hasExistingPayment = userBidPayments.data.bidPayments.length > 0;
-            const activePayments = userBidPayments.data.bidPayments.filter(
-                payment => payment.status !== 'canceled' && payment.type === 'bid_authorization'
-            );
-
-            const hasExistingPayment = activePayments.length > 0;
-
-            if (!hasExistingPayment) {
-                // Get commission amount from backend
-                const { data: commissionData } = await axiosInstance.get(`/api/v1/admin/commissions`);
-                const commission = commissionData.data.commissions.find(c => c.category === auction.category);
-                const commissionAmount = commission ? commission.commissionAmount : 0;
-
-                if (commissionAmount > 0) {
-                    const userConfirmed = window.confirm(
-                        `A $${commissionAmount} temporary hold will be placed on your credit card for bidding. This amount will be released after the auction ends if you are not the winning bidder. Continue?`
-                    );
-
-                    if (!userConfirmed) {
-                        toast.error('Payment is required to place bid');
-                        setBidding(false);
-                        return;
-                    }
-
-                    // Create payment intent only after user confirms
-                    const { data: paymentData } = await axiosInstance.post('/api/v1/bid-payments/create-intent', {
-                        auctionId: id,
-                        bidAmount: parseFloat(bidAmount)
-                    });
-                }
-            }
-
-            // Place the bid after payment is handled
-            const { data } = await axiosInstance.post(`/api/v1/auctions/bid/${id}`, {
-                amount: parseFloat(bidAmount)
-            });
-
-            if (data.success) {
-                setAuction(data.data.auction);
-                setBidAmount('');
-                toast.success('Bid placed successfully!');
-            }
-        } catch (error) {
-            toast.error(error?.response?.data?.message || 'Failed to place bid');
-            console.error('Bid error:', error);
-        } finally {
-            setBidding(false);
-        }
+        // Just open the modal - validation happens there
+        handleOpenModal();
     };
 
     // Payment confirmation handler
@@ -550,6 +551,7 @@ function SingleAuction() {
                                 onConfirm={handleConfirmBid}
                                 bidAmount={bidAmount}
                                 auction={auction}
+                                commissionAmount={commissionAmount}
                                 ref={formRef}
                             />
                         </form>

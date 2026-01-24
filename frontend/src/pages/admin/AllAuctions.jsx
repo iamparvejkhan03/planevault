@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminContainer, AdminHeader, AdminSidebar, LoadingSpinner } from "../../components";
-import { Search, Filter, Gavel, DollarSign, Clock, Eye, Edit, Shield, TrendingUp, User, Award, MoreVertical, Trash2, AlertTriangle, CheckCircle, Star, Crown } from "lucide-react";
+import { Search, Filter, Gavel, DollarSign, Clock, Eye, Edit, Shield, TrendingUp, User, Award, MoreVertical, Trash2, AlertTriangle, CheckCircle, Star, Crown, RefreshCcw } from "lucide-react";
 import { about } from "../../assets";
 import toast from "react-hot-toast";
 import axiosInstance from "../../utils/axiosInstance";
@@ -192,7 +192,7 @@ function AllAuctions() {
     };
 
     const handleEditAuction = (auction) => {
-        if(auction.status === 'sold'){
+        if (auction.status === 'sold') {
             return toast.error(`Sold auction can't be edited`)
         }
         navigate(`/admin/auctions/edit/${auction._id}`);
@@ -580,6 +580,25 @@ function AllAuctions() {
                                                                         <Trash2 size={16} />
                                                                         <span>Delete Auction</span>
                                                                     </button>
+
+                                                                    {/* Relist Auction */}
+                                                                    {
+                                                                        (auction.status === 'ended' || auction.status === 'reserve_not_met') && (
+                                                                            <>
+                                                                                <div className="border-t border-gray-100 my-1"></div>
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        handleEditAuction(auction);
+                                                                                        setActiveDropdown(null);
+                                                                                    }}
+                                                                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                                                                                >
+                                                                                    <RefreshCcw size={16} />
+                                                                                    <span>Relist Auction</span>
+                                                                                </button>
+                                                                            </>
+                                                                        )
+                                                                    }
                                                                 </div>
                                                             )}
                                                         </div>

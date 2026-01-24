@@ -1398,7 +1398,7 @@ export const updateAuction = async (req, res) => {
 
     // CHECK: If auction is sold, we'll reset everything
     const isReserveNotMet =
-      auction.status === "reserve_not_met";
+      auction.status === "reserve_not_met" || auction.status === "ended";
 
     if (isReserveNotMet) {
       const resetData = {

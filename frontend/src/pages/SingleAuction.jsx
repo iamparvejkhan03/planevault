@@ -488,7 +488,7 @@ function SingleAuction() {
                 {/* Current bid section */}
                 <div className="p-4 flex flex-col gap-3">
                     <div className="flex flex-col gap-2">
-                        <p className="font-light">{auction.bidCount > 0 ? 'Current Bid' : 'Start Bidding At'}</p>
+                        <p className="font-light">{auction.status === 'sold' ? 'Winning Bid' : auction.status === 'reserve_not_met' ? 'Final Bid' : auction.bidCount > 0 ? 'Current Bid' : 'Start Bidding At'}</p>
                         <p className="flex items-center gap-1 text-3xl sm:text-4xl font-medium">
                             <span>$ </span>
                             {/* <span> {auction?.bidCount > 0 ? auction.currentPrice.toLocaleString() : auction.startPrice.toLocaleString()}</span> */}

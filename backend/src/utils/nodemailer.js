@@ -377,18 +377,6 @@ const sendAuctionWonEmail = async (auction) => {
                             <p><strong>Auction Ended:</strong> ${new Date(auction.endDate).toLocaleDateString()}</p>
                             ${auction.location ? `<p><strong>Location:</strong> ${auction.location}</p>` : ''}
                         </div>
-
-                        ${auction.status === 'sold' ? `
-                            <p>Congratulations on being the highest bidder and winning this auction! Now, you can reach out to ${auction.seller.firstName || auction.seller.username} on the following details and follow up to arrange payment and transfer details.</p>
-
-                            ${auction.seller ? `<p><strong>Seller:</strong> ${auction.seller.firstName || auction.seller.username}</p>` : ''}
-
-                            ${auction.seller ? `<p><strong>E-mail:</strong> ${auction.seller?.email}</p>` : ''}
-
-                            ${auction.seller ? `<p><strong>Phone:</strong> ${auction.seller?.phone}</p>` : ''}
-                        ` : `
-                            <p></p>
-                        `}
                         
                         <div class="next-steps">
                             <h4>Next Steps:</h4>
@@ -456,18 +444,6 @@ const sendAuctionEndedSellerEmail = async (auction) => {
                         <p>Dear <strong>${auction.seller.firstName || auction.seller.username}</strong>,</p>
                         
                         <p>Your auction for <strong>"${auction.title}"</strong> has ended.</p>
-
-                        ${auction.status === 'sold' ? `
-                            <p>Congratulations on your successful sale! Now, you can reach out to ${auction.winner.firstName || auction.winner.username} on the following details and follow up to arrange payment and transfer details.</p>
-
-                            ${auction.winner ? `<p><strong>Winner:</strong> ${auction.winner.firstName || auction.winner.username}</p>` : ''}
-
-                            ${auction.winner ? `<p><strong>E-mail:</strong> ${auction.winner?.email}</p>` : ''}
-
-                            ${auction.winner ? `<p><strong>Phone:</strong> ${auction.winner?.phone}</p>` : ''}
-                        ` : `
-                            <p>Your item did not sell this time. You can relist the item from your dashboard.</p>
-                        `}
                         
                         <p><strong>Final Status:</strong> ${auction.status}</p>
                         ${auction.finalPrice ? `<p><strong>Final Price:</strong> $${auction.finalPrice.toLocaleString()}</p>` : ''}
@@ -684,20 +660,8 @@ const paymentSuccessEmail = async (user, auction, paymentAmount) => {
                             <p class="amount">$${auction?.commissionAmount?.toLocaleString()}</p>
                             <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
                         </div>
-
-                        ${auction.status === 'sold' ? `
-                            <p>Congratulations on being the highest bidder and winning this auction! Now, you can reach out to ${auction.seller.firstName || auction.seller.username} on the following details and follow up to arrange payment and transfer details.</p>
-
-                            ${auction.seller ? `<p><strong>Seller:</strong> ${auction.seller.firstName || auction.seller.username}</p>` : ''}
-
-                            ${auction.seller ? `<p><strong>E-mail:</strong> ${auction.seller?.email}</p>` : ''}
-
-                            ${auction.seller ? `<p><strong>Phone:</strong> ${auction.seller?.phone}</p>` : ''}
-                        ` : `
-                            <p></p>
-                        `}
                         
-                        <p>The hold we created on your card on the first bid has been successfully released and the commission/fee has been charged. Now, you can proceed to contacat the seller.</p>
+                        <p>The hold we created on your card on the first bid has been successfully released and the commission/fee has been charged. Now, you can proceed to contact the seller.</p>
                         
                         <p>You can check your order and contact the seller from your dashboard.</p>
                         

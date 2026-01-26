@@ -1398,7 +1398,7 @@ export const updateAuction = async (req, res) => {
 
     // CHECK: If auction is sold, we'll reset everything
     const isReserveNotMet =
-      auction.status === "reserve_not_met" || auction.status === "ended";
+      auction.status === "reserve_not_met" || auction.status === "ended" || auction.status === "cancelled";
 
     if (isReserveNotMet) {
       const resetData = {
@@ -1434,7 +1434,7 @@ export const updateAuction = async (req, res) => {
 
         // Reset views and watchlist if you want a fresh start
         views: 0,
-        // watchlistCount: 0,
+        watchlistCount: 0,
 
         // Reset commission
         commissionAmount: 0,
@@ -1446,6 +1446,12 @@ export const updateAuction = async (req, res) => {
 
       // Apply reset data to auction object
       Object.assign(auction, resetData);
+      const deleteComments = await Comment.deleteMany({ auction: auction._id });
+      const watchlistDelete = await Watchlist.deleteMany({
+        auction: auction._id,
+      });
+
+      await auction.save();
     }
 
     // Handle specifications

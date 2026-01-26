@@ -254,7 +254,10 @@ const EditAuction = () => {
         reset,
         formState: { errors }
     } = useForm({
-        mode: 'onChange'
+        mode: 'onChange',
+        defaultValues: {
+            endDate: ''
+        }
     });
 
     const auctionType = watch('auctionType');
@@ -319,7 +322,8 @@ const EditAuction = () => {
                         location: auction.location,
                         video: auction.videoLink,
                         startDate: formatDateForInput(auction.startDate),
-                        endDate: formatDateForInput(auction.endDate),
+                        // endDate: formatDateForInput(auction.endDate),
+                        endDate: '', // Force user to reselect end date
                         startPrice: auction.startPrice,
                         bidIncrement: auction.bidIncrement,
                         auctionType: auction.auctionType,
@@ -659,7 +663,6 @@ const EditAuction = () => {
         }
     };
 
-    // Update auction handler (SAME AS ADMIN but with seller endpoint)
     // Update auction handler with fixed photo handling
     const updateAuctionHandler = async (formData) => {
         try {
@@ -1449,6 +1452,7 @@ const EditAuction = () => {
                                         </button>
                                     )}
                                 </div>
+                                {errors.endDate && <p className='text-sm text-orange-500 float-right'>Please set end date to proceed.</p>}
                             </form>
                         </div>
                     </SellerContainer>

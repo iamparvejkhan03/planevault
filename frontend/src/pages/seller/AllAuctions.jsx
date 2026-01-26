@@ -424,6 +424,18 @@ function AllAuctions() {
                                                                         >
                                                                             View
                                                                         </Link>
+                                                                        {/* Relist Auction */}
+                                                                        {
+                                                                            (auction.status === 'ended' || auction.status === 'reserve_not_met') && (
+                                                                                <Link
+                                                                                    to={`/seller/auctions/edit/${auction._id}`}
+                                                                                    className="px-4 py-2 text-green-700 hover:bg-green-50 transition-colors text-left"
+                                                                                    onClick={() => setActiveDropdown(null)}
+                                                                                >
+                                                                                    Relist
+                                                                                </Link>
+                                                                            )
+                                                                        }
                                                                         <button
                                                                             onClick={() => {
                                                                                 handleShowReserveModal(auction);

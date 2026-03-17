@@ -991,6 +991,658 @@ export const updateAuction = async (req, res) => {
       });
     }
 
+    // if (auction.status === "sold") {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: `Sold auctions can't be edited`,
+    //   });
+    // }
+
+    // For FormData, we need to access fields from req.body directly
+    const {
+      title,
+      category,
+      avionics,
+      description,
+      specifications,
+      location,
+      videoLink,
+      startPrice,
+      bidIncrement,
+      auctionType,
+      reservePrice,
+      startDate,
+      endDate,
+      removedPhotos,
+      removedDocuments,
+      removedLogbooks,
+      photoOrder,
+      logbookOrder,
+    } = req.body;
+
+    // Basic validation - check if fields exist in req.body
+    if (
+      !title ||
+      !category ||
+      !description ||
+      !startPrice ||
+      !bidIncrement ||
+      !auctionType ||
+      !startDate ||
+      !endDate
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be provided",
+        missing: {
+          title: !title,
+          category: !category,
+          description: !description,
+          startPrice: !startPrice,
+          bidIncrement: !bidIncrement,
+          auctionType: !auctionType,
+          startDate: !startDate,
+          endDate: !endDate,
+        },
+      });
+    }
+
+    // Validate start price for all auction types
+    if (!startPrice || parseFloat(startPrice) < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Start price is required and must be positive",
+      });
+    }
+
+    // Validate bid increment for standard and reserve auctions
+    if (
+      (auctionType === "standard" || auctionType === "reserve") &&
+      (!bidIncrement || parseFloat(bidIncrement) <= 0)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Bid increment is required for standard and reserve auctions",
+      });
+    }
+
+    // Validate reserve price for reserve auctions
+    if (auctionType === "reserve") {
+      if (!reservePrice || parseFloat(reservePrice) < parseFloat(startPrice)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Reserve price must be provided and greater than or equal to start price",
+        });
+      }
+    }
+
+    // CHECK: If auction is sold, we'll reset everything
+    // const isReserveNotMet =
+    //   auction.status === "reserve_not_met" || auction.status === "ended" || auction.status === "cancelled";
+
+    // if (isReserveNotMet) {
+    //   const resetData = {
+    //     // Reset all bidding/offers/winner data
+    //     bids: [],
+    //     offers: [],
+    //     currentPrice: parseFloat(startPrice),
+    //     currentBidder: null,
+    //     winner: null,
+    //     finalPrice: null,
+    //     bidCount: 0,
+
+    //     // Reset payment info
+    //     paymentStatus: "pending",
+    //     paymentMethod: null,
+    //     paymentDate: null,
+    //     transactionId: null,
+    //     invoice: null,
+
+    //     // Reset notifications
+    //     notifications: {
+    //       ending30min: false,
+    //       ending2hour: false,
+    //       ending24hour: false,
+    //       ending30minSentAt: null,
+    //       ending2hourSentAt: null,
+    //       ending24hourSentAt: null,
+    //       offerReceived: false,
+    //       offerExpiring: false,
+    //     },
+
+    //     lastBidTime: null,
+
+    //     // Reset views and watchlist if you want a fresh start
+    //     views: 0,
+    //     watchlistCount: 0,
+
+    //     // Reset commission
+    //     commissionAmount: 0,
+    //     bidPaymentRequired: true,
+
+    //     // Set status based on new dates
+    //     status: "draft", // Start as draft since it's being re-listed
+    //   };
+
+    //   // Apply reset data to auction object
+    //   Object.assign(auction, resetData);
+    //   const deleteComments = await Comment.deleteMany({ auction: auction._id });
+    //   const watchlistDelete = await Watchlist.deleteMany({
+    //     auction: auction._id,
+    //   });
+
+    //   await auction.save();
+    // }
+
+    // Handle specifications
+    let finalSpecifications = new Map();
+
+    // Convert existing specifications to Map if they exist
+    if (auction.specifications && auction.specifications instanceof Map) {
+      auction.specifications.forEach((value, key) => {
+        if (value !== null && value !== undefined && value !== "") {
+          finalSpecifications.set(key, value);
+        }
+      });
+    } else if (
+      auction.specifications &&
+      typeof auction.specifications === "object"
+    ) {
+      Object.entries(auction.specifications).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== "") {
+          finalSpecifications.set(key, value);
+        }
+      });
+    }
+
+    // Parse and merge new specifications
+    if (specifications) {
+      try {
+        let newSpecs;
+        if (typeof specifications === "string") {
+          newSpecs = JSON.parse(specifications);
+        } else {
+          newSpecs = specifications;
+        }
+
+        if (typeof newSpecs === "object" && newSpecs !== null) {
+          Object.entries(newSpecs).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== "") {
+              finalSpecifications.set(key, value.toString());
+            } else {
+              finalSpecifications.delete(key);
+            }
+          });
+        }
+      } catch (parseError) {
+        console.error("Error parsing specifications:", parseError);
+        return res.status(400).json({
+          success: false,
+          message: "Invalid specifications format",
+        });
+      }
+    }
+
+    // Handle removed photos
+    let finalPhotos = [...auction.photos];
+    if (removedPhotos) {
+      try {
+        const removedPhotoIds =
+          typeof removedPhotos === "string"
+            ? JSON.parse(removedPhotos)
+            : removedPhotos;
+
+        if (Array.isArray(removedPhotoIds)) {
+          // Remove photos from the array and delete from Cloudinary
+          for (const photoId of removedPhotoIds) {
+            const photoIndex = finalPhotos.findIndex(
+              (photo) =>
+                photo.publicId === photoId || photo._id?.toString() === photoId,
+            );
+
+            if (photoIndex > -1) {
+              const removedPhoto = finalPhotos[photoIndex];
+              // Delete from Cloudinary
+              if (removedPhoto.publicId) {
+                await deleteFromCloudinary(removedPhoto.publicId);
+              }
+              finalPhotos.splice(photoIndex, 1);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error processing removed photos:", error);
+      }
+    }
+
+    // Handle removed documents
+    let finalDocuments = [...auction.documents];
+    if (removedDocuments) {
+      try {
+        const removedDocIds =
+          typeof removedDocuments === "string"
+            ? JSON.parse(removedDocuments)
+            : removedDocuments;
+
+        if (Array.isArray(removedDocIds)) {
+          for (const docId of removedDocIds) {
+            const docIndex = finalDocuments.findIndex(
+              (doc) => doc.publicId === docId || doc._id?.toString() === docId,
+            );
+
+            if (docIndex > -1) {
+              const removedDoc = finalDocuments[docIndex];
+              // Delete from Cloudinary
+              if (removedDoc.publicId) {
+                await deleteFromCloudinary(removedDoc.publicId);
+              }
+              finalDocuments.splice(docIndex, 1);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error processing removed documents:", error);
+      }
+    }
+
+    // Handle new photo uploads FIRST - add them to temporary array
+    const newPhotos = [];
+    if (req.files && req.files.photos) {
+      const photos = Array.isArray(req.files.photos)
+        ? req.files.photos
+        : [req.files.photos];
+      for (const photo of photos) {
+        try {
+          const result = await uploadImageToCloudinary(
+            photo.buffer,
+            "auction-photos",
+            photo.originalname
+          );
+          newPhotos.push({
+            url: result.secure_url,
+            publicId: result.public_id,
+            filename: photo.originalname,
+            resourceType: "image",
+          });
+        } catch (uploadError) {
+          console.error("Photo upload error:", uploadError);
+          return res.status(400).json({
+            success: false,
+            message: `Failed to upload photo: ${photo.originalname}`,
+          });
+        }
+      }
+    }
+
+    // NEW: Handle photo ordering
+    if (photoOrder) {
+      try {
+        const parsedPhotoOrder =
+          typeof photoOrder === "string" ? JSON.parse(photoOrder) : photoOrder;
+
+        if (Array.isArray(parsedPhotoOrder)) {
+          // Create a map of existing photos by their ID for quick lookup
+          const existingPhotosMap = new Map();
+          finalPhotos.forEach((photo) => {
+            const photoId = photo.publicId || photo._id?.toString();
+            if (photoId) {
+              existingPhotosMap.set(photoId, photo);
+            }
+          });
+
+          // Track used new photos to prevent duplicates
+          const usedNewPhotos = new Set();
+          const reorderedPhotos = [];
+
+          for (const orderItem of parsedPhotoOrder) {
+            if (orderItem.isExisting) {
+              // Find existing photo by ID
+              const existingPhoto = existingPhotosMap.get(orderItem.id);
+              if (existingPhoto) {
+                reorderedPhotos.push(existingPhoto);
+                // Remove from map to avoid duplicates
+                existingPhotosMap.delete(orderItem.id);
+              }
+            } else {
+              // For new photos, find by the temporary ID from frontend
+              // Since we can't reliably match by ID, we'll use the order
+              // Find the first unused new photo
+              let foundNewPhoto = null;
+              for (let i = 0; i < newPhotos.length; i++) {
+                if (!usedNewPhotos.has(i)) {
+                  foundNewPhoto = newPhotos[i];
+                  usedNewPhotos.add(i);
+                  break;
+                }
+              }
+
+              if (foundNewPhoto) {
+                reorderedPhotos.push(foundNewPhoto);
+              }
+            }
+          }
+
+          // Add any remaining existing photos that weren't in the photoOrder
+          existingPhotosMap.forEach((photo) => reorderedPhotos.push(photo));
+
+          // Add any remaining new photos that weren't used
+          newPhotos.forEach((photo, index) => {
+            if (!usedNewPhotos.has(index)) {
+              reorderedPhotos.push(photo);
+            }
+          });
+
+          finalPhotos = reorderedPhotos;
+        }
+      } catch (error) {
+        console.error("Error processing photo order:", error);
+        // Fallback: append new photos at the end
+        finalPhotos = [...finalPhotos, ...newPhotos];
+      }
+    } else {
+      // If no photoOrder is provided, just append new photos at the end
+      finalPhotos = [...finalPhotos, ...newPhotos];
+    }
+
+    // Handle new document uploads (append at the end as before)
+    if (req.files && req.files.documents) {
+      const documents = Array.isArray(req.files.documents)
+        ? req.files.documents
+        : [req.files.documents];
+      for (const doc of documents) {
+        try {
+          const result = await uploadDocumentToCloudinary(
+            doc.buffer,
+            doc.originalname,
+            "auction-documents",
+          );
+          finalDocuments.push({
+            url: result.secure_url,
+            publicId: result.public_id,
+            filename: doc.originalname,
+            originalName: doc.originalname,
+            resourceType: "raw",
+          });
+        } catch (uploadError) {
+          console.error("Document upload error:", uploadError);
+          return res.status(400).json({
+            success: false,
+            message: `Failed to upload document: ${doc.originalname}`,
+          });
+        }
+      }
+    }
+
+    // Handle removed logbooks
+    let finalLogbooks = [...(auction.logbooks || [])];
+    if (removedLogbooks) {
+      try {
+        const removedLogbookIds =
+          typeof removedLogbooks === "string"
+            ? JSON.parse(removedLogbooks)
+            : removedLogbooks;
+
+        if (Array.isArray(removedLogbookIds)) {
+          for (const logbookId of removedLogbookIds) {
+            const logbookIndex = finalLogbooks.findIndex(
+              (logbook) =>
+                logbook.publicId === logbookId ||
+                logbook._id?.toString() === logbookId,
+            );
+
+            if (logbookIndex > -1) {
+              const removedLogbook = finalLogbooks[logbookIndex];
+              // Delete from Cloudinary
+              if (removedLogbook.publicId) {
+                await deleteFromCloudinary(removedLogbook.publicId);
+              }
+              finalLogbooks.splice(logbookIndex, 1);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error processing removed logbooks:", error);
+      }
+    }
+
+    // Handle new logbook uploads
+    const newLogbooks = [];
+    if (req.files && req.files.logbooks) {
+      const logbooks = Array.isArray(req.files.logbooks)
+        ? req.files.logbooks
+        : [req.files.logbooks];
+      for (const logbook of logbooks) {
+        try {
+          const result = await uploadImageToCloudinary(
+            logbook.buffer,
+            "auction-logbooks",
+            photo.originalname
+          );
+          newLogbooks.push({
+            url: result.secure_url,
+            publicId: result.public_id,
+            filename: logbook.originalname,
+            originalName: logbook.originalname,
+            resourceType: "image",
+          });
+        } catch (uploadError) {
+          console.error("Logbook upload error:", uploadError);
+          return res.status(400).json({
+            success: false,
+            message: `Failed to upload logbook: ${logbook.originalname}`,
+          });
+        }
+      }
+    }
+
+    // Handle logbook ordering
+    if (logbookOrder) {
+      try {
+        const parsedLogbookOrder =
+          typeof logbookOrder === "string"
+            ? JSON.parse(logbookOrder)
+            : logbookOrder;
+
+        if (Array.isArray(parsedLogbookOrder)) {
+          // Create a map of existing logbooks by their ID for quick lookup
+          const existingLogbooksMap = new Map();
+          finalLogbooks.forEach((logbook) => {
+            const logbookId = logbook.publicId || logbook._id?.toString();
+            if (logbookId) {
+              existingLogbooksMap.set(logbookId, logbook);
+            }
+          });
+
+          // Track used new logbooks to prevent duplicates
+          const usedNewLogbooks = new Set();
+          const reorderedLogbooks = [];
+
+          for (const orderItem of parsedLogbookOrder) {
+            if (orderItem.isExisting) {
+              // Find existing logbook by ID
+              const existingLogbook = existingLogbooksMap.get(orderItem.id);
+              if (existingLogbook) {
+                reorderedLogbooks.push(existingLogbook);
+                // Remove from map to avoid duplicates
+                existingLogbooksMap.delete(orderItem.id);
+              }
+            } else {
+              // For new logbooks, find by the temporary ID from frontend
+              let foundNewLogbook = null;
+              for (let i = 0; i < newLogbooks.length; i++) {
+                if (!usedNewLogbooks.has(i)) {
+                  foundNewLogbook = newLogbooks[i];
+                  usedNewLogbooks.add(i);
+                  break;
+                }
+              }
+
+              if (foundNewLogbook) {
+                reorderedLogbooks.push(foundNewLogbook);
+              }
+            }
+          }
+
+          // Add any remaining existing logbooks that weren't in the logbookOrder
+          existingLogbooksMap.forEach((logbook) =>
+            reorderedLogbooks.push(logbook),
+          );
+
+          // Add any remaining new logbooks that weren't used
+          newLogbooks.forEach((logbook, index) => {
+            if (!usedNewLogbooks.has(index)) {
+              reorderedLogbooks.push(logbook);
+            }
+          });
+
+          finalLogbooks = reorderedLogbooks;
+        }
+      } catch (error) {
+        console.error("Error processing logbook order:", error);
+        // Fallback: append new logbooks at the end
+        finalLogbooks = [...finalLogbooks, ...newLogbooks];
+      }
+    } else {
+      // If no logbookOrder is provided, just append new logbooks at the end
+      finalLogbooks = [...finalLogbooks, ...newLogbooks];
+    }
+
+    // For admin, allow updating past start dates if needed
+    // Remove this check for admin or modify as needed
+    // if (start <= new Date() && new Date(auction.startDate).getTime() !== start.getTime()) {
+    //     return res.status(400).json({
+    //         success: false,
+    //         message: 'Start date must be in the future'
+    //     });
+    // }
+
+    if (
+      auctionType === "reserve" &&
+      (!reservePrice || parseFloat(reservePrice) < parseFloat(startPrice))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Reserve price must be provided and greater than or equal to start price",
+      });
+    }
+
+    // Validate dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const now = new Date();
+
+    if (end <= start) {
+      return res.status(400).json({
+        success: false,
+        message: "End date must be after start date",
+      });
+    }
+
+    // Prepare update data
+    const updateData = {
+      title,
+      category,
+      avionics: avionics || "",
+      description,
+      specifications: finalSpecifications,
+      location: location || "",
+      videoLink: videoLink || "",
+      startPrice: parseFloat(startPrice),
+      bidIncrement: parseFloat(bidIncrement),
+      auctionType,
+      startDate: start,
+      endDate: end,
+      photos: finalPhotos, // This now contains the properly ordered photos
+      documents: finalDocuments,
+      logbooks: finalLogbooks,
+    };
+
+    // Add reserve price if applicable
+    if (auctionType === "reserve") {
+      updateData.reservePrice = parseFloat(reservePrice);
+    } else {
+      updateData.reservePrice = undefined;
+    }
+
+    // Handle status changes based on new dates
+    if (start > now && end > now) {
+      // Dates are in future - activate if not already active
+      if (auction.status == "active") {
+        updateData.status = "approved";
+      } else if (auction.status == "ended") {
+        updateData.status = "approved";
+      } else if (auction.status == "reserve_not_met") {
+        updateData.status = "approved";
+      }
+    } else if (end <= now) {
+      // Auction has ended
+      if (auction.status === "active") {
+        updateData.status = "ended";
+        // Trigger end auction logic
+        await auction.endAuction();
+      }
+    } else if (start <= now && end > now) {
+      // Auction should be active now (start date passed but end date in future)
+      if (auction.status !== "active") {
+        updateData.status = "active";
+      }
+    }
+
+    const updatedAuction = await Auction.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).populate("seller", "username firstName lastName");
+
+    // Reschedule jobs if dates changed
+    if (
+      start.getTime() !== new Date(auction.startDate).getTime() ||
+      end.getTime() !== new Date(auction.endDate).getTime()
+    ) {
+      await agendaService.cancelAuctionJobs(auction._id);
+
+      // Only schedule activation if start date is in future
+      if (start > new Date()) {
+        await agendaService.scheduleAuctionActivation(auction._id, start);
+      } else {
+        // If start date is in past, activate immediately
+        if (auction.status === "draft") {
+          updatedAuction.status = "active";
+          await updatedAuction.save();
+        }
+      }
+
+      await agendaService.scheduleAuctionEnd(auction._id, end);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Auction updated successfully",
+      data: { auction: updatedAuction },
+    });
+  } catch (error) {
+    console.error("Update auction error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while updating auction",
+    });
+  }
+};
+
+export const relistAuction = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const auction = await Auction.findById(id);
+
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: "Auction not found",
+      });
+    }
+
     if (auction.status === "sold") {
       return res.status(401).json({
         success: false,

@@ -12,7 +12,8 @@ import {
     approveAuction,
     endAuction,
     deleteAuction,
-    updateAuction
+    updateAuction,
+    relistAuction
 } from '../controllers/admin.controller.js';
 import { authAdmin } from '../middlewares/auth.middleware.js';
 import upload from '../middlewares/multer.middleware.js';
@@ -38,6 +39,11 @@ AdminRouter.put('/auctions/:id', authAdmin, upload.fields([
     { name: 'documents' },
     { name: 'logbooks' },
 ]), updateAuction);
+AdminRouter.put('/auctions/:id/relist', authAdmin, upload.fields([
+    { name: 'photos' },
+    { name: 'documents' },
+    { name: 'logbooks' },
+]), relistAuction);
 AdminRouter.get('/transactions', authAdmin, getAdminTransactions);
 AdminRouter.get('/transactions/stats', authAdmin, getTransactionStats);
 

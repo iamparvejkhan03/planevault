@@ -236,7 +236,7 @@ const categoryFields = {
     ]
 };
 
-const EditAuction = () => {
+const RelistAuction = () => {
     const [step, setStep] = useState(1);
     const [allPhotos, setAllPhotos] = useState([]); // Unified photo array
     const [uploadedDocuments, setUploadedDocuments] = useState([]);
@@ -286,7 +286,7 @@ const EditAuction = () => {
     } = useForm({
         mode: 'onChange',
         defaultValues: {
-            // endDate: ''
+            endDate: ''
         }
     });
 
@@ -358,8 +358,8 @@ const EditAuction = () => {
                         location: auction.location,
                         video: auction.videoLink,
                         startDate: formatDateForInput(auction.startDate),
-                        endDate: formatDateForInput(auction.endDate),
-                        // endDate: '',
+                        // endDate: formatDateForInput(auction.endDate),
+                        endDate: '',
                         startPrice: auction.startPrice,
                         bidIncrement: auction.bidIncrement,
                         auctionType: auction.auctionType,
@@ -796,7 +796,7 @@ const EditAuction = () => {
 
             // Use admin-specific endpoint
             const { data } = await axiosInstance.put(
-                `/api/v1/admin/auctions/${auctionId}`,
+                `/api/v1/admin/auctions/${auctionId}/relist`,
                 formDataToSend,
                 {
                     headers: {
@@ -1515,4 +1515,4 @@ const EditAuction = () => {
     );
 };
 
-export default EditAuction;
+export default RelistAuction;

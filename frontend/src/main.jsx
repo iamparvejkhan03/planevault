@@ -51,6 +51,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AllUsers = lazy(() => import('./pages/admin/AllUsers'));
 const AdminAllAuctions = lazy(() => import('./pages/admin/AllAuctions'));
 const AdminEditAuction = lazy(() => import('./pages/admin/EditAuction'));
+const AdminRelistAuction = lazy(() => import('./pages/admin/RelistAuction'));
 const UserQueries = lazy(() => import('./pages/admin/UserQueries'));
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminProfile = lazy(() => import('./pages/admin/Profile'));
@@ -304,6 +305,16 @@ createRoot(document.getElementById('root')).render(
                                 element={
                                     <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                         <AdminEditAuction />
+                                    </Suspense>
+                                }
+                            />
+
+                            {/* Admin Relist Auction */}
+                            <Route
+                                path='/admin/auctions/relist/:auctionId'
+                                element={
+                                    <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                        <AdminRelistAuction />
                                     </Suspense>
                                 }
                             />

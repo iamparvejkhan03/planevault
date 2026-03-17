@@ -198,6 +198,10 @@ function AllAuctions() {
         navigate(`/admin/auctions/edit/${auction._id}`);
     };
 
+    const handleRelistAuction = (auction) => {
+        navigate(`/admin/auctions/relist/${auction._id}`);
+    };
+
     const getStatusBadge = (status, endDate) => {
         const config = {
             active: {
@@ -588,7 +592,7 @@ function AllAuctions() {
                                                                                 <div className="border-t border-gray-100 my-1"></div>
                                                                                 <button
                                                                                     onClick={() => {
-                                                                                        handleEditAuction(auction);
+                                                                                        handleRelistAuction(auction);
                                                                                         setActiveDropdown(null);
                                                                                     }}
                                                                                     className="flex items-center gap-3 w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"

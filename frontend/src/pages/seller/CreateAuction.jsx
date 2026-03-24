@@ -217,6 +217,9 @@ const CreateAuction = () => {
     const auctionType = watch('auctionType');
     const selectedCategory = watch('category');
 
+    const [hasDamageHistory, setHasDamageHistory] = useState(false);
+    const [damageHistoryDetails, setDamageHistoryDetails] = useState('');
+
     // Move photo function for drag and drop
     const movePhoto = (fromIndex, toIndex) => {
         const updatedPhotos = [...uploadedPhotos];
@@ -462,6 +465,7 @@ const CreateAuction = () => {
             formData.append('bidIncrement', auctionData.bidIncrement);
             formData.append('auctionType', auctionData.auctionType);
             formData.append('avionics', auctionData.avionics || '');
+formData.append('damageHistory', auctionData.damageHistory || '');
 
             // Append specifications as JSON
             if (auctionData.specifications) {
@@ -594,6 +598,50 @@ const CreateAuction = () => {
 
                                         {/* Category-specific fields */}
                                         {selectedCategory && renderCategoryFields()}
+
+                                        {/* Damage History Section - Only for Aircraft */}
+                                        {selectedCategory === 'Aircraft' && (
+                                            <div className="mb-6">
+                                                <label className="flex items-center mb-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={hasDamageHistory}
+                                                        onChange={(e) => {
+                                                            setHasDamageHistory(e.target.checked);
+                                                            if (!e.target.checked) {
+                                                                setDamageHistoryDetails('');
+                                                                setValue('damageHistory', '');
+                                                            }
+                                                        }}
+                                                        className="mr-2 w-4 h-4"
+                                                    />
+                                                    <span className="text-sm font-medium text-secondary">
+                                                        Has this aircraft had any previous damage history?
+                                                    </span>
+                                                </label>
+
+                                                {hasDamageHistory && (
+                                                    <div className="mt-2">
+                                                        <label className="block text-sm font-medium text-secondary mb-1">
+                                                            Damage History Details *
+                                                        </label>
+                                                        <textarea
+                                                            value={damageHistoryDetails}
+                                                            onChange={(e) => {
+                                                                setDamageHistoryDetails(e.target.value);
+                                                                setValue('damageHistory', e.target.value);
+                                                            }}
+                                                            rows="4"
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                                            placeholder="Please provide details about any previous damage, repairs, or incidents..."
+                                                        />
+                                                        {errors.damageHistory && (
+                                                            <p className="text-red-500 text-sm mt-1">{errors.damageHistory.message}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {/* Avionics details */}
                                         {/* Avionics Section - Only for Aircraft */}
@@ -1008,6 +1056,15 @@ const CreateAuction = () => {
                                                     </div>
                                                 </div>
                                             )}
+
+                                            {watch('damageHistory') && (
+    <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
+        <h4 className="font-medium text-black mb-3">Damage History</h4>
+        <div className="border rounded-lg p-4 bg-red-50 border-red-200">
+            <p className="text-gray-700 whitespace-pre-wrap">{watch('damageHistory')}</p>
+        </div>
+    </div>
+)}
 
                                             {/* Description Preview */}
                                             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">

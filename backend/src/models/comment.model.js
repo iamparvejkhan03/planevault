@@ -26,6 +26,11 @@ const commentSchema = new Schema({
         default: ''
     },
 
+    mentions: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+
     // Comment content
     content: {
         type: String,

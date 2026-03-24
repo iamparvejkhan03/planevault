@@ -2346,6 +2346,130 @@ const newBidNotificationEmail = async (seller, auction, bidAmount, bidder) => {
     }
 };
 
+const userMentionedEmail = async (mentionedUser, comment, auction, commentAuthor) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `"PlaneVault" <${process.env.EMAIL_USER}>`,
+            to: mentionedUser.email,
+            subject: `🔔 You Were Mentioned in a Comment on ${auction.title}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .logo { width: auto; height: 48px; margin-bottom: 15px; }
+                        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+                        .header h2 { color: white; margin: 0; }
+                        .header p { color: rgba(255,255,255,0.9); margin: 10px 0 0; }
+                        .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; }
+                        .mention-badge { background: #f3e5f5; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-bottom: 20px; }
+                        .mention-badge span { color: #7b1fa2; font-weight: bold; }
+                        .auction-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                        .comment-card { background: #f3e5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7b1fa2; }
+                        .detail { margin: 8px 0; }
+                        .label { font-weight: bold; color: #555; display: inline-block; width: 120px; }
+                        .comment-text { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; font-style: italic; border: 1px solid #e0e0e0; }
+                        .highlight-mention { background: #fff3cd; padding: 2px 4px; border-radius: 3px; font-weight: bold; color: #856404; }
+                        .cta-button { background: #7b1fa2; color: #fff !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }
+                        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+                        .timestamp { color: #6c757d; font-size: 12px; }
+                        .author-badge { background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-left: 10px; }
+                        .mention-highlight { background: #e8eaf6; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #7b1fa2; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <img src="${process.env.FRONTEND_URL}/logo.png" alt="PlaneVault Logo" class="logo" style="filter: brightness(0) invert(1);">
+                            <h2>🔔 You Were Mentioned!</h2>
+                            <p>Someone mentioned you in a comment</p>
+                        </div>
+                        
+                        <div class="content">
+                            <div class="mention-badge">
+                                <span>@${mentionedUser.username}</span>
+                            </div>
+                            
+                            <p>Hello <strong>${mentionedUser.firstName || mentionedUser.username}</strong>,</p>
+                            
+                            <p><strong>${commentAuthor.firstName || commentAuthor.username}</strong> mentioned you in a comment on the auction: <strong>"${auction.title}"</strong></p>
+
+                            <div class="auction-card">
+                                <h4>📋 Auction Details</h4>
+                                <div class="detail">
+                                    <span class="label">Title:</span>
+                                    ${auction.title}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Current Price:</span>
+                                    $${auction.currentPrice?.toLocaleString()}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Bid Count:</span>
+                                    ${auction.bidCount}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Time Remaining:</span>
+                                    ${auction.timeRemainingFormatted || 'Ending soon'}
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Category:</span>
+                                    ${auction.category}
+                                </div>
+                            </div>
+
+                            <div class="comment-card">
+                                <h4>💬 Comment Where You Were Mentioned</h4>
+                                <div class="detail">
+                                    <span class="label">From:</span>
+                                    ${commentAuthor.firstName || commentAuthor.username}
+                                    <span class="author-badge">${commentAuthor.userType}</span>
+                                </div>
+                                <div class="comment-text">
+                                    "${comment.content}"
+                                </div>
+                                <div class="mention-highlight">
+                                    <strong>📍 You were mentioned in this comment</strong>
+                                </div>
+                                <div class="timestamp">
+                                    Posted: ${new Date(comment.createdAt).toLocaleString()}
+                                </div>
+                            </div>
+
+                            <p><strong>What this means:</strong></p>
+                            <ul>
+                                <li>Someone is engaging with you about this auction</li>
+                                <li>You might want to check the comment and respond if needed</li>
+                                <li>Your expertise or opinion might be valuable to the conversation</li>
+                            </ul>
+
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="${process.env.FRONTEND_URL}/auction/${auction._id}" class="cta-button">View Comment & Respond</a>
+                            </div>
+
+                            <p>Don't miss out on the conversation! Click the button above to see the full context and join the discussion.</p>
+                            
+                            <div class="footer">
+                                <p>You're receiving this because someone mentioned @${mentionedUser.username} in a comment.</p>
+                                <p>&copy; ${new Date().getFullYear()} PlaneVault. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `,
+        });
+
+        console.log(`✅ Mention email sent to ${mentionedUser.email}`);
+        return !!info;
+    } catch (error) {
+        console.error(`❌ Failed to send mention email to ${mentionedUser.email}:`, error);
+        return false;
+    }
+};
+
 export {
     contactEmail,
     contactConfirmationEmail,
@@ -2366,6 +2490,7 @@ export {
     flaggedCommentAdminEmail,
     newCommentSellerEmail,
     newCommentBidderEmail,
+    userMentionedEmail,
     auctionSubmittedForApprovalEmail,
     auctionApprovedEmail,
     sendBulkAuctionNotifications,

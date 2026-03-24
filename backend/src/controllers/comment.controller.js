@@ -1,7 +1,13 @@
-import Comment from '../models/comment.model.js';
-import Auction from '../models/auction.model.js';
-import { flaggedCommentAdminEmail, newCommentBidderEmail, newCommentSellerEmail } from '../utils/nodemailer.js';
-import User from '../models/user.model.js';
+import Comment from "../models/comment.model.js";
+import Auction from "../models/auction.model.js";
+import {
+    flaggedCommentAdminEmail,
+    newCommentBidderEmail,
+    newCommentSellerEmail,
+    userMentionedEmail,
+} from "../utils/nodemailer.js";
+import User from "../models/user.model.js";
+import { extractMentions } from "../utils/mentionUtils.js";
 
 // Add a new comment
 export const addComment = async (req, res) => {
@@ -15,7 +21,7 @@ export const addComment = async (req, res) => {
         if (!auction) {
             return res.status(404).json({
                 success: false,
-                message: 'Auction not found'
+                message: "Auction not found",
             });
         }
 
@@ -23,7 +29,19 @@ export const addComment = async (req, res) => {
         if (!content || !content.trim()) {
             return res.status(400).json({
                 success: false,
-                message: 'Comment content is required'
+                message: "Comment content is required",
+            });
+        }
+
+        // Extract mentions from content
+        const mentionedUsernames = extractMentions(content);
+        let mentionedUsers = [];
+
+        if (mentionedUsernames.length > 0) {
+            // Find all mentioned users
+            mentionedUsers = await User.find({
+                username: { $in: mentionedUsernames },
+                isActive: true,
             });
         }
 
@@ -32,13 +50,13 @@ export const addComment = async (req, res) => {
             const parentComment = await Comment.findOne({
                 _id: parentCommentId,
                 auction: auctionId,
-                status: 'active'
+                status: "active",
             });
 
             if (!parentComment) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Parent comment not found'
+                    message: "Parent comment not found",
                 });
             }
         }
@@ -48,28 +66,52 @@ export const addComment = async (req, res) => {
             auction: auctionId,
             user: userId,
             userName: req.user.username,
-            userAvatar: req.user.avatar || '',
+            userAvatar: req.user.avatar || "",
             content: content.trim(),
             contentHtml: contentHtml || content.trim(),
-            parentComment: parentCommentId || null
+            parentComment: parentCommentId || null,
+            mentions: mentionedUsers.map((user) => user._id),
         });
 
         // Populate user info for response
-        await comment.populate('user', 'username firstName lastName avatar');
+        await comment.populate("user", "username firstName lastName avatar");
 
         res.status(201).json({
             success: true,
-            message: parentCommentId ? 'Reply added successfully' : 'Comment added successfully',
-            data: { comment }
+            message: parentCommentId
+                ? "Reply added successfully"
+                : "Comment added successfully",
+            data: { comment },
         });
 
         // Populate the comment with necessary data
         const populatedComment = await Comment.findById(comment._id)
-            .populate('auction')
-            .populate('user', 'firstName lastName username email userType');
+            .populate("auction")
+            .populate("user", "firstName lastName username email userType");
 
         // Populate the auction's seller
-        await populatedComment.auction.populate('seller', 'email username firstName');
+        await populatedComment.auction.populate(
+            "seller",
+            "email username firstName",
+        );
+
+        // Send emails to mentioned users (don't await - do it in background)
+        if (mentionedUsers.length > 0) {
+            for (const mentionedUser of mentionedUsers) {
+                // Don't email the commenter themselves
+                if (mentionedUser._id.toString() !== userId.toString()) {
+                    // Don't email if they're the seller (they already get seller notification)
+                    if (mentionedUser._id.toString() !== auction.seller._id.toString()) {
+                        await userMentionedEmail(
+                            mentionedUser,
+                            populatedComment,
+                            auction,
+                            req.user,
+                        );
+                    }
+                }
+            }
+        }
 
         // 1. Notify the seller (if comment author is not the seller)
         if (populatedComment.auction.seller._id.toString() !== userId.toString()) {
@@ -77,27 +119,31 @@ export const addComment = async (req, res) => {
                 populatedComment.auction.seller,
                 populatedComment.auction,
                 populatedComment,
-                populatedComment.user
+                populatedComment.user,
             );
         }
 
         // Get previous commenters
         const previousCommenters = await Comment.find({
             auction: auctionId,
-            user: { $ne: userId }
-        }).distinct('user');
+            user: { $ne: userId },
+        }).distinct("user");
 
-        console.log('Previous commenter IDs:', previousCommenters);
+        console.log("Previous commenter IDs:", previousCommenters);
 
         const commenterUsers = await User.find({
             _id: { $in: previousCommenters },
         });
 
-        console.log(`Found ${commenterUsers.length} commenters with alerts enabled`);
+        console.log(
+            `Found ${commenterUsers.length} commenters with alerts enabled`,
+        );
 
         for (const commenter of commenterUsers) {
             // Simple check - just make sure it's not the seller or current user
-            const isSeller = commenter._id.toString() === populatedComment.auction.seller._id.toString();
+            const isSeller =
+                commenter._id.toString() ===
+                populatedComment.auction.seller._id.toString();
             const isCurrentUser = commenter._id.toString() === userId.toString();
 
             if (!isSeller && !isCurrentUser) {
@@ -106,16 +152,15 @@ export const addComment = async (req, res) => {
                     commenter,
                     populatedComment.auction,
                     populatedComment,
-                    populatedComment.user
+                    populatedComment.user,
                 );
             }
         }
-
     } catch (error) {
-        console.error('Add comment error:', error);
+        console.error("Add comment error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while adding comment'
+            message: "Internal server error while adding comment",
         });
     }
 };
@@ -124,27 +169,32 @@ export const addComment = async (req, res) => {
 export const getComments = async (req, res) => {
     try {
         const { auctionId } = req.params;
-        const { page = 1, limit = 10, parentCommentId = null, sortBy = 'recent' } = req.query;
+        const {
+            page = 1,
+            limit = 10,
+            parentCommentId = null,
+            sortBy = "recent",
+        } = req.query;
 
         // Validate auction exists
         const auction = await Auction.findById(auctionId);
         if (!auction) {
             return res.status(404).json({
                 success: false,
-                message: 'Auction not found'
+                message: "Auction not found",
             });
         }
 
         // Build sort options
         let sortOptions = {};
         switch (sortBy) {
-            case 'recent':
+            case "recent":
                 sortOptions = { createdAt: -1 };
                 break;
-            case 'oldest':
+            case "oldest":
                 sortOptions = { createdAt: 1 };
                 break;
-            case 'popular':
+            case "popular":
                 sortOptions = { likeCount: -1, createdAt: -1 };
                 break;
             default:
@@ -157,9 +207,9 @@ export const getComments = async (req, res) => {
         const comments = await Comment.find({
             auction: auctionId,
             parentComment: parentCommentId,
-            status: 'active'
+            status: "active",
         })
-            .populate('user', 'username firstName lastName avatar')
+            .populate("user", "username firstName lastName avatar")
             .sort(sortOptions)
             .limit(parseInt(limit))
             .skip(skip);
@@ -168,7 +218,7 @@ export const getComments = async (req, res) => {
         const totalComments = await Comment.countDocuments({
             auction: auctionId,
             parentComment: parentCommentId,
-            status: 'active'
+            status: "active",
         });
 
         // Get reply counts for each comment (if fetching top-level comments)
@@ -176,7 +226,7 @@ export const getComments = async (req, res) => {
             for (let comment of comments) {
                 const replyCount = await Comment.countDocuments({
                     parentComment: comment._id,
-                    status: 'active'
+                    status: "active",
                 });
                 comment._doc.replyCount = replyCount;
             }
@@ -190,16 +240,15 @@ export const getComments = async (req, res) => {
                     currentPage: parseInt(page),
                     totalPages: Math.ceil(totalComments / limit),
                     totalComments,
-                    commentsPerPage: parseInt(limit)
-                }
-            }
+                    commentsPerPage: parseInt(limit),
+                },
+            },
         });
-
     } catch (error) {
-        console.error('Get comments error:', error);
+        console.error("Get comments error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while fetching comments'
+            message: "Internal server error while fetching comments",
         });
     }
 };
@@ -215,14 +264,14 @@ export const toggleLike = async (req, res) => {
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found'
+                message: "Comment not found",
             });
         }
 
-        if (comment.status !== 'active') {
+        if (comment.status !== "active") {
             return res.status(400).json({
                 success: false,
-                message: 'Cannot like this comment'
+                message: "Cannot like this comment",
             });
         }
 
@@ -231,11 +280,11 @@ export const toggleLike = async (req, res) => {
 
         if (comment.isLikedByUser(userId)) {
             comment.removeLike(userId);
-            message = 'Comment unliked';
+            message = "Comment unliked";
             isLiked = false;
         } else {
             comment.addLike(userId);
-            message = 'Comment liked';
+            message = "Comment liked";
             isLiked = true;
         }
 
@@ -247,15 +296,14 @@ export const toggleLike = async (req, res) => {
             data: {
                 isLiked,
                 likeCount: comment.likeCount,
-                commentId: comment._id
-            }
+                commentId: comment._id,
+            },
         });
-
     } catch (error) {
-        console.error('Toggle like error:', error);
+        console.error("Toggle like error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while updating like'
+            message: "Internal server error while updating like",
         });
     }
 };
@@ -270,13 +318,13 @@ export const updateComment = async (req, res) => {
         const comment = await Comment.findOne({
             _id: commentId,
             user: userId,
-            status: 'active'
+            status: "active",
         });
 
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found or you are not authorized to edit it'
+                message: "Comment not found or you are not authorized to edit it",
             });
         }
 
@@ -285,14 +333,14 @@ export const updateComment = async (req, res) => {
         if (Date.now() - comment.createdAt > editTimeLimit) {
             return res.status(400).json({
                 success: false,
-                message: 'Comment can only be edited within 15 minutes of posting'
+                message: "Comment can only be edited within 15 minutes of posting",
             });
         }
 
         if (!content || !content.trim()) {
             return res.status(400).json({
                 success: false,
-                message: 'Comment content is required'
+                message: "Comment content is required",
             });
         }
 
@@ -304,15 +352,14 @@ export const updateComment = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Comment updated successfully',
-            data: { comment }
+            message: "Comment updated successfully",
+            data: { comment },
         });
-
     } catch (error) {
-        console.error('Update comment error:', error);
+        console.error("Update comment error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while updating comment'
+            message: "Internal server error while updating comment",
         });
     }
 };
@@ -331,24 +378,23 @@ export const deleteComment = async (req, res) => {
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found or you are not authorized to delete it'
+                message: "Comment not found or you are not authorized to delete it",
             });
         }
 
-        comment.status = 'deleted';
+        comment.status = "deleted";
         await comment.save();
 
         res.status(200).json({
             success: true,
-            message: 'Comment deleted successfully',
-            data: { commentId }
+            message: "Comment deleted successfully",
+            data: { commentId },
         });
-
     } catch (error) {
-        console.error('Delete comment error:', error);
+        console.error("Delete comment error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while deleting comment'
+            message: "Internal server error while deleting comment",
         });
     }
 };
@@ -365,44 +411,44 @@ export const flagComment = async (req, res) => {
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found'
+                message: "Comment not found",
             });
         }
 
         // Check if user already flagged this comment
-        const alreadyFlagged = comment.flags.some(flag =>
-            flag.user.toString() === userId.toString()
+        const alreadyFlagged = comment.flags.some(
+            (flag) => flag.user.toString() === userId.toString(),
         );
 
         if (alreadyFlagged) {
             return res.status(400).json({
                 success: false,
-                message: 'You have already flagged this comment'
+                message: "You have already flagged this comment",
             });
         }
 
         comment.flags.push({
             user: userId,
-            reason: reason || 'Inappropriate content'
+            reason: reason || "Inappropriate content",
         });
 
         // Auto-moderate if too many flags
         if (comment.flags.length >= 3) {
-            comment.status = 'flagged';
+            comment.status = "flagged";
         }
 
         await comment.save();
 
         res.status(200).json({
             success: true,
-            message: 'Comment flagged for moderation',
-            data: { commentId }
+            message: "Comment flagged for moderation",
+            data: { commentId },
         });
 
-        const adminUsers = await User.find({ userType: 'admin' });
+        const adminUsers = await User.find({ userType: "admin" });
         const commentWithAuction = await Comment.findById(commentId)
-            .populate('auction')
-            .populate('user', 'firstName lastName username email userType createdAt');
+            .populate("auction")
+            .populate("user", "firstName lastName username email userType createdAt");
 
         // Get the user who reported (from req.user)
         const reportedByUser = req.user;
@@ -410,18 +456,17 @@ export const flagComment = async (req, res) => {
         for (const admin of adminUsers) {
             await flaggedCommentAdminEmail(
                 admin.email,
-                reason || 'Inappropriate content',
+                reason || "Inappropriate content",
                 commentWithAuction,
                 commentWithAuction.auction,
-                reportedByUser
+                reportedByUser,
             );
         }
-
     } catch (error) {
-        console.error('Flag comment error:', error);
+        console.error("Flag comment error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while flagging comment'
+            message: "Internal server error while flagging comment",
         });
     }
 };
@@ -432,20 +477,20 @@ export const getFlaggedComments = async (req, res) => {
         const {
             page = 1,
             limit = 10,
-            status = 'flagged',
-            sortBy = 'recent'
+            status = "flagged",
+            sortBy = "recent",
         } = req.query;
 
         const skip = (page - 1) * limit;
 
         // Build filter - FIXED
         const filter = {};
-        if (status === 'flagged') {
+        if (status === "flagged") {
             // Show comments that have flags (flags array not empty) regardless of status
             filter.flags = { $exists: true, $ne: [] }; // This ensures flags array exists and is not empty
-        } else if (status === 'all') {
+        } else if (status === "all") {
             // No additional filter for 'all'
-            filter.status = { $in: ['active', 'flagged', 'deleted'] };
+            filter.status = { $in: ["active", "flagged", "deleted"] };
         } else {
             filter.status = status;
         }
@@ -453,16 +498,16 @@ export const getFlaggedComments = async (req, res) => {
         // Build sort options
         let sortOptions = {};
         switch (sortBy) {
-            case 'recent':
+            case "recent":
                 sortOptions = { createdAt: -1 };
                 break;
-            case 'oldest':
+            case "oldest":
                 sortOptions = { createdAt: 1 };
                 break;
-            case 'mostFlags':
+            case "mostFlags":
                 // For mostFlags, we need to use aggregation or handle differently
                 // Since we're using find(), we'll sort by the flags array length
-                sortOptions = { 'flags': -1 }; // MongoDB sorts by array length in descending order
+                sortOptions = { flags: -1 }; // MongoDB sorts by array length in descending order
                 break;
             default:
                 sortOptions = { createdAt: -1 };
@@ -470,22 +515,22 @@ export const getFlaggedComments = async (req, res) => {
 
         // Get comments with populated data
         const comments = await Comment.find(filter)
-            .populate('user', 'username firstName lastName avatar email isActive')
-            .populate('auction', 'title itemName images')
-            .populate('flags.user', 'username firstName lastName')
+            .populate("user", "username firstName lastName avatar email isActive")
+            .populate("auction", "title itemName images")
+            .populate("flags.user", "username firstName lastName")
             .sort(sortOptions)
             .limit(parseInt(limit))
             .skip(skip)
             .lean();
 
         // Add flags count to each comment
-        const commentsWithFlagsCount = comments.map(comment => ({
+        const commentsWithFlagsCount = comments.map((comment) => ({
             ...comment,
-            flagsCount: comment.flags.length
+            flagsCount: comment.flags.length,
         }));
 
         // For mostFlags sorting, we need to sort by the actual flags count after fetching
-        if (sortBy === 'mostFlags') {
+        if (sortBy === "mostFlags") {
             commentsWithFlagsCount.sort((a, b) => b.flagsCount - a.flagsCount);
         }
 
@@ -500,16 +545,15 @@ export const getFlaggedComments = async (req, res) => {
                     currentPage: parseInt(page),
                     totalPages: Math.ceil(totalComments / limit),
                     totalComments,
-                    commentsPerPage: parseInt(limit)
-                }
-            }
+                    commentsPerPage: parseInt(limit),
+                },
+            },
         });
-
     } catch (error) {
-        console.error('Get flagged comments error:', error);
+        console.error("Get flagged comments error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while fetching flagged comments'
+            message: "Internal server error while fetching flagged comments",
         });
     }
 };
@@ -520,19 +564,22 @@ export const adminDeleteComment = async (req, res) => {
         const { commentId } = req.params;
         const { deleteReason } = req.body;
 
-        const comment = await Comment.findById(commentId)
-            .populate('user', 'username');
+        const comment = await Comment.findById(commentId).populate(
+            "user",
+            "username",
+        );
 
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found'
+                message: "Comment not found",
             });
         }
 
         // Update comment status to deleted
-        comment.status = 'deleted';
-        comment.adminDeleteReason = deleteReason || 'Violation of community guidelines';
+        comment.status = "deleted";
+        comment.adminDeleteReason =
+            deleteReason || "Violation of community guidelines";
         comment.deletedAt = new Date();
         comment.deletedBy = req.user._id;
 
@@ -540,18 +587,17 @@ export const adminDeleteComment = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Comment deleted successfully',
+            message: "Comment deleted successfully",
             data: {
                 commentId,
-                userName: comment.user.username
-            }
+                userName: comment.user.username,
+            },
         });
-
     } catch (error) {
-        console.error('Admin delete comment error:', error);
+        console.error("Admin delete comment error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while deleting comment'
+            message: "Internal server error while deleting comment",
         });
     }
 };
@@ -566,12 +612,12 @@ export const restoreComment = async (req, res) => {
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found'
+                message: "Comment not found",
             });
         }
 
         // Restore comment
-        comment.status = 'active';
+        comment.status = "active";
         comment.adminDeleteReason = undefined;
         comment.deletedAt = undefined;
         comment.deletedBy = undefined;
@@ -580,15 +626,14 @@ export const restoreComment = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Comment restored successfully',
-            data: { commentId }
+            message: "Comment restored successfully",
+            data: { commentId },
         });
-
     } catch (error) {
-        console.error('Restore comment error:', error);
+        console.error("Restore comment error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while restoring comment'
+            message: "Internal server error while restoring comment",
         });
     }
 };
@@ -603,27 +648,26 @@ export const clearFlags = async (req, res) => {
         if (!comment) {
             return res.status(404).json({
                 success: false,
-                message: 'Comment not found'
+                message: "Comment not found",
             });
         }
 
         // Clear all flags and restore to active status
         comment.flags = [];
-        comment.status = 'active';
+        comment.status = "active";
 
         await comment.save();
 
         res.status(200).json({
             success: true,
-            message: 'Flags cleared successfully',
-            data: { commentId }
+            message: "Flags cleared successfully",
+            data: { commentId },
         });
-
     } catch (error) {
-        console.error('Clear flags error:', error);
+        console.error("Clear flags error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while clearing flags'
+            message: "Internal server error while clearing flags",
         });
     }
 };
@@ -635,20 +679,20 @@ export const getCommentStats = async (req, res) => {
 
         // Count comments that have ANY flags (flags array not empty)
         const flaggedComments = await Comment.countDocuments({
-            'flags.0': { $exists: true } // This checks if flags array has at least 1 element
+            "flags.0": { $exists: true }, // This checks if flags array has at least 1 element
         });
 
-        const activeComments = await Comment.countDocuments({ status: 'active' });
-        const deletedComments = await Comment.countDocuments({ status: 'deleted' });
+        const activeComments = await Comment.countDocuments({ status: "active" });
+        const deletedComments = await Comment.countDocuments({ status: "deleted" });
 
         // Get recent flags (last 7 days)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const recentFlags = await Comment.aggregate([
-            { $unwind: '$flags' },
-            { $match: { 'flags.flaggedAt': { $gte: sevenDaysAgo } } },
-            { $group: { _id: null, count: { $sum: 1 } } }
+            { $unwind: "$flags" },
+            { $match: { "flags.flaggedAt": { $gte: sevenDaysAgo } } },
+            { $group: { _id: null, count: { $sum: 1 } } },
         ]);
 
         const flagsThisWeek = recentFlags.length > 0 ? recentFlags[0].count : 0;
@@ -660,15 +704,14 @@ export const getCommentStats = async (req, res) => {
                 flaggedComments, // This now means "comments with any flags"
                 activeComments,
                 deletedComments,
-                flagsThisWeek
-            }
+                flagsThisWeek,
+            },
         });
-
     } catch (error) {
-        console.error('Get comment stats error:', error);
+        console.error("Get comment stats error:", error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error while fetching comment statistics'
+            message: "Internal server error while fetching comment statistics",
         });
     }
 };

@@ -752,65 +752,65 @@ export const updateAuction = async (req, res) => {
           message:
             "Reserve price must be provided and greater than or equal to start price",
         });
-      }
+      } 
     }
 
     // CHECK: If auction is sold, we'll reset everything
-    const isReserveNotMet =
-      auction.status === "reserve_not_met" || auction.status === "ended" || auction.status === "cancelled";
+    // const isReserveNotMet =
+    //   auction.status === "reserve_not_met" || auction.status === "ended" || auction.status === "cancelled";
 
-    if (isReserveNotMet) {
-      const resetData = {
-        // Reset all bidding/offers/winner data
-        bids: [],
-        offers: [],
-        currentPrice: parseFloat(startPrice),
-        currentBidder: null,
-        winner: null,
-        finalPrice: null,
-        bidCount: 0,
+    // if (isReserveNotMet) {
+    //   const resetData = {
+    //     // Reset all bidding/offers/winner data
+    //     bids: [],
+    //     offers: [],
+    //     currentPrice: parseFloat(startPrice),
+    //     currentBidder: null,
+    //     winner: null,
+    //     finalPrice: null,
+    //     bidCount: 0,
 
-        // Reset payment info
-        paymentStatus: "pending",
-        paymentMethod: null,
-        paymentDate: null,
-        transactionId: null,
-        invoice: null,
+    //     // Reset payment info
+    //     paymentStatus: "pending",
+    //     paymentMethod: null,
+    //     paymentDate: null,
+    //     transactionId: null,
+    //     invoice: null,
 
-        // Reset notifications
-        notifications: {
-          ending30min: false,
-          ending2hour: false,
-          ending24hour: false,
-          ending30minSentAt: null,
-          ending2hourSentAt: null,
-          ending24hourSentAt: null,
-          offerReceived: false,
-          offerExpiring: false,
-        },
+    //     // Reset notifications
+    //     notifications: {
+    //       ending30min: false,
+    //       ending2hour: false,
+    //       ending24hour: false,
+    //       ending30minSentAt: null,
+    //       ending2hourSentAt: null,
+    //       ending24hourSentAt: null,
+    //       offerReceived: false,
+    //       offerExpiring: false,
+    //     },
 
-        lastBidTime: null,
+    //     lastBidTime: null,
 
-        // Reset views and watchlist if you want a fresh start
-        views: 0,
-        watchlistCount: 0,
+    //     // Reset views and watchlist if you want a fresh start
+    //     views: 0,
+    //     watchlistCount: 0,
 
-        // Reset commission
-        commissionAmount: 0,
-        bidPaymentRequired: true,
+    //     // Reset commission
+    //     commissionAmount: 0,
+    //     bidPaymentRequired: true,
 
-        // Set status based on new dates
-        status: "draft", // Start as draft since it's being re-listed
-      };
+    //     // Set status based on new dates
+    //     status: "draft", // Start as draft since it's being re-listed
+    //   };
 
-      // Apply reset data to auction object
-      Object.assign(auction, resetData);
+    //   // Apply reset data to auction object
+    //   Object.assign(auction, resetData);
 
-      const deleteComments = await Comment.deleteMany({ auction: auction._id });
-      const watchlistDelete = await Watchlist.deleteMany({ auction: auction._id });
+    //   const deleteComments = await Comment.deleteMany({ auction: auction._id });
+    //   const watchlistDelete = await Watchlist.deleteMany({ auction: auction._id });
 
-      await auction.save();
-    }
+    //   await auction.save();
+    // }
 
     // Handle specifications
     let finalSpecifications = new Map();

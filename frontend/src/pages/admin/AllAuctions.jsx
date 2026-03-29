@@ -192,9 +192,9 @@ function AllAuctions() {
     };
 
     const handleEditAuction = (auction) => {
-        if (auction.status === 'sold') {
-            return toast.error(`Sold auction can't be edited`)
-        }
+        // if (auction.status === 'sold') {
+        //     return toast.error(`Sold auction can't be edited`)
+        // }
         navigate(`/admin/auctions/edit/${auction._id}`);
     };
 

@@ -416,21 +416,17 @@ function SingleAuction() {
                 )}
 
                 {/* Damage History Section */}
-                {auction.damageHistory && (
-                    <>
-                        <div>
-                            <h3 className="my-5 text-primary text-xl font-semibold">Damage History</h3>
-                            <div className="prose prose-lg max-w-none border rounded-lg px-6 py-3 bg-white text-md">
-                                {/* {parse(auction.avionics)} */}
-                                {auction.damageHistory ? (
-                                    <div dangerouslySetInnerHTML={{ __html: auction.damageHistory }} />
-                                ) : (
-                                    <p className="text-gray-500">No damage history provided.</p>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                )}
+                <div>
+                    <h3 className="my-5 text-primary text-xl font-semibold">Damage History</h3>
+                    <div className="prose prose-lg max-w-none border rounded-lg px-6 py-3 bg-white text-md">
+                        {/* {parse(auction.avionics)} */}
+                        {auction.damageHistory ? (
+                            <div dangerouslySetInnerHTML={{ __html: auction.damageHistory }} />
+                        ) : (
+                            <p className="text-gray-500">There is no previous damage history.</p>
+                        )}
+                    </div>
+                </div>
 
                 {/* Logbook Images Section */}
                 {auction.logbooks && auction.logbooks.length > 0 && (

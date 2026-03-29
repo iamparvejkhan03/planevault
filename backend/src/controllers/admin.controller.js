@@ -1647,7 +1647,7 @@ export const relistAuction = async (req, res) => {
     if (auction.status === "sold") {
       return res.status(401).json({
         success: false,
-        message: `Sold auctions can't be edited`,
+        message: `Sold auctions can't be relisted`,
       });
     }
 

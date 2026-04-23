@@ -22,94 +22,82 @@ import {
     UserCircle,
     MessageCircle,
     Hand,
+    Tags,
+    PoundSterling,
+    Banknote,
+    BanknoteArrowDown,
+    BanknoteArrowUp,
+    Video,
+    UserPlus,
     ShieldUser
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logo } from "../../assets";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePermissions } from "../../hooks/usePermissions";
 
-const navigation = [
+// Define navigation with permissions
+const allNavigation = [
     {
         name: 'Dashboard',
-        path: '/admin/dashboard',
-        icon: <LayoutDashboard size={20} />
+        path: '/staff/dashboard',
+        icon: <LayoutDashboard size={20} />,
+        permission: 'view_dashboard'
     },
     {
         name: 'Users',
-        path: '/admin/users',
-        icon: <Users size={20} />
+        path: '/staff/users',
+        icon: <Users size={20} />,
+        permission: 'manage_users'
     },
     {
         name: 'Staff',
-        path: '/admin/staff',
+        path: '/staff/staff',
         icon: <ShieldUser size={20} />,
+        permission: 'manage_admins'
     },
     {
         name: 'Auctions',
-        path: '/admin/auctions/all',
-        icon: <Gavel size={20} />
+        path: '/staff/auctions/all',
+        icon: <Gavel size={20} />,
+        permission: 'manage_auctions'
     },
     {
         name: 'Bids',
-        path: '/admin/bids',
-        icon: <Hand size={20} />
+        path: '/staff/bids',
+        icon: <Hand size={20} />,
+        permission: 'manage_bids'
+    },
+    {
+        name: 'Offers',
+        path: '/staff/offers',
+        icon: <Hand size={20} />,
+        permission: 'manage_offers'
     },
     {
         name: 'Transactions',
-        path: '/admin/transactions',
-        icon: <DollarSign size={20} />,
-        // submenu: [
-        //     { name: 'Transactions', path: '/admin/financial/transactions' },
-        //     { name: 'Revenue Analytics', path: '/admin/financial/revenue' },
-        //     { name: 'Commission Reports', path: '/admin/financial/commissions' },
-        //     { name: 'Payouts', path: '/admin/financial/payouts' },
-        //     { name: 'Tax Documents', path: '/admin/financial/taxes' }
-        // ]
+        path: '/staff/transactions',
+        icon: <Banknote size={20} />,
+        permission: 'manage_transactions'
     },
     {
-        name: 'Comments',
-        path: '/admin/comments',
-        icon: <MessageCircle size={20} />,
-        // submenu: [
-        //     { name: 'Reported Content', path: '/admin/moderation/reports' },
-        //     { name: 'Flagged Listings', path: '/admin/moderation/flagged' },
-        //     { name: 'User Reports', path: '/admin/moderation/user-reports' },
-        //     { name: 'Approval Queue', path: '/admin/moderation/approval' }
-        // ]
-    },
-    {
-        name: 'Support',
-        path: '/admin/support/inquiries',
+        name: 'User Inquiries',
+        path: '/staff/support/inquiries',
         icon: <MessageSquare size={20} />,
-        // submenu: [
-        //     { name: 'Support Tickets', path: '/admin/support/tickets' },
-        //     { name: 'User Inquiries', path: '/admin/support/inquiries' },
-        //     { name: 'Dispute Resolution', path: '/admin/support/disputes' },
-        //     { name: 'FAQ Management', path: '/admin/support/faq' }
-        // ]
+        permission: 'manage_inquiries'
     },
     {
         name: 'Commissions',
-        path: '/admin/commissions',
+        path: '/staff/commissions',
         icon: <Settings size={20} />,
-        // submenu: [
-        //     { name: 'Platform Settings', path: '/admin/settings/platform' },
-        //     { name: 'Payment Gateway', path: '/admin/settings/payments' },
-        //     { name: 'Email Templates', path: '/admin/settings/emails' },
-        //     { name: 'API Management', path: '/admin/settings/api' },
-        //     { name: 'Backup & Security', path: '/admin/settings/security' }
-        // ]
+        permission: 'manage_commissions'
     },
-    // {
-    //     name: 'Notifications',
-    //     path: '/admin/notifications',
-    //     icon: <Bell size={20} />
-    // },
     {
         name: 'Profile',
-        path: '/admin/profile',
-        icon: <UserCircle size={20} />
+        path: '/staff/profile',
+        icon: <UserCircle size={20} />,
+        permission: null // Always show
     }
 ];
 
@@ -118,7 +106,16 @@ function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [expandedMenus, setExpandedMenus] = useState([]);
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
+    const { permissions, loading: permissionsLoading, isAdmin } = usePermissions();
+
+    // Filter navigation based on permissions (use permissions from hook, not user)
+    const navigation = allNavigation.filter(item => {
+        if (item.path === '/staff/profile') return true;
+        if (!item.permission) return true;
+        if (isAdmin) return true;
+        return permissions.includes(item.permission);
+    });
 
     // Handle window resize
     useEffect(() => {
@@ -161,12 +158,32 @@ function Sidebar() {
 
     const isMenuExpanded = (menuName) => expandedMenus.includes(menuName);
 
+    // Get role display text
+    const getRoleDisplay = () => {
+        if (isAdmin) return { title: "Administrator", description: "Full System Access", bgColor: "bg-white", textColor: "text-black", badgeColor: "text-primary" };
+        if (user?.userType === 'staff') return { title: "Staff Member", description: "Limited Access", bgColor: "bg-blue-900", textColor: "text-white", badgeColor: "text-blue-300" };
+        return { title: "Admin", description: "System Access", bgColor: "bg-white", textColor: "text-black", badgeColor: "text-primary" };
+    };
+
+    const role = getRoleDisplay();
+
+    // Show loading state while fetching permissions
+    // if (permissionsLoading) {
+    //     return (
+    //         <aside className="fixed md:relative w-64 bg-bg-primary h-screen p-4">
+    //             <div className="flex items-center justify-center h-32">
+    //                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+    //             </div>
+    //         </aside>
+    //     );
+    // }
+
     return (
         <>
             {/* Mobile menu button */}
             <button
                 onClick={toggleSidebar}
-                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-black text-white`}
+                className={`md:hidden ${isOpen && isMobile ? 'hidden' : 'fixed'} top-4 left-4 z-30 sm:z-40 p-2 rounded-md bg-primary text-pure-white`}
             >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -174,7 +191,7 @@ function Sidebar() {
             {/* Overlay for mobile */}
             {isOpen && isMobile && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    className="fixed inset-0 bg-[#1e2d3b] bg-opacity-50 z-40"
                     onClick={() => setIsOpen(false)}
                 />
             )}
@@ -187,8 +204,9 @@ function Sidebar() {
             `}>
                 {/* Logo/Brand */}
                 <div className="px-4 mb-8 flex items-center justify-between pb-2 border-b border-gray-700">
-                    <Link to={'/'}>
-                        <img src={logo} className="h-10" alt="logo" />
+                    <Link to='/' className="z-50 mb-4 flex items-center gap-2">
+                        <img src={logo} alt="logo" className="h-10" />
+                        {/* <span className={`text-xl font-bold text-pure-white`}>JLTM</span> */}
                     </Link>
                     <button
                         onClick={() => setIsOpen(false)}
@@ -198,14 +216,14 @@ function Sidebar() {
                     </button>
                 </div>
 
-                {/* Admin Badge */}
+                {/* Role Badge */}
                 <div className="px-4 mb-6">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                    <div className={`${role.bgColor} ${role.textColor} rounded-lg p-3 text-center`}>
+                        <div className="flex items-center justify-center gap-2 ${role.badgeColor}">
                             <Shield size={16} />
-                            <span className="text-sm font-medium">Administrator</span>
+                            <span className="text-sm font-medium">{role.title}</span>
                         </div>
-                        <p className="text-xs text-blue-200 mt-1">Full System Access</p>
+                        <p className={`text-xs ${role.badgeColor} mt-1`}>{role.description}</p>
                     </div>
                 </div>
 
@@ -275,13 +293,13 @@ function Sidebar() {
                             </li>
                         ))}
                         {/* Logout Button */}
-                    <button
-                        onClick={logout}
-                        className="flex items-center w-full p-3 mt-3 rounded-lg text-white hover:bg-red-600 transition-all duration-200"
-                    >
-                        <LogOut size={20} className="mr-3" />
-                        <span>Log Out</span>
-                    </button>
+                        <button
+                            onClick={logout}
+                            className="flex items-center w-full p-3 mt-3 rounded-lg text-white hover:bg-red-600 transition-all duration-200"
+                        >
+                            <LogOut size={20} className="mr-3" />
+                            <span>Log Out</span>
+                        </button>
                     </ul>
                 </nav>
             </aside>

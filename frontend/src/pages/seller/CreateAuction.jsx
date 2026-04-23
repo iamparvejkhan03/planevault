@@ -348,6 +348,7 @@ const CreateAuction = () => {
     const nextStep = async () => {
         // Validate current step before proceeding
         let isValid = true;
+        scrollTo({top: 0, behavior: 'smooth'})
 
         if (step === 1) {
             // Trigger validation for all fields
@@ -406,6 +407,7 @@ const CreateAuction = () => {
 
     const prevStep = () => {
         setStep(step - 1);
+        scrollTo({top: 0, behavior: 'smooth'})
     };
 
     const handlePhotoUpload = (e) => {
@@ -465,7 +467,7 @@ const CreateAuction = () => {
             formData.append('bidIncrement', auctionData.bidIncrement);
             formData.append('auctionType', auctionData.auctionType);
             formData.append('avionics', auctionData.avionics || '');
-formData.append('damageHistory', auctionData.damageHistory || '');
+            formData.append('damageHistory', auctionData.damageHistory || '');
 
             // Append specifications as JSON
             if (auctionData.specifications) {
@@ -834,7 +836,7 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                             Pricing & Bidding
                                         </h2>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                        <div className="grid-cols-1 md:grid-cols-2 gap-6 mb-6 hidden">
                                             <div>
                                                 <label htmlFor="startPrice" className="block text-sm font-medium text-secondary mb-1">Start Price *</label>
                                                 <div className="relative">
@@ -848,6 +850,7 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                                         type="number"
                                                         step="0.01"
                                                         min="0"
+                                                        defaultValue={0}
                                                         className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                                                         placeholder="0.00"
                                                     />
@@ -856,6 +859,7 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                             </div>
 
                                             <div>
+                                                <label htmlFor="bidIncrement" className="block text-sm font-medium text-secondary mb-1">Bid Increment *</label>
                                                 <label htmlFor="bidIncrement" className="block text-sm font-medium text-secondary mb-1">Bid Increment *</label>
                                                 <div className="relative">
                                                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
@@ -868,6 +872,7 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                                         type="number"
                                                         step="0.01"
                                                         min="0"
+                                                        defaultValue={0}
                                                         className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                                                         placeholder="0.00"
                                                     />
@@ -898,7 +903,7 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                         </div>
 
                                         {auctionType === 'reserve' && (
-                                            <div className="mb-6">
+                                            <div className="mb-6 hidden">
                                                 <label htmlFor="reservePrice" className="block text-sm font-medium text-secondary mb-1">Reserve Price *</label>
                                                 <div className="relative">
                                                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
@@ -916,6 +921,7 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                                         type="number"
                                                         step="0.01"
                                                         min="0"
+                                                        defaultValue={0}
                                                         className="w-full pl-8 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                                                         placeholder="0.00"
                                                     />
@@ -1058,13 +1064,13 @@ formData.append('damageHistory', auctionData.damageHistory || '');
                                             )}
 
                                             {watch('damageHistory') && (
-    <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
-        <h4 className="font-medium text-black mb-3">Damage History</h4>
-        <div className="border rounded-lg p-4 bg-red-50 border-red-200">
-            <p className="text-gray-700 whitespace-pre-wrap">{watch('damageHistory')}</p>
-        </div>
-    </div>
-)}
+                                                <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
+                                                    <h4 className="font-medium text-black mb-3">Damage History</h4>
+                                                    <div className="border rounded-lg p-4 bg-red-50 border-red-200">
+                                                        <p className="text-gray-700 whitespace-pre-wrap">{watch('damageHistory')}</p>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Description Preview */}
                                             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">

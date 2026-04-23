@@ -45,19 +45,19 @@ const userSchema = new Schema({
     // User Type
     userType: {
         type: String,
-        enum: ['bidder', 'seller'],
+        enum: ['bidder', 'seller', 'admin', 'staff'],
         required: true
     },
 
     // Additional Info
     countryCode: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     countryName: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     phone: {
@@ -81,6 +81,30 @@ const userSchema = new Schema({
         newsletter: { type: Boolean, default: true },
         smsUpdates: { type: Boolean, default: false },
         favoriteCategories: [{ type: String }]
+    },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
+    permissions: {
+        type: [String],
+        default: [],
+        enum: [
+            "view_dashboard",
+            "manage_users",
+            "manage_cashiers",
+            "manage_auctions",
+            "manage_bids",
+            "manage_offers",
+            "manage_transactions",
+            "manage_subscriptions",
+            "manage_categories",
+            "manage_videos",
+            "manage_inquiries",
+            "manage_commissions",
+            "manage_comments",
+            "manage_admins",
+        ],
     },
 
     // Stripe Payment Info (For Bidders Only)
@@ -117,6 +141,10 @@ const userSchema = new Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: true, //changed
     },
     isActive: {
         type: Boolean,

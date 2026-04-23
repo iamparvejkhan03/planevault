@@ -22,10 +22,11 @@ import {
     Trophy,
     Move
 } from "lucide-react";
-import { RTE, AdminContainer, AdminHeader, AdminSidebar } from '../../components';
+import { RTE, StaffContainer, StaffHeader, StaffSidebar } from '../../components';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../utils/axiosInstance';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Drag and Drop item types
 const ItemTypes = {
@@ -260,6 +261,7 @@ const EditAuction = () => {
     const [damageHistoryDetails, setDamageHistoryDetails] = useState('');
 
     const { auctionId } = useParams();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     const categories = [
@@ -416,7 +418,7 @@ const EditAuction = () => {
             } catch (error) {
                 console.error('Error:', error);
                 toast.error('Failed to load auction data');
-                navigate('/admin/auctions');
+                navigate('/staff/auctions/all');
             } finally {
                 setIsLoading(false);
             }
@@ -824,7 +826,7 @@ const EditAuction = () => {
 
             if (data.success) {
                 toast.success('Auction updated successfully!');
-                navigate('/admin/auctions/all');
+                navigate('/staff/auctions/all');
             } else {
                 throw new Error(data.message || 'Failed to update auction');
             }
@@ -852,14 +854,14 @@ const EditAuction = () => {
     if (isLoading) {
         return (
             <section className="flex min-h-screen bg-gray-50">
-                <AdminSidebar />
+                <StaffSidebar />
                 <div className="w-full relative">
-                    <AdminHeader />
-                    <AdminContainer>
+                    <StaffHeader />
+                    <StaffContainer>
                         <div className="pt-16 md:py-7 flex justify-center items-center">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
                         </div>
-                    </AdminContainer>
+                    </StaffContainer>
                 </div>
             </section>
         );
@@ -868,7 +870,7 @@ const EditAuction = () => {
     return (
         <DndProvider backend={HTML5Backend}>
             <section className="flex min-h-screen bg-gray-50">
-                <AdminSidebar />
+                <StaffSidebar />
 
                 <UploadProgressModal
                     isOpen={isSubmitting && hasNewUploads}
@@ -877,18 +879,18 @@ const EditAuction = () => {
                 />
 
                 <div className="w-full relative">
-                    <AdminHeader />
+                    <StaffHeader />
 
-                    <AdminContainer>
+                    <StaffContainer>
                         <div className="pt-16 md:py-7">
                             <div className="flex items-center gap-3 mb-5">
                                 <button
-                                    onClick={() => navigate('/admin/auctions')}
+                                    onClick={() => navigate('/staff/auctions')}
                                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                 >
                                     <ArrowLeft size={20} />
                                 </button>
-                                <h1 className="text-3xl md:text-4xl font-bold">Edit Auction (Admin)</h1>
+                                <h1 className="text-3xl md:text-4xl font-bold">Edit Auction (Staff)</h1>
                             </div>
                             <p className="text-gray-600 mb-8">Update auction listing as administrator</p>
 
@@ -1575,7 +1577,7 @@ const EditAuction = () => {
                                 {errors.endDate && <p className='text-sm text-orange-500 float-right'>Please set end date to proceed.</p>}
                             </form>
                         </div>
-                    </AdminContainer>
+                    </StaffContainer>
                 </div>
             </section>
         </DndProvider>

@@ -168,7 +168,7 @@ export const createAuction = async (req, res) => {
           const result = await uploadImageToCloudinary(
             logbook.buffer,
             "auction-logbooks",
-            photo.originalname
+            logbook.originalname
           );
           uploadedLogbooks.push({
             url: result.secure_url,
@@ -1085,7 +1085,7 @@ export const updateAuction = async (req, res) => {
           const result = await uploadImageToCloudinary(
             logbook.buffer,
             "auction-logbooks",
-            photo.originalname
+            logbook.originalname
           );
           newLogbooks.push({
             url: result.secure_url,

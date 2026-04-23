@@ -85,7 +85,7 @@ export const requireBidder = (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-    if (req.user.userType !== 'admin') {
+    if (req.user.userType !== 'admin' && req.user.userType !== 'staff') {
         return res.status(403).json({
             success: false,
             message: 'Admin access required'

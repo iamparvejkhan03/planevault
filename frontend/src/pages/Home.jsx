@@ -325,6 +325,15 @@ function Home() {
         fetchAuctions('active'); // Load sold auctions by default
     }, []);
 
+    // Load upcoming if there are no live auctions
+    useEffect(() => {
+        if(auctions.length === 0 && !loading){
+            fetchAuctions('approved');
+        }
+        
+        setActiveTab('approved');
+    }, [auctions.length, loading]);
+
     const handleLoadByStatus = () => {
         const status = tabStatusMap[activeTab];
         const params = new URLSearchParams();

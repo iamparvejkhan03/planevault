@@ -38,6 +38,9 @@ import AdminHeader from "./admin/Header";
 import AdminRoute from "./admin/AdminRoute";
 import AdminSidebar from "./admin/Sidebar";
 import AdminContainer from "./admin/Container";
+import StaffHeader from "./staff/Header";
+import StaffSidebar from "./staff/Sidebar";
+import StaffContainer from "./staff/Container";
 import TimerDisplay from "./TimerDisplay";
 import WatchlistButton from "./WatchlistButton";
 import SpecificationsSection from "./SpecificationsSection";
@@ -87,6 +90,9 @@ export {
     AdminHeader,
     AdminSidebar,
     AdminRoute,
+    StaffContainer,
+    StaffHeader,
+    StaffSidebar,
     TimerDisplay,
     WatchlistButton,
     SpecificationsSection,

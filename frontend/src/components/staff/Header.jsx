@@ -29,15 +29,15 @@ function Header() {
                 {/* User profile */}
                 <div className="flex items-center space-x-3 pl-3 border-l border-gray-200">
                     <div className="text-right hidden md:block">
-                        <Link to={`/admin/profile`} className="text-sm font-medium text-black">{user?.firstName + ' ' + user?.lastName}</Link>
+                        <Link to={`/staff/profile`} className="text-sm font-medium text-black">{user?.firstName + ' ' + user?.lastName}</Link>
                         <p className="text-xs text-secondary">{user.username}</p>
                     </div>
                     {
                         user?.image
                             ?
-                            <Link to={`/admin/profile`}><img src={user?.image} alt="userImage" className="h-10 w-10 rounded-full" /></Link>
+                            <Link to={`/staff/profile`}><img src={user?.image} alt="userImage" className="h-10 w-10 rounded-full" /></Link>
                             :
-                            <Link to={`/admin/profile`} className="h-10 w-10 rounded-full bg-gradient-to-r from-black/70 to-black flex items-center justify-center text-white font-semibold">
+                            <Link to={`/staff/profile`} className="h-10 w-10 rounded-full bg-gradient-to-r from-black/70 to-black flex items-center justify-center text-white font-semibold">
                                 {user?.firstName[0] + user?.lastName[0]}
                             </Link>
                     }

@@ -13,6 +13,7 @@ import {
     clearFlags
 } from '../controllers/comment.controller.js';
 import { auth, authAdmin } from '../middlewares/auth.middleware.js';
+import { requirePermission } from '../middlewares/permission.middleware.js';
 
 const commentRouter = Router();
 
@@ -28,10 +29,10 @@ commentRouter.delete('/:commentId', auth, deleteComment);
 commentRouter.post('/:commentId/flag', auth, flagComment);
 
 // Comment moderation routes
-commentRouter.get('/flagged', authAdmin, getFlaggedComments);
-commentRouter.get('/stats', authAdmin, getCommentStats);
-commentRouter.delete('/:commentId', authAdmin, adminDeleteComment);
-commentRouter.patch('/:commentId/restore', authAdmin, restoreComment);
-commentRouter.patch('/:commentId/clear-flags', authAdmin, clearFlags);
+commentRouter.get('/flagged', authAdmin, requirePermission("manage_comments"), getFlaggedComments);
+commentRouter.get('/stats', authAdmin, requirePermission("manage_comments"), getCommentStats);
+commentRouter.delete('/:commentId', authAdmin, requirePermission("manage_comments"), adminDeleteComment);
+commentRouter.patch('/:commentId/restore', authAdmin, requirePermission("manage_comments"), restoreComment);
+commentRouter.patch('/:commentId/clear-flags', authAdmin, requirePermission("manage_comments"), clearFlags);
 
 export default commentRouter;

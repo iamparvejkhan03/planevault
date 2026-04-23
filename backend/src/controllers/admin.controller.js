@@ -196,12 +196,12 @@ export const getAdminStats = async (req, res) => {
       averageSalePrice,
       highestSaleAuction: highestSaleAuction
         ? {
-            title: highestSaleAuction.title,
-            amount: highestSaleAuction.finalPrice,
-            seller: highestSaleAuction.seller?.username || "Unknown",
-            winner: highestSaleAuction.winner?.username || "Unknown",
-            date: highestSaleAuction.createdAt,
-          }
+          title: highestSaleAuction.title,
+          amount: highestSaleAuction.finalPrice,
+          seller: highestSaleAuction.seller?.username || "Unknown",
+          winner: highestSaleAuction.winner?.username || "Unknown",
+          date: highestSaleAuction.createdAt,
+        }
         : null,
 
       // Performance metrics
@@ -255,6 +255,7 @@ export const getAllUsers = async (req, res) => {
 
     // Build search query
     let searchQuery = {
+      userType: { $nin: ["cashier", "staff", "admin"] },
       $or: [
         { firstName: { $regex: search, $options: "i" } },
         { lastName: { $regex: search, $options: "i" } },
@@ -604,7 +605,7 @@ export const updateUserType = async (req, res) => {
     const { userType } = req.body;
 
     // Validate user type
-    if (!["admin", "seller", "bidder"].includes(userType)) {
+    if (!["admin", "seller", "bidder", "staff"].includes(userType)) {
       return res.status(400).json({
         success: false,
         message: "Invalid user type",
@@ -1417,7 +1418,7 @@ export const updateAuction = async (req, res) => {
           const result = await uploadImageToCloudinary(
             logbook.buffer,
             "auction-logbooks",
-            photo.originalname
+            logbook.originalname
           );
           newLogbooks.push({
             url: result.secure_url,
@@ -2070,7 +2071,7 @@ export const relistAuction = async (req, res) => {
           const result = await uploadImageToCloudinary(
             logbook.buffer,
             "auction-logbooks",
-            photo.originalname
+            logbook.originalname
           );
           newLogbooks.push({
             url: result.secure_url,
@@ -2280,6 +2281,327 @@ export const relistAuction = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal server error while updating auction",
+    });
+  }
+};
+
+/**
+ * @desc    Create a new staff member (Admin only)
+ * @route   POST /api/v1/admin/staff/create
+ * @access  Private (Admin or user with manage_admins permission)
+ */
+export const createStaff = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password, permissions } = req.body;
+
+    // Validation
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "First name, last name, email, and password are required",
+      });
+    }
+
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [{ email: normalizedEmail }],
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
+    // Generate username from email (before @)
+    let username = normalizedEmail.split("@")[0];
+    let usernameExists = await User.findOne({ username });
+    if (usernameExists) {
+      username = `${username}_${Date.now().toString().slice(-4)}`;
+    }
+
+    // Create staff user
+    const staff = await User.create({
+      firstName,
+      lastName,
+      username,
+      email: normalizedEmail,
+      // phone: phone && phone.trim() !== "" ? phone : null,
+      password,
+      userType: "staff",
+      isVerified: true,
+      isEmailVerified: true,
+      isActive: true,
+      permissions: permissions || [],
+      createdBy: req.user._id,
+    });
+
+    // Return safe user object (without password)
+    const staffObject = staff.toObject();
+    delete staffObject.password;
+
+    res.status(201).json({
+      success: true,
+      message: "Staff member created successfully",
+      data: { staff: staffObject },
+    });
+  } catch (error) {
+    console.error("Create staff error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while creating staff",
+    });
+  }
+};
+
+/**
+ * @desc    Get all staff members
+ * @route   GET /api/v1/admin/staff
+ * @access  Private (Admin or user with manage_admins permission)
+ */
+export const getStaffList = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      status,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const filter = { userType: "staff" };
+
+    // Search filter
+    if (search && search.trim()) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: "i" } },
+        { lastName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { username: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Status filter
+    if (status === "active") {
+      filter.isActive = true;
+    } else if (status === "inactive") {
+      filter.isActive = false;
+    }
+
+    // Sort options
+    const sortOptions = {};
+    sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const staff = await User.find(filter)
+      .select("-password -refreshToken -resetPasswordToken")
+      .populate("createdBy", "firstName lastName email")
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        staff,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / limit),
+          totalStaff: total,
+          limit: parseInt(limit),
+          hasNextPage: skip + staff.length < total,
+          hasPrevPage: skip > 0,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get staff list error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching staff",
+    });
+  }
+};
+
+/**
+ * @desc    Get single staff member by ID
+ * @route   GET /api/v1/admin/staff/:id
+ * @access  Private (Admin or user with manage_admins permission)
+ */
+export const getStaffById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const staff = await User.findOne({ _id: id, userType: "staff" })
+      .select("-password -refreshToken -resetPasswordToken")
+      .populate("createdBy", "firstName lastName email");
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { staff },
+    });
+  } catch (error) {
+    console.error("Get staff by ID error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching staff",
+    });
+  }
+};
+
+/**
+ * @desc    Update staff member
+ * @route   PUT /api/v1/admin/staff/:id
+ * @access  Private (Admin or user with manage_admins permission)
+ */
+export const updateStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, permissions, isActive } = req.body;
+
+    const staff = await User.findOne({ _id: id, userType: "staff" });
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    // Check email uniqueness if changing
+    if (email && email !== staff.email) {
+      const existingEmail = await User.findOne({ email: email.toLowerCase().trim() });
+      if (existingEmail) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already in use",
+        });
+      }
+      staff.email = email.toLowerCase().trim();
+    }
+
+    if (firstName) staff.firstName = firstName;
+    if (lastName) staff.lastName = lastName;
+    // if (phone !== undefined) staff.phone = phone || null;
+    if (permissions) staff.permissions = permissions;
+    if (isActive !== undefined) staff.isActive = isActive;
+
+    await staff.save();
+
+    const staffObject = staff.toObject();
+    delete staffObject.password;
+
+    res.status(200).json({
+      success: true,
+      message: "Staff member updated successfully",
+      data: { staff: staffObject },
+    });
+  } catch (error) {
+    console.error("Update staff error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while updating staff",
+    });
+  }
+};
+
+/**
+ * @desc    Delete staff member
+ * @route   DELETE /api/v1/admin/staff/:id
+ * @access  Private (Admin or user with manage_admins permission)
+ */
+export const deleteStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Prevent self-deletion
+    if (id === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot delete your own account",
+      });
+    }
+
+    const staff = await User.findOne({ _id: id, userType: "staff" });
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    await staff.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Staff member deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete staff error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while deleting staff",
+    });
+  }
+};
+
+/**
+ * @desc    Update staff status (activate/deactivate)
+ * @route   PATCH /api/v1/admin/staff/:id/status
+ * @access  Private (Admin or user with manage_admins permission)
+ */
+export const updateStaffStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    // Prevent self-deactivation
+    if (id === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot change your own account status",
+      });
+    }
+
+    const staff = await User.findOne({ _id: id, userType: "staff" });
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    staff.isActive = isActive;
+    await staff.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Staff member ${isActive ? "activated" : "deactivated"} successfully`,
+      data: { staff: { _id: staff._id, isActive: staff.isActive } },
+    });
+  } catch (error) {
+    console.error("Update staff status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while updating staff status",
     });
   }
 };

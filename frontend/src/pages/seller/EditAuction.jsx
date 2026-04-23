@@ -464,6 +464,7 @@ const EditAuction = () => {
     // Next step function (same as admin)
     const nextStep = async () => {
         let isValid = true;
+        scrollTo({top: 0, behavior: 'smooth'})
 
         if (step === 1) {
             const fieldsToValidate = ['title', 'category', 'description', 'startDate', 'endDate'];
@@ -518,6 +519,7 @@ const EditAuction = () => {
 
     const prevStep = () => {
         setStep(step - 1);
+        scrollTo({top: 0, behavior: 'smooth'})
     };
 
     // Fixed handlePhotoUpload function

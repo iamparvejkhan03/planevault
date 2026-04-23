@@ -82,6 +82,12 @@ const allNavigation = [
         permission: 'manage_transactions'
     },
     {
+        name: 'Comments',
+        path: '/staff/comments',
+        icon: <MessageSquare size={20} />,
+        permission: 'manage_comments'
+    },
+    {
         name: 'User Inquiries',
         path: '/staff/support/inquiries',
         icon: <MessageSquare size={20} />,

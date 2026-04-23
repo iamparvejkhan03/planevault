@@ -327,12 +327,15 @@ function Home() {
 
     // Load upcoming if there are no live auctions
     useEffect(() => {
-        if(auctions.length === 0 && !loading){
-            fetchAuctions('approved');
-        }
-        
-        setActiveTab('approved');
-    }, [auctions.length, loading]);
+        const loadInitialAuctions = async () => {
+            await fetchAuctions('active');
+            if (auctions.length === 0 && !loading) {
+                setActiveTab('approved');
+                await fetchAuctions('approved');
+            }
+        };
+        loadInitialAuctions();
+    }, []);
 
     const handleLoadByStatus = () => {
         const status = tabStatusMap[activeTab];
@@ -343,9 +346,9 @@ function Home() {
 
     const handleSearchByTitle = (title) => {
         const params = new URLSearchParams();
-        if(title === 'Explore'){
+        if (title === 'Explore') {
             navigate(`/auctions`);
-        }else{
+        } else {
             params.append('search', title);
             navigate(`/auctions?${(params.toString()).toLocaleLowerCase()}`);
         }

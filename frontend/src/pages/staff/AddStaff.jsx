@@ -34,7 +34,6 @@ const AddStaff = () => {
         { value: "manage_users", label: "Manage Users", icon: <Users size={16} /> },
         { value: "manage_auctions", label: "Manage Auctions", icon: <Gavel size={16} /> },
         { value: "manage_bids", label: "Manage Bids", icon: <Hand size={16} /> },
-        { value: "manage_offers", label: "Manage Offers", icon: <Hand size={16} /> },
         { value: "manage_transactions", label: "Manage Transactions", icon: <Banknote size={16} /> },
         { value: "manage_inquiries", label: "Manage Inquiries", icon: <MessageSquare size={16} /> },
         { value: "manage_comments", label: "Manage Comments", icon: <MessageCircle size={16} /> },

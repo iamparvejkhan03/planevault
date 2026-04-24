@@ -903,7 +903,7 @@ const CreateAuction = () => {
                                         </div>
 
                                         {auctionType === 'reserve' && (
-                                            <div className="mb-6 hidden">
+                                            <div className="mb-6">
                                                 <label htmlFor="reservePrice" className="block text-sm font-medium text-secondary mb-1">Reserve Price *</label>
                                                 <div className="relative">
                                                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>

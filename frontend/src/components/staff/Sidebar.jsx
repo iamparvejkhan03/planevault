@@ -29,7 +29,8 @@ import {
     BanknoteArrowUp,
     Video,
     UserPlus,
-    ShieldUser
+    ShieldUser,
+    Bookmark
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logo } from "../../assets";
@@ -68,6 +69,11 @@ const allNavigation = [
         path: '/staff/bids',
         icon: <Hand size={20} />,
         permission: 'manage_bids'
+    },
+    {
+        name: "Watchlists",
+        path: "/staff/watchlists",
+        icon: <Bookmark size={20} />,
     },
     {
         name: 'Offers',

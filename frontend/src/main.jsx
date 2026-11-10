@@ -81,6 +81,7 @@ const StaffTransactions = lazy(() => import('./pages/staff/Transactions'));
 const StaffAddStaff = lazy(() => import('./pages/staff/AddStaff'));
 const StaffAllStaff = lazy(() => import('./pages/staff/AllStaff'));
 const StaffEditStaff = lazy(() => import('./pages/staff/EditStaff'));
+const StaffWatchlists = lazy(() => import('./pages/staff/AllWatchlists'));
 
 createRoot(document.getElementById('root')).render(
     //<StrictMode>
@@ -601,6 +602,16 @@ createRoot(document.getElementById('root')).render(
                             element={
                                 <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                     <StaffTransactions />
+                                </Suspense>
+                            }
+                        />
+
+                        {/* Staff Watchlists */}
+                        <Route
+                            path='/staff/watchlists'
+                            element={
+                                <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                    <StaffWatchlists />
                                 </Suspense>
                             }
                         />

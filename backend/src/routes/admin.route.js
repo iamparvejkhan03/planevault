@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { 
+import {
     getAdminStats,
     getAllUsers,
     getUserDetails,
@@ -20,7 +20,9 @@ import {
     updateStaff,
     deleteStaff,
     updateStaffStatus,
-    updateUserDetails
+    updateUserDetails,
+    getAdminWatchlist,
+    getAuctionWatchlistDetails
 } from '../controllers/admin.controller.js';
 import { authAdmin } from '../middlewares/auth.middleware.js';
 import upload from '../middlewares/multer.middleware.js';
@@ -61,6 +63,10 @@ AdminRouter.put('/auctions/:id/relist', authAdmin, requirePermission("manage_auc
 // Transaction Management - requires manage_transactions permission
 AdminRouter.get('/transactions', authAdmin, requirePermission("manage_transactions"), getAdminTransactions);
 AdminRouter.get('/transactions/stats', authAdmin, requirePermission("manage_transactions"), getTransactionStats);
+
+// Watchlist Management - requires manage_auctions permission
+AdminRouter.get('/watchlists', authAdmin, requirePermission("manage_auctions"), getAdminWatchlist);
+AdminRouter.get('/watchlists/:auctionId', authAdmin, requirePermission("manage_auctions"), getAuctionWatchlistDetails);
 
 // Staff Management Routes
 AdminRouter.post(

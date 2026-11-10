@@ -22,7 +22,8 @@ import {
     UserCircle,
     MessageCircle,
     Hand,
-    ShieldUser
+    ShieldUser,
+    Bookmark
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logo } from "../../assets";
@@ -54,6 +55,11 @@ const navigation = [
         name: 'Bids',
         path: '/admin/bids',
         icon: <Hand size={20} />
+    },
+    {
+        name: "Watchlists",
+        path: "/admin/watchlists",
+        icon: <Bookmark size={20} />,
     },
     {
         name: 'Transactions',
@@ -275,13 +281,13 @@ function Sidebar() {
                             </li>
                         ))}
                         {/* Logout Button */}
-                    <button
-                        onClick={logout}
-                        className="flex items-center w-full p-3 mt-3 rounded-lg text-white hover:bg-red-600 transition-all duration-200"
-                    >
-                        <LogOut size={20} className="mr-3" />
-                        <span>Log Out</span>
-                    </button>
+                        <button
+                            onClick={logout}
+                            className="flex items-center w-full p-3 mt-3 rounded-lg text-white hover:bg-red-600 transition-all duration-200"
+                        >
+                            <LogOut size={20} className="mr-3" />
+                            <span>Log Out</span>
+                        </button>
                     </ul>
                 </nav>
             </aside>

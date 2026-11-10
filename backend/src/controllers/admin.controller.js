@@ -2814,3 +2814,197 @@ export const updateStaffStatus = async (req, res) => {
     });
   }
 };
+
+// ============================================
+// WATCHLIST MANAGEMENT (Admin)
+// ============================================
+
+/**
+ * @desc    Get all auctions that have at least one watchlist entry
+ * @route   GET /api/v1/admin/watchlists
+ * @access  Private (Admin / manage_auctions)
+ */
+export const getAdminWatchlist = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "most_watched", // most_watched | recent | ending_soon
+    } = req.query;
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Aggregation pipeline: group watchlist entries by auction
+    const pipeline = [
+      {
+        $group: {
+          _id: "$auction",
+          watchersCount: { $sum: 1 },
+          lastAddedAt: { $max: "$addedAt" },
+        },
+      },
+      {
+        $lookup: {
+          from: "auctions",
+          localField: "_id",
+          foreignField: "_id",
+          as: "auction",
+        },
+      },
+      { $unwind: "$auction" }, // drops watchlist rows whose auction was deleted
+      {
+        $lookup: {
+          from: "users",
+          localField: "auction.seller",
+          foreignField: "_id",
+          as: "sellerInfo",
+        },
+      },
+      { $unwind: { path: "$sellerInfo", preserveNullAndEmptyArrays: true } },
+    ];
+
+    // Search across auction title / category / seller username / seller email
+    if (search && search.trim() !== "") {
+      pipeline.push({
+        $match: {
+          $or: [
+            { "auction.title": { $regex: search, $options: "i" } },
+            { "auction.category": { $regex: search, $options: "i" } },
+            { "sellerInfo.username": { $regex: search, $options: "i" } },
+            { "sellerInfo.email": { $regex: search, $options: "i" } },
+          ],
+        },
+      });
+    }
+
+    // Sorting
+    let sortStage;
+    switch (sortBy) {
+      case "recent":
+        sortStage = { lastAddedAt: -1 };
+        break;
+      case "ending_soon":
+        sortStage = { "auction.endDate": 1 };
+        break;
+      case "most_watched":
+      default:
+        sortStage = { watchersCount: -1, lastAddedAt: -1 };
+    }
+    pipeline.push({ $sort: sortStage });
+
+    // Count total BEFORE pagination
+    const countResult = await Watchlist.aggregate([
+      ...pipeline,
+      { $count: "total" },
+    ]);
+    const total = countResult[0]?.total || 0;
+
+    // Paginate
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: limitNum });
+
+    // Final projection
+    pipeline.push({
+      $project: {
+        _id: 0,
+        auctionId: "$_id",
+        watchersCount: 1,
+        lastAddedAt: 1,
+        title: "$auction.title",
+        category: "$auction.category",
+        status: "$auction.status",
+        auctionType: "$auction.auctionType",
+        currentPrice: "$auction.currentPrice",
+        startPrice: "$auction.startPrice",
+        reservePrice: "$auction.reservePrice",
+        endDate: "$auction.endDate",
+        photos: "$auction.photos",
+        seller: {
+          _id: "$sellerInfo._id",
+          username: "$sellerInfo.username",
+          firstName: "$sellerInfo.firstName",
+          lastName: "$sellerInfo.lastName",
+          email: "$sellerInfo.email",
+        },
+      },
+    });
+
+    const auctions = await Watchlist.aggregate(pipeline);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        auctions,
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(total / limitNum),
+          totalAuctions: total,
+          hasNext: pageNum * limitNum < total,
+          hasPrev: pageNum > 1,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get admin watchlist error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching admin watchlist",
+    });
+  }
+};
+
+/**
+ * @desc    Get all users who watchlisted a specific auction
+ * @route   GET /api/v1/admin/watchlists/:auctionId
+ * @access  Private (Admin / manage_auctions)
+ */
+export const getAuctionWatchlistDetails = async (req, res) => {
+  try {
+    const { auctionId } = req.params;
+
+    const auction = await Auction.findById(auctionId).populate(
+      "seller",
+      "username firstName lastName email phone"
+    );
+
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: "Auction not found",
+      });
+    }
+
+    const watchlistEntries = await Watchlist.find({ auction: auctionId })
+      .populate(
+        "user",
+        "firstName lastName username email phone image userType countryCode countryName createdAt"
+      )
+      .sort({ addedAt: -1 });
+
+    // Filter out any orphaned entries (user deleted)
+    const validEntries = watchlistEntries.filter((entry) => entry.user);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        auction,
+        totalWatchers: validEntries.length,
+        watchlistUsers: validEntries.map((entry) => ({
+          _id: entry._id,
+          addedAt: entry.addedAt,
+          user: entry.user,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Get auction watchlist details error:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        "Internal server error while fetching auction watchlist details",
+    });
+  }
+};

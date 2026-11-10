@@ -62,6 +62,7 @@ const Transactions = lazy(() => import('./pages/admin/Transactions'));
 const AddStaff = lazy(() => import('./pages/admin/AddStaff'));
 const AllStaff = lazy(() => import('./pages/admin/AllStaff'));
 const EditStaff = lazy(() => import('./pages/admin/EditStaff'));
+const AllWatchlists = lazy(() => import('./pages/admin/AllWatchlists'));
 
 {/* Staff Pages */ }
 const StaffLayout = lazy(() => import('./pages/staff/Layout'));
@@ -436,6 +437,16 @@ createRoot(document.getElementById('root')).render(
                             element={
                                 <Suspense fallback={<LoadingSpinner height={'750px'} />}>
                                     <Transactions />
+                                </Suspense>
+                            }
+                        />
+
+                        {/* Admin Watchlists */}
+                        <Route
+                            path='/admin/watchlists'
+                            element={
+                                <Suspense fallback={<LoadingSpinner height={'750px'} />}>
+                                    <AllWatchlists />
                                 </Suspense>
                             }
                         />
